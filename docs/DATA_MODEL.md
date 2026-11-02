@@ -38,7 +38,14 @@ erDiagram
   organizations ||--o{ ledger_accounts : has
   ledger_transactions ||--|{ ledger_entries : balanced
   ledger_accounts ||--o{ ledger_entries : posts
-  units ||--o{ maintenance_requests : raised
+  units ||--o{ tickets : raised
+  tenants ||--o{ tickets : raises
+  tickets ||--o{ ticket_messages : thread
+  tickets ||--o{ ticket_attachments : attaches
+  tickets ||--o{ ticket_events : logs
+  documents ||--o{ ticket_attachments : "stored as"
+  tickets |o--o{ expenses : "may spawn"
+  tickets }o--o| invoices : "billing query on"
   leases ||--o{ notices : gives
   organizations ||--o{ documents : stores
   users ||--o{ notifications : receives
@@ -106,7 +113,7 @@ Overpayment or goodwill balances held for a lease. `organization_id`, `lease_id`
 `organization_id`, `lease_id`, `kind (rent|security|water|key)`, `amount_minor`, `received_payment_id`, `status (held|partially_refunded|refunded|forfeited)`, `refund_due_date`, `refunded_minor`, `deductions jsonb` (list of {reason, amount_minor, evidence_document_id}), `settlement_ledger_transaction_id`. Held as a liability (account 2100). Refund workflow requires manager approval; refund paid outside Kodibox (bank/M-Pesa by landlord), then recorded.
 
 ### expenses
-`organization_id`, `property_id`, `landlord_id`, `category (repairs|utilities|security|management_fee|tax|other)`, `vendor`, `amount_minor`, `incurred_on date`, `paid_on null`, `paid_from_source_id null`, `receipt_document_id`, `maintenance_request_id null`, `ledger_transaction_id`, `status (draft|approved|paid|void)`, `submitted_by`. Index (organization_id, property_id, incurred_on).
+`organization_id`, `property_id`, `landlord_id`, `category (repairs|utilities|security|management_fee|tax|other)`, `vendor`, `amount_minor`, `incurred_on date`, `paid_on null`, `paid_from_source_id null`, `receipt_document_id`, `maintenance_request_id null`, `ledger_transaction_id`, `status (draft|approved|paid|void)`, `submitted_by`, `ticket_id null` (repair ticket that spawned the expense, M2-05). Index (organization_id, property_id, incurred_on).
 
 ### ledger_accounts
 Chart of accounts per org. `organization_id`, `code text` (e.g. 1100), `name`, `type (asset|liability|equity|income|expense)`, `normal_side (debit|credit)`, `landlord_id null` (sub-ledger for agencies), `parent_id`, `system_key text null` (e.g. `ar_tenants`, `deposits_held`, `rent_income`, `penalty_income`, `utility_income`, `cash_clearing`, `tenant_credit`, `suspense`), `is_active`. Unique(organization_id, code), unique(organization_id, landlord_id, system_key). Seeded at org creation.
@@ -121,14 +128,25 @@ Header of a balanced posting. `organization_id`, `occurred_at timestamptz`, `pos
 - `core/ledger.post()` also validates before insert (defence in depth).
 - Index (organization_id, account_id, transaction_id), (organization_id, lease_id), (transaction_id).
 
-### maintenance_requests
-`organization_id`, `property_id`, `unit_id null`, `raised_by_user_id`, `tenant_id null`, `title`, `description`, `category`, `priority (low|normal|urgent)`, `status (open|assigned|in_progress|resolved|closed|rejected)`, `assigned_to_user_id null`, `vendor`, `cost_estimate_minor`, `resolved_at`, `photos uuid[]` (documents). Index (organization_id, status, priority).
+### tickets (replaces `maintenance_requests`)
+Tenant or staff-raised repair, complaint, billing query or other issue. `organization_id`, `property_id`, `unit_id null` (required for repair and billing query), `tenant_id null`, `raised_by_user_id`, `channel (portal|app|staff_call|sms|whatsapp)`, `type (repair|complaint|billing_query|other)`, `category text` (CHECK per type; complaint subjects: `neighbour_noise|security|cleanliness_garbage|staff_conduct|landlord_management|other`), `title`, `description` [PII], `subject_party_note` [PII] null (complaints only; names or describes the party complained about; visible to managers and Owner only), `identity_private bool default false` (neighbour complaints: tenant identity hidden from the other party; managers still see it), `preferred_access` [PII] null, `urgency (emergency|high|normal|low)`, `status (new|acknowledged|in_progress|waiting_on_tenant|resolved|closed)`, `assignee_type (caretaker|staff|vendor) null`, `assignee_user_id null`, `vendor text null`, `work_order_id null` (M2-05), `linked_invoice_id null`, `linked_payment_id null`, `linked_ledger_transaction_id null` (credit note or reversal; never deletion), `sla_ack_due_at`, `sla_resolve_due_at`, `sla_breached_at null`, `escalated_to_user_id null` (Owner), `acknowledged_at`, `resolved_at`, `auto_close_at` (resolved_at + 7 days; cleared on reopen), `closed_at`, `rating smallint null CHECK (rating between 1 and 5)`, `rating_comment` [PII] null. Index (organization_id, status, urgency, sla_resolve_due_at), (organization_id, unit_id, type, created_at) for repeat-issue reports, (organization_id, tenant_id).
+- Complaints about a manager or caretaker set `assignee_user_id` to the Owner, never to the accused person.
+- Expenses link back via `expenses.ticket_id`.
+
+### ticket_messages
+Two-way thread. `organization_id`, `ticket_id`, `visibility (public|internal)` (public: tenant sees it and it triggers notifications; internal: staff only, never returned by tenant API), `body` [PII], `author_user_id null`, `author_tenant_id null` (exactly one author set, CHECK), `hidden_at null`, `hidden_by_user_id null`, `hidden_reason text null`. Hiding is the only moderation: bodies are never censored or edited, and every hide writes a `ticket_events` row. Not append-only (hide is an update). Index (organization_id, ticket_id, created_at).
+
+### ticket_attachments
+`organization_id`, `ticket_id`, `message_id null`, `document_id` (→ `documents`, kind `ticket_media`). Photos and video are stored in private storage; EXIF metadata (GPS, device) is stripped on upload; size and MIME limits are enforced at presign; download is allowed only when `documents.scan_status = clean`.
+
+### ticket_events
+Append-only audit trail of every ticket transition (same trigger protection as `ledger_entries`). `organization_id`, `ticket_id`, `event_type (created|status_changed|assigned|escalated|sla_breached|linked|message_hidden|rated|reopened|auto_closed)`, `from_value text null`, `to_value text null`, `actor_user_id null` (null = system job), `actor_role`, `meta jsonb` (no free-text PII), `at timestamptz`. Index (organization_id, ticket_id, at). Each row is also written to `audit_events` (E-06).
 
 ### notices
 Vacation, entry, rent increase, arrears, eviction-stage notices. `organization_id`, `lease_id`, `kind (vacate_by_tenant|vacate_by_landlord|rent_increase|arrears|entry|general)`, `served_on date`, `effective_on date`, `served_by`, `delivery (in_app|sms|email|physical)`, `document_id`, `status (draft|served|acknowledged|withdrawn)`. Kind/period validated against lease terms (e.g. min notice days) in `core`.
 
 ### documents
-`organization_id`, `owner_type`, `owner_id` (polymorphic), `kind (lease|id_scan|receipt|photo|notice|statement)`, `storage_key`, `mime`, `size_bytes`, `sha256`, `encrypted bool`, `scan_status (pending|clean|infected)`, `uploaded_by`, `retention_until date`, `deleted_at`. [PII] when kind=id_scan. Index (organization_id, owner_type, owner_id).
+`organization_id`, `owner_type`, `owner_id` (polymorphic), `kind (lease|id_scan|receipt|photo|notice|statement|ticket_media)`, `storage_key`, `mime`, `size_bytes`, `sha256`, `encrypted bool`, `scan_status (pending|clean|infected)`, `uploaded_by`, `retention_until date`, `deleted_at`. [PII] when kind=id_scan. Index (organization_id, owner_type, owner_id).
 
 ### notifications
 `organization_id`, `recipient_user_id null`, `recipient_tenant_id null`, `channel (sms|email|in_app|whatsapp)`, `template_key`, `to_address` [ENC][PII], `body_rendered text` (PII redacted at rest after 90 days), `status (queued|sent|delivered|failed|suppressed)`, `provider_msg_id`, `error_code`, `cost_minor`, `purpose (transactional|reminder|marketing)`, `consent_id null`, `scheduled_for`, `sent_at`, `related_type/related_id`. Unique(organization_id, template_key, related_id, channel, stage) for dedupe. Index (organization_id, status, scheduled_for).

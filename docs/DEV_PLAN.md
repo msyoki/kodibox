@@ -42,6 +42,8 @@ M1-04 ledger (core, pure) ──────────────────
 M1-06 payment sources ── M1-07 C2B webhook + matching ── M1-08 unmatched queue ── M1-10 cash maker-checker
                                      └── M1-09 STK push
 M1-12 notifications ── M1-13 penalties ── M1-14 dashboard ── M1-15 reports ── M1-16 onboarding ── M1-17 subscriptions
+M1-02 tenants ─┬─ M1-18 ticket intake ── M2-11 tenant tickets (needs M1-12 notifications, E-06 audit)
+M1-01 units ───┘          └── M2-05 work orders/expenses (repair tickets)
 ```
 `M1-04` (ledger) is pure logic with no I/O, so it can start in parallel as soon as E-01 lands.
 
@@ -89,13 +91,14 @@ M1-12 notifications ── M1-13 penalties ── M1-14 dashboard ── M1-15 r
 - [ ] M1-15 Reports + audited exports (frame: Reports)
 - [ ] M1-16 Onboarding wizard
 - [ ] M1-17 Kodibox subscription billing (frame: Billing)
+- [ ] M1-18 Basic ticket intake: staff-logged + manager inbox, repair & complaint types, statuses, assignment, audit (frame: Tickets)
 - [ ] Mini-pentest + fixes; pilot with 3–5 landlords on live Daraja
 - **Exit:** the Phase 1 exit criteria in PROJECT_PLAN.md.
 
 ### Sprints 6–9 (Wk 12–19): Phase 2 differentiators
 | Sprint | Tasks |
 |---|---|
-| 6 | M2-01 Tenant portal PWA · M2-03 Utility billing |
+| 6 | M2-01 Tenant portal PWA · M2-03 Utility billing · M2-11 Tenant tickets (frame: TenantTicket; the work-order link is added with M2-05 in Sprint 7) |
 | 7 | M2-02 Caretaker views (offline) · M2-05 Expenses & maintenance |
 | 8 | M2-04 Deposits · M2-07 Notices · M2-06 Agency mode + landlord portal |
 | 9 | M2-08 MRI tax report · M2-09 DSR tooling · M2-10 Bank import → public beta |

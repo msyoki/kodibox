@@ -20,6 +20,7 @@ Publicly visible gaps that Kodibox targets:
 |---|---|
 | No tenant portal or mobile app | Tenant PWA (Phase 2) and a native app (Phase 3), with STK Push "pay now" in 2 taps and SMS/USSD fallback |
 | No caretaker workflow | Caretaker role with offline meter readings, photo evidence, move-in/out checklists |
+| No maintenance tickets; passive tenant side | Tenant repair and complaint tickets (M1-18 staff intake, M2-11 tenant app/portal) with SLAs, escalation to the Owner, audited thread and ratings |
 | Thin lease and deposit lifecycle | Full lease lifecycle: digital lease, deposit held as liability, move-out inspection, deposit refund statement |
 | No expenses or owner payout statements | Expenses, agency commission, landlord remittance statements |
 | No tax tooling | Monthly Rental Income (MRI) tax report and eTIMS-ready receipts |
@@ -76,6 +77,7 @@ Engineering tasks:
 - [ ] M1-15 Reports: rent roll, arrears, collections by property, Excel/CSV/PDF export (exports audited and permission-gated).
 - [ ] M1-16 Onboarding wizard: org → property → units → payment source → import tenants → first invoice run, in under 15 minutes.
 - [ ] M1-17 Subscription billing for Kodibox itself (plans, trial, invoices to the org).
+- [ ] M1-18 Basic ticket intake (staff-logged + manager inbox, repair & complaint types, statuses, assignment, audit).
 
 **Exit criteria:**
 - A pilot with 3–5 landlords (~200 units) running live M-Pesa for 1 full month.
@@ -88,12 +90,13 @@ Engineering tasks:
 - [ ] M2-02 Caretaker app view: offline-capable meter readings with photo, move-in/out inspection checklists.
 - [ ] M2-03 Utility billing: metered water/electricity (tiered tariffs), shared-meter apportioning, bulk reading upload.
 - [ ] M2-04 Deposits lifecycle: held as liability, move-out deductions with evidence, refund statement, and handover to the landlord's own payment process (Kodibox doesn't disburse).
-- [ ] M2-05 Expenses & maintenance: requests → work orders → vendor → cost → expense entry.
+- [ ] M2-05 Expenses & work orders (vendors, costs) linked to repair tickets: work order → vendor → cost → expense entry.
 - [ ] M2-06 Agency mode: multiple landlords, commission rules, landlord remittance statements, landlord read-only portal.
 - [ ] M2-07 Notices: vacation notices, rent-increase notices from advocate-reviewed templates with configurable notice periods. No automated eviction, lockout or distress features (legal).
 - [ ] M2-08 MRI tax report: monthly gross residential rent per landlord, KRA-format export, deadline reminders (20th).
 - [ ] M2-09 Data subject rights tooling: export, rectification, erasure with legal-hold exceptions, DSR request tracker with SLA.
 - [ ] M2-10 Bank integrations: one bank (e.g. Equity/KCB/Co-op) paybill or statement callbacks; bank statement CSV import + matcher.
+- [ ] M2-11 Tenant tickets in tenant portal/app: create with photos, thread, notifications, SLAs & escalation, ratings, reports.
 
 ### Phase 3: Scale & reach (Weeks 20–30)
 - [ ] M3-01 Native mobile app (Expo) for tenants, caretakers and managers/landlords; push notifications. Broken down into MA-01…MA-12 in `docs/MOBILE_APP_PLAN.md`.

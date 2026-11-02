@@ -39,7 +39,8 @@ Design frames live in the design project; filenames are `*.dc.html`.
 | Pay (STK Push prompt, status) | `TenantPay` | Backend initiates STK; app only waits for result |
 | Receipt | `TenantReceipt` | Shareable PDF, M-Pesa code |
 | Statement | `TenantStatement` | Payments tab; current statement only cached |
-| Maintenance requests | `TenantRequest` | Photos, status timeline |
+| Requests: create repair or complaint ticket, list | `TenantRequest` | Photos and video, urgency, preferred access times, emergency guidance ("Fire, gas leak or break-in? Call 999 or 112 first."), status list |
+| Ticket detail and thread | `TenantTicket` | Public thread and replies, status timeline, rate resolution 1–5 with optional comment, reopen |
 | Notices | `TenantNotices` | Vacation and rent-increase notices (templates only) |
 | Profile, consents, data export and correction requests | `TenantProfile` | DPA rights entry points |
 
@@ -58,7 +59,7 @@ Design frames live in the design project; filenames are `*.dc.html`.
 | Home (collected vs expected, quick actions, attention list, property switcher) | `ManagerHome` | Read-mostly dashboard |
 | Approvals (cash, unmatched M-Pesa, flagged readings) | `ManagerApprovals` | Biometric/2FA step-up on every approve |
 | Tenant search and quick card | `ManagerTenant` | Call, SMS, STK request, statement |
-| Alerts inbox | `ManagerAlerts` | Payments, failed SMS, lease ending, MRI due, security alerts |
+| Alerts inbox | `ManagerAlerts` | Payments, failed SMS, lease ending, MRI due, security alerts, ticket SLA breaches (escalated to Owner) |
 
 ## 4. Technology
 | Concern | Choice |
@@ -159,9 +160,9 @@ Phase 3 **M3-01 Native mobile app (Expo)** is split into sub-tasks, one PR each:
 - [ ] MA-03 Auth: `AppLogin`, OTP, TOTP, token storage in secure-store, rotating refresh, device binding, remote revoke.
 - [ ] MA-04 Biometric unlock and step-up, app-switcher masking, screenshot blocking, role switcher.
 - [ ] MA-05 Tenant core: `TenantHome`, `TenantPay` (STK via backend), `TenantReceipt`, `TenantStatement`.
-- [ ] MA-06 Tenant extras: `TenantRequest` (photos), `TenantNotices`, `TenantProfile` (consents, data requests).
+- [ ] MA-06 Tenant extras: `TenantRequest` (create/list tickets with photos and video), `TenantTicket` (detail, public thread, rating), `TenantNotices`, `TenantProfile` (consents, data requests).
 - [ ] MA-07 Offline engine: SQLite outbox, idempotency keys, sync worker, conflict rules, attachment upload, sync status UI.
-- [ ] MA-08 Caretaker screens: `CaretakerHome`, `Caretaker` (readings), `CaretakerCash`, `CaretakerInspection`, `CaretakerJob`.
+- [ ] MA-08 Caretaker screens: `CaretakerHome`, `Caretaker` (readings), `CaretakerCash`, `CaretakerInspection`, `CaretakerJob` (repair jobs opened from a ticket; internal notes only, no complainant identity).
 - [ ] MA-09 Manager screens: `ManagerHome`, `ManagerApprovals`, `ManagerTenant`, `ManagerAlerts` with step-up on approvals.
 - [ ] MA-10 Push notifications (Expo Notifications, FCM/APNs), no-PII payloads, preferences; certificate pinning ADR and implementation.
 - [ ] MA-11 i18n English/Kiswahili (aligns with M3-08), low-end and 3G optimisation pass, bundle-size budget in CI.

@@ -41,9 +41,13 @@ Status: v1 draft. **[LEGAL]** marks points needing confirmation from a Kenyan da
 | Service SMS/email (rent due, receipts, maintenance) | Contract (service messages) | No opt-in needed but opt-out of non-essential reminders offered |
 | Marketing messages (promotions, third-party offers) | Consent (explicit, opt-in) | Separate from lease; STOP honoured; withdrawable any time |
 | Credit referencing / sharing arrears with a credit reference bureau or blacklist | Consent, or legal basis per Credit Reference Bureau Regulations **[LEGAL]** | Off by default; never silent; requires notice with consequences and a dispute path |
+| Repair and complaint tickets (description, photos and video, thread, rating) | Contract (repairs and service); legitimate interests for complaint handling **[LEGAL]** | Minimise; role-based visibility; EXIF stripped from media; abusive messages hidden (audited), not censored |
+| Third-party data in complaints (neighbours, caretaker, staff, manager; `subject_party_note`) | Legitimate interests (handling the complaint) **[LEGAL]** | Collect only what the complaint needs; identity can be hidden from the other party; never used to trigger penalties, eviction or notices |
 | Sensitive personal data (s.2: health, ethnic origin, children's data, etc.) | Explicit consent or specific exceptions | Avoided by design; maintenance notes must not capture health data; free-text fields carry a warning |
 | Kodibox customer account data | Contract; legitimate interests for security logging; consent for product marketing | |
 | Security and audit logs | Legitimate interests / legal obligation | Minimal PII (masked) |
+
+Ticket retention: tickets are kept for 2 years after closure **[LEGAL]**, or longer where linked to a dispute or financial record (credit note, reversal, invoice). Data subject export includes the tenant's own tickets and redacts other parties' names and identities. Complaints never trigger penalties or eviction steps.
 
 Rule: no feature may process a category without an entry in the lawful-basis register (`docs/` RoPA) and a purpose tag in code.
 

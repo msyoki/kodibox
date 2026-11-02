@@ -206,6 +206,34 @@ Pure logic in `packages/core/billing`; scheduling in the worker.
 - **Pro-rating**: move-in/out mid-month charges `rent * days_occupied / days_in_month` using integer math with largest-remainder rounding; rule configurable (daily vs 30-day basis).
 - **Corrections**: never edit an issued invoice; issue credit note (reversal) and re-issue.
 
+### 8.1 Tickets
+
+Tenant complaints and repair requests (see `DATA_MODEL.md` `tickets`). Tickets are raised from the tenant app/portal or logged by staff from a call; SMS `HELP` and WhatsApp are later channels.
+
+```mermaid
+flowchart LR
+  T["Tenant app/portal or staff call"] --> N["Ticket: New"]
+  N --> A["Acknowledged"]
+  A --> G{"Assign"}
+  G -->|caretaker| CJ["Caretaker job"]
+  G -->|vendor| WO["Work order + expense (M2-05)"]
+  G -->|staff| P["In progress"]
+  CJ --> P
+  WO --> P
+  P <--> W["Waiting on tenant"]
+  P --> R["Resolved"]
+  R -->|"7 days, no reopen"| C["Closed"]
+  R -->|"tenant reopens"| P
+  R --> RT["Tenant rating 1-5"]
+```
+
+- **SLAs** per org: acknowledge within 24 h (emergency 1 h); resolve targets per urgency. A breach sets `sla_breached_at`, escalates to the Owner and flags the dashboard.
+- **Routing**: complaints about a manager or caretaker go straight to the Owner, not the accused person.
+- **Billing queries** link to the invoice or payment; a correction is a credit note or reversal, never a deletion.
+- **Thread**: public replies notify the tenant per channel preference; internal notes never leave staff views.
+- **Notification events**: `ticket.created`, `ticket.acknowledged`, `ticket.status_changed`, `ticket.reply` (tenant), `ticket.sla_breached` (Owner), `ticket.resolved` (tenant, rating prompt).
+- **Jobs**: `tickets.sla-check` every 5 min; `tickets.auto-close` daily (moves Resolved to Closed after 7 days unless reopened). See section 10.
+
 ## 9. Notifications
 
 Channels: SMS (Africa's Talking, primary), email (Resend/SES), in-app (Postgres + SSE), WhatsApp (later, via Business API, template-based).
@@ -227,6 +255,8 @@ Flow: domain event -> `notifications` row (queued) -> `notify` job -> channel ad
 | `webhook-retry` | every 5 min (exponential, max 24 h) | `webhook_events.id:{attempt}` |
 | `retention-purge` | weekly Sun 04:00 | `retention:{table}:{week}` |
 | `dsr-export` | on request | `dsr.id` |
+| `tickets.sla-check` | every 5 min | `sla:{ticket}:{ack\|resolve}` |
+| `tickets.auto-close` | daily | `autoclose:{ticket}:{resolved_at}` |
 | `backup-verify` | weekly | `backup:{date}` |
 
 Rules: all handlers must be safe to run twice; job ids are the idempotency key (BullMQ `jobId`); DB unique constraints are the real guard. Failed jobs go to a DLQ queue with alerting.

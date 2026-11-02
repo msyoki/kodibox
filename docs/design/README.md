@@ -17,6 +17,7 @@ Live canvas (view, click through in Play mode, comment): https://claude.ai/artif
 - Invoices
 - Utilities
 - Maintenance
+- Tickets (tenant complaints and repair requests, M1-18)
 - MoveOut
 - Messages
 - Reports (MRI tax)
@@ -28,7 +29,7 @@ Live canvas (view, click through in Play mode, comment): https://claude.ai/artif
 - Billing
 
 **Mobile app** (see `docs/MOBILE_APP_PLAN.md`):
-- **Tenant:** AppLogin, TenantHome, TenantPay, TenantReceipt, TenantStatement, TenantRequest, TenantNotices, TenantProfile
+- **Tenant:** AppLogin, TenantHome, TenantPay, TenantReceipt, TenantStatement, TenantRequest, TenantTicket, TenantNotices, TenantProfile
 - **Caretaker:** CaretakerHome, Caretaker (water readings), CaretakerCash, CaretakerInspection, CaretakerJob
 - **Manager/landlord:** ManagerHome, ManagerApprovals, ManagerTenant, ManagerAlerts
 
