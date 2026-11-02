@@ -28,7 +28,6 @@ export const auditEvents = pgTable(
     prevHash: text('prev_hash'),
     hash: text('hash'),
     at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     index('audit_events_org_entity_idx').on(
@@ -37,5 +36,7 @@ export const auditEvents = pgTable(
       t.entityId,
       t.at.desc(),
     ),
+    index('audit_events_org_at_idx').on(t.organizationId, t.at),
+    index('audit_events_actor_idx').on(t.actorUserId),
   ],
 );

@@ -1,6 +1,6 @@
 {
-  "id": "376fec88-7630-479f-ac07-e355643f770c",
-  "prevId": "2529fd57-6c7f-41bc-96de-4401ae953bf7",
+  "id": "28b69ac6-ae3a-4d4a-a949-578659a62622",
+  "prevId": "41ca036a-aab3-4aa8-8a5b-956ce1d1970d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -314,13 +314,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {
@@ -349,6 +342,42 @@
               "expression": "at",
               "isExpression": false,
               "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "audit_events_org_at_idx": {
+          "name": "audit_events_org_at_idx",
+          "columns": [
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "audit_events_actor_idx": {
+          "name": "audit_events_actor_idx",
+          "columns": [
+            {
+              "expression": "actor_user_id",
+              "isExpression": false,
+              "asc": true,
               "nulls": "last"
             }
           ],

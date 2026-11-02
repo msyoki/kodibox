@@ -5,22 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1793626631297,
+      "when": 1793627483480,
       "tag": "0000_roles_and_helpers",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1793626639160,
-      "tag": "0001_baseline_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1793626645375,
-      "tag": "0002_rls_baseline",
+      "when": 1793627488656,
+      "tag": "0001_baseline",
       "breakpoints": true
     }
   ]

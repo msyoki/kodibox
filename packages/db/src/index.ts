@@ -1,10 +1,10 @@
-import { createDbClient, type DbClient, type Tx } from './client';
+import { createDbClient, type DbClient, type Tx, type WithOrgOptions } from './client';
 import { appDatabaseUrl } from './env';
 
 export const PACKAGE = '@kodibox/db' as const;
 
 export * from './schema';
-export type { Tx, Database, DbClient } from './client';
+export type { Tx, Database, DbClient, WithOrgOptions } from './client';
 
 let singleton: DbClient | undefined;
 function client(): DbClient {
@@ -16,8 +16,12 @@ function client(): DbClient {
  * Run `fn` in a transaction scoped to one organization (RLS context set via SET LOCAL semantics).
  * This is the ONLY way application code reaches org-scoped tables.
  */
-export function withOrg<T>(orgId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
-  return client().withOrg(orgId, fn);
+export function withOrg<T>(
+  orgId: string,
+  fn: (tx: Tx) => Promise<T>,
+  opts?: WithOrgOptions,
+): Promise<T> {
+  return client().withOrg(orgId, fn, opts);
 }
 
 /**

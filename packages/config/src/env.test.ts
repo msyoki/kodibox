@@ -36,4 +36,40 @@ describe('parseServerEnv', () => {
   it('rejects an unknown NODE_ENV', () => {
     expect(() => parseServerEnv({ ...valid, NODE_ENV: 'staging' })).toThrow(EnvValidationError);
   });
+
+  describe('production database safety', () => {
+    const prod = {
+      ...valid,
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgres://kodibox_app:pw@db:5432/kodibox',
+    };
+
+    it('accepts the app role without privileged URLs', () => {
+      expect(parseServerEnv(prod).NODE_ENV).toBe('production');
+    });
+
+    it('rejects migrator/admin URLs on runtime processes', () => {
+      expect(() =>
+        parseServerEnv({ ...prod, MIGRATION_DATABASE_URL: 'postgres://kodibox_migrator:x@db/k' }),
+      ).toThrow(/MIGRATION_DATABASE_URL/);
+      expect(() =>
+        parseServerEnv({ ...prod, DATABASE_ADMIN_URL: 'postgres://postgres:x@db/k' }),
+      ).toThrow(/DATABASE_ADMIN_URL/);
+    });
+
+    it('rejects a DATABASE_URL user other than kodibox_app', () => {
+      expect(() =>
+        parseServerEnv({ ...prod, DATABASE_URL: 'postgres://kodibox_migrator:x@db/k' }),
+      ).toThrow(/kodibox_app/);
+    });
+
+    it('allows privileged URLs and other users outside production', () => {
+      const env = parseServerEnv({
+        ...valid,
+        MIGRATION_DATABASE_URL: 'postgres://kodibox_migrator:x@localhost/k',
+        DATABASE_ADMIN_URL: 'postgres://postgres:x@localhost/k',
+      });
+      expect(env.NODE_ENV).toBe('development');
+    });
+  });
 });

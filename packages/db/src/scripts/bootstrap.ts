@@ -1,6 +1,24 @@
 import postgres from 'postgres';
 import { adminDatabaseUrl } from '../env';
 
+const MIN_PASSWORD_LENGTH = 24;
+
+/** Outside development/test, refuse placeholder (.env.example "change-me") or short passwords. */
+export function assertStrongPasswords(
+  passwords: { migrator: string; app: string },
+  nodeEnv: string | undefined = process.env.NODE_ENV,
+): void {
+  if (!passwords.migrator || !passwords.app) throw new Error('role passwords are required');
+  if (nodeEnv === 'development' || nodeEnv === 'test') return;
+  for (const [role, pw] of Object.entries(passwords)) {
+    if (/change-me/i.test(pw) || pw.length < MIN_PASSWORD_LENGTH) {
+      throw new Error(
+        `db:bootstrap: the ${role} password is a placeholder or shorter than ${MIN_PASSWORD_LENGTH} characters; refusing outside development/test`,
+      );
+    }
+  }
+}
+
 /**
  * Creates/updates the two runtime roles with LOGIN + passwords and hands the database to the
  * migrator. Run once per environment by a privileged role (DATABASE_ADMIN_URL). Idempotent.
@@ -9,9 +27,18 @@ export async function bootstrapRoles(
   adminUrl: string,
   passwords: { migrator: string; app: string },
 ): Promise<void> {
-  if (!passwords.migrator || !passwords.app) throw new Error('role passwords are required');
+  assertStrongPasswords(passwords);
   const admin = postgres(adminUrl, { max: 1, onnotice: () => undefined });
   try {
+    // Keep the ALTER ROLE ... PASSWORD statements out of the server log (max: 1 => same session).
+    // log_statement is superuser-only; managed Postgres admins may not be able to set it.
+    try {
+      await admin.unsafe("SET log_statement = 'none'");
+    } catch {
+      console.warn(
+        'db:bootstrap: could not SET log_statement = none (not superuser); check server logging',
+      );
+    }
     await admin.unsafe(`DO $b$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'kodibox_migrator') THEN
         CREATE ROLE kodibox_migrator NOSUPERUSER NOBYPASSRLS;

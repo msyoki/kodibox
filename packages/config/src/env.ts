@@ -2,25 +2,55 @@ import { z } from 'zod';
 
 const optionalString = z.string().min(1).optional();
 
-export const serverEnvSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  APP_URL: z.string().url(),
-  // Runtime connection: role kodibox_app (no BYPASSRLS, not owner).
-  DATABASE_URL: z.string().url(),
-  // Migrations/CI only (role kodibox_migrator). Must NOT be set on runtime web/worker services.
-  MIGRATION_DATABASE_URL: z.string().url().optional(),
-  REDIS_URL: z.string().url(),
-  AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
-  // Placeholder until E-0x envelope encryption lands: base64 32-byte key-encryption key.
-  ENCRYPTION_KEK: z.string().min(1),
-  DARAJA_CONSUMER_KEY: optionalString,
-  DARAJA_CONSUMER_SECRET: optionalString,
-  DARAJA_PASSKEY: optionalString,
-  DARAJA_SHORTCODE: optionalString,
-  AT_USERNAME: optionalString,
-  AT_API_KEY: optionalString,
-  AT_SENDER_ID: optionalString,
-});
+export const serverEnvSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    APP_URL: z.string().url(),
+    // Runtime connection: role kodibox_app (no BYPASSRLS, not owner).
+    DATABASE_URL: z.string().url(),
+    // Migrations/CI only (role kodibox_migrator). Must NOT be set on runtime web/worker services.
+    MIGRATION_DATABASE_URL: z.string().url().optional(),
+    // db:bootstrap only (privileged). Must NOT be set on runtime services in production.
+    DATABASE_ADMIN_URL: z.string().url().optional(),
+    REDIS_URL: z.string().url(),
+    AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
+    // Placeholder until E-0x envelope encryption lands: base64 32-byte key-encryption key.
+    ENCRYPTION_KEK: z.string().min(1),
+    DARAJA_CONSUMER_KEY: optionalString,
+    DARAJA_CONSUMER_SECRET: optionalString,
+    DARAJA_PASSKEY: optionalString,
+    DARAJA_SHORTCODE: optionalString,
+    AT_USERNAME: optionalString,
+    AT_API_KEY: optionalString,
+    AT_SENDER_ID: optionalString,
+  })
+  // This schema validates RUNTIME processes (web, worker). Migration/bootstrap scripts read their
+  // own URLs and never call parseServerEnv. See packages/db/README.md for the env-per-process table.
+  .superRefine((env, ctx) => {
+    if (env.NODE_ENV !== 'production') return;
+    for (const key of ['MIGRATION_DATABASE_URL', 'DATABASE_ADMIN_URL'] as const) {
+      if (env[key] !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: `${key} must not be set on runtime processes in production`,
+        });
+      }
+    }
+    let user = '';
+    try {
+      user = decodeURIComponent(new URL(env.DATABASE_URL).username);
+    } catch {
+      // malformed URL is reported by the field validator
+    }
+    if (user !== 'kodibox_app') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['DATABASE_URL'],
+        message: 'DATABASE_URL must connect as role kodibox_app in production',
+      });
+    }
+  });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 

@@ -4,7 +4,7 @@ import { bootstrapRoles, createDbClient, runMigrations, type DbClient } from '..
 
 export function dockerAvailable(): boolean {
   try {
-    return spawnSync('docker', ['info'], { stdio: 'ignore', timeout: 15_000 }).status === 0;
+    return spawnSync('docker', ['info'], { stdio: 'ignore', timeout: 60_000 }).status === 0;
   } catch {
     return false;
   }
