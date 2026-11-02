@@ -1,12 +1,7 @@
-import { EmptyState } from '@/components/ui';
+import { CaretakerHome } from '@/features/mobile-caretaker/home';
+
+export const metadata = { title: 'Caretaker | Kodibox' };
 
 export default function Page() {
-  return (
-    <div className="p-4">
-      <EmptyState
-        title="Caretaker app: coming in P-06"
-        description="The mobile views are built as responsive web routes."
-      />
-    </div>
-  );
+  return <CaretakerHome />;
 }
