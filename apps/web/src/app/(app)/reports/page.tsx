@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { ReportsView } from '@/features/reports/components/reports-view';
 
-export default function Page() {
-  return <ComingSoon title="Reports & tax" task="P-05" />;
+export const metadata = { title: 'Reports & tax | Kodibox' };
+
+export default function ReportsPage() {
+  return <ReportsView />;
 }

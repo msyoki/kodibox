@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { MessagesView } from '@/features/messages/components/messages-view';
 
-export default function Page() {
-  return <ComingSoon title="Messages" task="P-05" />;
+export const metadata = { title: 'Messages | Kodibox' };
+
+export default function MessagesPage() {
+  return <MessagesView />;
 }

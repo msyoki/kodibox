@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { TeamView } from '@/features/settings/components/team-view';
 
-export default function Page() {
-  return <ComingSoon title="Settings" task="P-05" />;
+export const metadata = { title: 'Settings | Kodibox' };
+
+export default function SettingsPage() {
+  return <TeamView />;
 }
