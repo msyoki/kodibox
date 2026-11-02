@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { MoveOutsView } from '@/features/move-outs/components/move-outs-view';
 
-export default function Page() {
-  return <ComingSoon title="Notices & move-outs" task="P-04" />;
+export const metadata = { title: 'Notices & move-outs | Kodibox' };
+
+export default function MoveOutsPage() {
+  return <MoveOutsView />;
 }

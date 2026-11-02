@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { UtilitiesView } from '@/features/utilities/components/utilities-view';
 
-export default function Page() {
-  return <ComingSoon title="Utilities" task="P-04" />;
+export const metadata = { title: 'Utilities | Kodibox' };
+
+export default function UtilitiesPage() {
+  return <UtilitiesView />;
 }

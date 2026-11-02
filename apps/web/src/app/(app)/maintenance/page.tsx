@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { MaintenanceView } from '@/features/maintenance/components/maintenance-view';
 
-export default function Page() {
-  return <ComingSoon title="Expenses & repairs" task="P-04" />;
+export const metadata = { title: 'Expenses & repairs | Kodibox' };
+
+export default function MaintenancePage() {
+  return <MaintenanceView />;
 }

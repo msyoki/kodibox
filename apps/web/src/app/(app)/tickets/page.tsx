@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { TicketsView } from '@/features/tickets/components/tickets-view';
 
-export default function Page() {
-  return <ComingSoon title="Tickets" task="P-04" />;
+export const metadata = { title: 'Tickets | Kodibox' };
+
+export default function TicketsPage() {
+  return <TicketsView />;
 }
