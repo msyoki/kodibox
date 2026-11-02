@@ -1,5 +1,7 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { PaymentsView } from '@/features/payments/components/payments-view';
 
-export default function Page() {
-  return <ComingSoon title="Payments" task="P-02" />;
+export const metadata = { title: 'Payments | Kodibox' };
+
+export default function PaymentsPage() {
+  return <PaymentsView />;
 }
