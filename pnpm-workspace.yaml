@@ -6,3 +6,6 @@ onlyBuiltDependencies:
   - simple-git-hooks
   - sharp
   - unrs-resolver
+overrides:
+  # undici 8 requires Node >=22.19 (testcontainers dep); pin 7.x so Node 22.x LTS dev machines work.
+  undici: ^7.30.1

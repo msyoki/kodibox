@@ -50,7 +50,7 @@ Legal and business tasks run in parallel with engineering:
 Engineering tasks:
 - [x] E-01 Monorepo scaffold: pnpm, Turborepo, TS strict, ESLint, Prettier, `packages/config/env.ts` (Zod).
 - [x] E-02 CI (GitHub Actions): lint, typecheck, test, build, gitleaks, Semgrep, `pnpm audit`, Trivy; Renovate.
-- [ ] E-03 `packages/db`: Drizzle, migrations, `withOrg()` + RLS baseline, Testcontainers test harness.
+- [x] E-03 `packages/db`: Drizzle, migrations, `withOrg()` + RLS baseline, Testcontainers test harness.
 - [ ] E-04 Auth: Better Auth (email/phone + password, OTP, TOTP 2FA mandatory for owner/manager/accountant), sessions, rate limits.
 - [ ] E-05 Organizations, memberships, roles, `can()` authz module + tests (including cross-org denial tests).
 - [ ] E-06 Audit log (hash-chained `audit_events`), PII envelope encryption helper, log redaction.

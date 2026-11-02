@@ -56,7 +56,7 @@ M1-01 units ───┘          └── M2-05 work orders/expenses (repair t
 - **Demo:** `pnpm dev` boots web and worker against local Postgres and Redis; CI is green on an empty PR.
 
 ### Sprint 1 (Wk 2–3): platform core
-- [ ] E-03 `packages/db`: Drizzle, migrations, `withOrg()`, RLS baseline, Testcontainers harness
+- [x] E-03 `packages/db`: Drizzle, migrations, `withOrg()`, RLS baseline, Testcontainers harness
 - [ ] E-04 Auth (Better Auth, 2FA enforced for owner/manager/accountant)
 - [ ] E-05 Organizations, memberships, roles, `can()` + cross-org denial tests
 - [ ] E-06 Hash-chained audit log, envelope encryption helper, log redaction

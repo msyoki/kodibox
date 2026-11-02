@@ -5,7 +5,10 @@ const optionalString = z.string().min(1).optional();
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_URL: z.string().url(),
+  // Runtime connection: role kodibox_app (no BYPASSRLS, not owner).
   DATABASE_URL: z.string().url(),
+  // Migrations/CI only (role kodibox_migrator). Must NOT be set on runtime web/worker services.
+  MIGRATION_DATABASE_URL: z.string().url().optional(),
   REDIS_URL: z.string().url(),
   AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
   // Placeholder until E-0x envelope encryption lands: base64 32-byte key-encryption key.
