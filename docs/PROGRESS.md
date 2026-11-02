@@ -9,7 +9,7 @@
 | Track | Done | In progress | Pending |
 |---|---|---|---|
 | Planning & docs | 9 | 0 | 0 |
-| Prototype (clickable UI on demo data) | 1 | 5 | 1 |
+| Prototype (clickable UI on demo data) | 6 | 1 | 0 |
 | Phase 0 engineering | 4 | 0 | 4 |
 | Phase 0 legal | 0 | 0 | 6 |
 | Phase 1 MVP | 0 | 0 | 18 |
@@ -34,12 +34,12 @@ Goal: see and test the whole product now. Screens live in `apps/web` and read fr
 | ID | Scope | Status |
 |---|---|---|
 | P-01 | App shell, design tokens, UI kit, demo data layer, sign-in and onboarding screens | ✅ |
-| P-02 | Dashboard, payments reconciliation, invoices | 🔄 |
-| P-03 | Properties and units, tenants and leases, bulk import | 🔄 |
-| P-04 | Tickets, repairs and expenses, move-outs and deposits, utilities | 🔄 |
-| P-05 | Messages, reports and MRI tax, landlords/agency, landlord portal, settings, privacy, subscription | 🔄 |
-| P-06 | Mobile views (tenant, caretaker, manager) as responsive web routes under `/m` | 🔄 |
-| P-07 | Click-through QA pass, demo banner, shareable preview deploy (ask before deploying) | ⏳ |
+| P-02 | Dashboard, payments reconciliation, invoices | ✅ |
+| P-03 | Properties and units, tenants and leases, bulk import | ✅ |
+| P-04 | Tickets, repairs and expenses, move-outs and deposits, utilities | ✅ |
+| P-05 | Messages, reports and MRI tax, landlords/agency, landlord portal, settings, privacy, subscription | ✅ |
+| P-06 | Mobile views (tenant, caretaker, manager) as responsive web routes under `/m` | ✅ |
+| P-07 | Click-through QA pass, demo banner, shareable preview deploy (ask before deploying) | 🔄 (crawl of 230 pages passed; preview deploy waits on hosting decision) |
 
 ## Phase 0: engineering
 | ID | Task | Status | Notes |
