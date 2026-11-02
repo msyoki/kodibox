@@ -28,7 +28,10 @@ describe('bootstrap password guard', () => {
 describe('seed guard', () => {
   it('refuses to run in production before touching the database', async () => {
     await expect(
-      seed('postgres://invalid:invalid@127.0.0.1:1/none', { NODE_ENV: 'production' }),
+      seed(
+        { app: 'postgres://x:x@127.0.0.1:1/n', migrator: 'postgres://x:x@127.0.0.1:1/n' },
+        { NODE_ENV: 'production' },
+      ),
     ).rejects.toThrow(/production/);
   });
 });

@@ -44,14 +44,27 @@ queries cannot bypass `withOrg`. Raw clients live in `@kodibox/db/internal` (ESL
 it outside this package). `withPlatformAdmin()` is a stub until E-05/E-06.
 
 `withOrg(orgId, fn, { userId })` also sets `app.current_user_id` (the acting user). Both GUCs are
-transaction-local and written only in `src/client.ts`; `scripts/check-guc-usage.mjs` (part of
-`pnpm lint`) fails on `set_config` or `app.current_*_id` anywhere else except migrations.
+transaction-local and written only in `src/client.ts`; `scripts/check-guc-usage.mjs` (root
+`pnpm lint:guards`, part of `pnpm lint`, uncached) fails on `set_config` or `app.current_*_id` anywhere else except migrations.
 
-Identity: `kodibox_app` cannot INSERT into `users` or `memberships`, and can only UPDATE
-`users.display_name` (own row) and `memberships(role, status, updated_at)`. Use the SECURITY DEFINER
-functions `create_or_get_user_for_invite(email, display_name)` and `add_membership(org, user, role)`.
-Activating a membership is reserved for the invite-acceptance flow (E-04), which must verify email
-ownership first.
+Identity: `kodibox_app` cannot INSERT into `organizations`, `users` or `memberships`, cannot UPDATE
+`memberships`, and can only UPDATE `users.display_name` (own row). Everything else goes through
+SECURITY DEFINER functions that check the acting user (`app.current_user_id`) against the current org:
+`create_organization(name)` (org + ACTIVE owner membership, atomically; any placeholder org uuid works
+as the withOrg context), `create_or_get_user_for_invite(email, display_name)`,
+`add_membership(org, user, role)` (starts `invited`), `change_membership_role(id, role)`,
+`revoke_membership(id)` and `accept_invite(id)` (only the invited user). Only owners may grant, change
+or revoke owner; the last active owner cannot be demoted or revoked. A BEFORE INSERT trigger on
+`audit_events` binds `actor_user_id` to the acting user when one is set.
+
+E-04 notes: UUIDv7 ids leak creation time, so the value returned by `create_or_get_user_for_invite`
+is not an oracle-free signal of whether the user pre-existed. E-04 must treat pre-existing user rows as
+unverified, verify email ownership before binding credentials or calling `accept_invite`, and reset
+`display_name` on email verification.
+
+Seed (`db:seed`, dev/test only): inserts the demo owner via `MIGRATION_DATABASE_URL` (the migrator has a
+users insert policy for this; the app role does not), then calls `create_organization` as the app role.
+An existing demo user means "already seeded" and the seed does nothing. Needs both URLs set.
 
 ## Migrations
 

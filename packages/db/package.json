@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit -p tsconfig.json",
-    "lint": "eslint . && node ../../scripts/check-guc-usage.mjs",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "db:generate": "drizzle-kit generate",
