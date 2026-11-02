@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Properties and units</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F">4 properties · 150 units · 94.7% occupied</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Properties &amp; units</h1>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<a href="Import.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font-weight: 700; font-size: 14px; text-decoration: none; box-sizing: border-box">Bulk import</a>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Add units</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Add property</button>
+</div>
+</header>
+
+<section aria-label="Properties" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px">
+<sc-for list="{{props}}" as="p" hint-placeholder-count="4">
+<button type="button" style="{{p.cardStyle}}">
+<span style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; width: 100%"><strong style="font-size: 17px; font-weight: 700">{{p.name}}</strong><span style="{{p.pill}}">{{p.type}}</span></span>
+<span style="font-size: 13px; color: #5A635F">{{p.area}}</span>
+<span style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; margin-top: 6px"><span><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 500">{{p.units}}</span> units</span><span style="font-weight: 700">{{p.occ}} occupied</span></span>
+<span style="display: block; width: 100%; height: 8px; background: #EEECE5; border-radius: 99px; overflow: hidden"><span style="{{p.bar}}"></span></span>
+<span style="font-size: 12px; color: #5A635F">{{p.landlord}}</span>
+</button>
+</sc-for>
+</section>
+
+<section aria-labelledby="units" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+<div>
+<h2 id="units" style="margin: 0; font-size: 18px; font-weight: 700">Riverside Court · Units</h2>
+<p style="margin: 4px 0 0; font-size: 13px; color: #5A635F">Unit code is the tenant's M-Pesa account number. Paybill <span style="font-family: 'IBM Plex Mono', monospace">[PAYBILL]</span>, e.g. account <span style="font-family: 'IBM Plex Mono', monospace">B-12</span>.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<label style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: 1px solid #D9D6CC; border-radius: 10px; padding: 0 12px; min-height: 44px; min-width: 220px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A635F" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="position: absolute; left: -9999px">Search units</span>
+<input type="search" placeholder="Search unit or tenant" style="border: 0; outline: 0; font: inherit; font-size: 14px; flex: 1; background: transparent; min-width: 0">
+</label>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600">Status
+<select style="min-height: 44px; border: 1px solid #D9D6CC; border-radius: 10px; padding: 0 10px; font: inherit; font-size: 14px; background: #FFFFFF"><option>All</option><option>Occupied</option><option>Vacant</option><option>Notice</option></select>
+</label>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600">Type
+<select style="min-height: 44px; border: 1px solid #D9D6CC; border-radius: 10px; padding: 0 10px; font: inherit; font-size: 14px; background: #FFFFFF"><option>All</option><option>Bedsitter</option><option>1BR</option><option>2BR</option><option>Shop</option></select>
+</label>
+</div>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 860px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Unit / account no.</th><th style="padding: 8px; font-weight: 600">Type</th><th style="padding: 8px; font-weight: 600; text-align: right">Rent (KES)</th><th style="padding: 8px; font-weight: 600">Tenant</th><th style="padding: 8px; font-weight: 600">Status</th><th style="padding: 8px; font-weight: 600; text-align: right">Balance (KES)</th><th style="padding: 8px 0 8px 8px; font-weight: 600; text-align: right">Action</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{units}}" as="u" hint-placeholder-count="10">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 11px 8px 11px 0; font-family: 'IBM Plex Mono', monospace; font-weight: 500">{{u.code}}</td>
+<td style="padding: 11px 8px">{{u.type}}</td>
+<td style="padding: 11px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace">{{u.rent}}</td>
+<td style="padding: 11px 8px">{{u.tenant}}</td>
+<td style="padding: 11px 8px"><span style="{{u.pill}}">{{u.status}}</span></td>
+<td style="padding: 11px 8px; {{u.balStyle}}">{{u.balance}}</td>
+<td style="padding: 11px 0 11px 8px; text-align: right"><a href="{{u.href}}" style="font-weight: 600; font-size: 14px">{{u.action}}</a></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 13px; color: #5A635F">
+<span>Showing 10 of 48 units</span><span>Archiving a unit keeps its full ledger history. Units are never deleted.</span>
+</div>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const bar = (pct, color) => 'display: block; height: 100%; width: ' + pct + '%; background: ' + (color || '#0E4D45') + '; border-radius: 99px';
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const pillS = (kind) => {
+const m = { ok: ['#E1F2E8', '#1C6B44'], warn: ['#FDEBD3', '#8A4B08'], info: ['#E3ECF9', '#1D4F91'], danger: ['#FBE7E1', '#9B2C1A'] }[kind];
+return 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; background: ' + m[0] + '; color: ' + m[1];
+};
+const card = (sel) => 'display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; font: inherit; color: #14201E; cursor: pointer; background: ' + (sel ? '#F1F7F5' : '#FFFFFF') + '; border: ' + (sel ? '2px solid #0E4D45' : '1px solid #E2E0D8') + '; border-radius: 14px; padding: ' + (sel ? '19px' : '20px');
+const unit = (code, type, rent, tenant, st, bal) => {
+const k = { Occupied: 'ok', Vacant: 'info', Notice: 'warn' }[st];
+return {
+code, type, rent, tenant: tenant || 'No tenant', status: st, pill: pillS(k), balance: bal,
+balStyle: 'padding: 11px 8px; text-align: right; font-family: IBM Plex Mono, monospace; ' + (bal !== '0' && bal !== '-' ? 'color: #9B2C1A; font-weight: 500' : 'color: #5A635F'),
+action: tenant ? 'Open lease' : 'List vacancy',
+href: tenant ? 'TenantLease.dc.html' : '#'
+};
+};
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html', true),
+navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'),
+navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html')
+],
+props: [
+{ name: 'Riverside Court', area: 'Kilimani, Nairobi', type: 'Residential', pill: pillS('info'), units: '48', occ: '46 of 48', landlord: 'Landlord: Mwangi Family Trust', bar: bar(96), cardStyle: card(true) },
+{ name: 'Baraka Flats', area: 'Ruaka, Kiambu', type: 'Residential', pill: pillS('info'), units: '36', occ: '34 of 36', landlord: 'Landlord: J. Kamau', bar: bar(94), cardStyle: card(false) },
+{ name: 'Mvule Apartments', area: 'Nyali, Mombasa', type: 'Residential', pill: pillS('info'), units: '42', occ: '40 of 42', landlord: 'Landlord: Said Holdings Ltd', bar: bar(95), cardStyle: card(false) },
+{ name: 'Tumaini Shops', area: 'Thika Road', type: 'Commercial', pill: pillS('warn'), units: '24', occ: '22 of 24', landlord: 'Landlord: Tumaini Co-op', bar: bar(92, '#D9822B'), cardStyle: card(false) }
+],
+units: [
+unit('A-01', 'Bedsitter', '8,000', 'Esther Wanjiku', 'Occupied', '0'),
+unit('A-07', '1BR', '11,500', 'Hassan Abdi', 'Notice', '0'),
+unit('A-11', '1BR', '12,000', 'Faith Njeri', 'Occupied', '0'),
+unit('B-04', '2BR', '16,500', 'Brian Kiprop', 'Occupied', '16,500'),
+unit('B-09', '2BR', '16,500', '', 'Vacant', '-'),
+unit('B-12', '2BR', '14,000', 'Peter Otieno', 'Occupied', '16,700'),
+unit('C-02', '2BR', '17,500', 'Mercy Achieng', 'Occupied', '0'),
+unit('C-05', 'Bedsitter', '7,500', 'Joseph Mwaura', 'Occupied', '3,200'),
+unit('C-08', '1BR', '12,500', '', 'Vacant', '-'),
+unit('G-01','Shop', '25,000', 'Njoroge Hardware', 'Occupied', '0')
+]
+};
+}
+}
+</script>
+</body>
+</html>

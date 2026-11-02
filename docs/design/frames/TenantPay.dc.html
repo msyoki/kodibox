@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pay with M-Pesa</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; padding: 20px 16px; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; align-items: center; gap: 12px">
+<a href="TenantHome.dc.html" aria-label="Back to home" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #E2E0D8; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14201E" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 20px; font-weight: 800">Pay rent</h1>
+</header>
+
+<sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 18px; flex: 1">
+<div style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #5A635F">Paying to</span>
+<strong style="font-size: 16px">Mwangi Properties</strong>
+<span style="font-size: 13px; color: #5A635F">Paybill [PAYBILL] · Account B-12</span>
+</div>
+
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 700">
+Amount (KES)
+<input type="text" inputmode="numeric" value="16,700" style="min-height: 60px; padding: 0 16px; border: 2px solid #0E4D45; border-radius: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 28px; background: #FFFFFF">
+</label>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 99px; border: 1px solid #0E4D45; background: #E2EEEB; color: #0E4D45; font: inherit; font-size: 13px; font-weight: 700">Full balance 16,700</button>
+<button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 99px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-size: 13px; font-weight: 600">Rent only 14,000</button>
+</div>
+
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 700">
+M-Pesa phone number
+<input type="tel" value="0712 345 512" style="min-height: 52px; padding: 0 16px; border: 1px solid #C9C6BB; border-radius: 14px; font: inherit; font-size: 17px; font-weight: 500; background: #FFFFFF">
+</label>
+
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+<button type="button" onClick="{{send}}" style="min-height: 56px; border-radius: 14px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 17px; font-weight: 800; cursor: pointer">Send M-Pesa prompt</button>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5A635F; text-align: center">Your money goes directly to your landlord’s paybill. Kodibox never holds it.</p>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; padding-top: 40px">
+<div style="width: 88px; height: 88px; border-radius: 99px; background: #E2EEEB; display: flex; align-items: center; justify-content: center">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0E4D45" stroke-width="2" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"></rect><path d="M11 18h2"></path></svg>
+</div>
+<h2 style="margin: 0; font-size: 22px; font-weight: 800">Check your phone</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3F4743; max-width: 300px">Enter your M-Pesa PIN on 0712 ••• 512 to pay <strong>KES 16,700</strong> to Mwangi Properties.</p>
+<div style="width: 100%; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; text-align: left; font-size: 14px">
+<div style="display: flex; gap: 10px; align-items: center"><span style="width: 10px; height: 10px; border-radius: 99px; background: #1C6B44"></span>Prompt sent</div>
+<div style="display: flex; gap: 10px; align-items: center"><span style="width: 10px; height: 10px; border-radius: 99px; background: #D9822B"></span>Waiting for your PIN…</div>
+<div style="display: flex; gap: 10px; align-items: center; color: #5A635F"><span style="width: 10px; height: 10px; border-radius: 99px; border: 2px solid #C9C6BB; box-sizing: border-box"></span>Receipt by SMS</div>
+</div>
+<div style="margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 10px">
+<button type="button" onClick="{{reset}}" style="min-height: 52px; border-radius: 14px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Didn’t get it? Send again</button>
+<a href="TenantReceipt.dc.html" style="font-size: 14px; font-weight: 700; min-height: 44px; display: flex; align-items: center; justify-content: center">Paid? View receipt</a>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const sent = !!(this.state && this.state.sent);
+return {
+sent, notSent: !sent,
+send: () => this.setState({ sent: true }),
+reset: () => this.setState({ sent: false })
+};
+}
+}
+</script>
+</body>
+</html>

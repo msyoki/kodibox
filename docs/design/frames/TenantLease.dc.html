@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tenant profile and lease</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px">
+<div style="display: flex; gap: 16px; align-items: center">
+<span aria-hidden="true" style="flex: none; width: 64px; height: 64px; border-radius: 99px; background: #E2EEEB; color: #0E4D45; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: center">PO</span>
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F"><a href="Properties.dc.html" style="font-weight: 600">Riverside Court</a> · Unit <span style="font-family: 'IBM Plex Mono', monospace">B-12</span> · 2BR</p>
+<h1 style="margin: 2px 0 6px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Peter Otieno</h1>
+<span style="display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #FBE7E1; color: #9B2C1A">Balance KES 16,700 · due 5 Nov</span>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Send statement</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Issue notice</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Request payment (STK)</button>
+<a href="MoveOut.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #9B2C1A; background: #FFFFFF; color: #9B2C1A; font-weight: 700; font-size: 14px; text-decoration: none; box-sizing: border-box">End lease</a>
+</div>
+</header>
+
+<section aria-label="Contact details" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between">
+<div style="display: flex; flex-wrap: wrap; gap: 32px">
+<sc-for list="{{contact}}" as="c" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; color: #5A635F; text-transform: uppercase; letter-spacing: 0.4px">{{c.label}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px">{{c.value}}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+<button type="button" onClick="{{toggle}}" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FAF9F6; color: #14201E; font: inherit; font-weight: 700; font-size: 14px">{{revealLabel}}</button>
+<span style="font-size: 12px; color: #5A635F; max-width: 260px">{{revealNote}}</span>
+</div>
+</section>
+
+<div role="tablist" aria-label="Tenant sections" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #E2E0D8">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+<button type="button" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section aria-labelledby="lease" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 id="lease" style="margin: 0; font-size: 17px; font-weight: 700">Lease</h2><span style="display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #E1F2E8; color: #1C6B44">Active</span></div>
+<dl style="margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 10px 16px; font-size: 14px">
+<sc-for list="{{lease}}" as="l" hint-placeholder-count="8">
+<dt style="color: #5A635F">{{l.k}}</dt><dd style="margin: 0; text-align: right; font-weight: 600; font-family: 'IBM Plex Mono', monospace; font-size: 13.5px">{{l.v}}</dd>
+</sc-for>
+</dl>
+<div style="border-top: 1px solid #EEECE5; padding-top: 12px; display: flex; flex-direction: column; gap: 8px">
+<strong style="font-size: 14px">Recurring charges</strong>
+<sc-for list="{{charges}}" as="c" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px"><span>{{c.name}}<br><span style="font-size: 12px; color: #5A635F">{{c.note}}</span></span><span style="font-family: 'IBM Plex Mono', monospace; text-align: right">{{c.amt}}</span></div>
+</sc-for>
+</div>
+<div style="border-top: 1px solid #EEECE5; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<span style="font-size: 14px"><strong>Deposit held</strong><br><span style="font-size: 12px; color: #5A635F">Held by landlord, tracked here. Refund via move-out.</span></span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 500">KES 28,000</span>
+</div>
+</section>
+
+<section aria-labelledby="cons" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 id="cons" style="margin: 0; font-size: 17px; font-weight: 700">Consents</h2>
+<sc-for list="{{consents}}" as="c" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; background: #FAF9F6; border: 1px solid #EEECE5; border-radius: 10px; font-size: 14px">
+<span><strong style="font-weight: 600">{{c.name}}</strong><br><span style="font-size: 12px; color: #5A635F">{{c.when}}</span></span>
+<span style="{{c.pill}}">{{c.val}}</span>
+</div>
+</sc-for>
+<p style="margin: 0; font-size: 12px; color: #5A635F">Every SMS carries an opt-out. Tenant can export their data or request corrections from the app.</p>
+</section>
+</div>
+
+<section aria-labelledby="stmt" style="flex: 2 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px">
+<h2 id="stmt" style="margin: 0; font-size: 17px; font-weight: 700">Statement · Oct to Nov 2026</h2>
+<span style="font-size: 13px; color: #5A635F">Ledger entries are never deleted. Corrections post as reversals.</span>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Date</th><th style="padding: 8px; font-weight: 600">Description</th><th style="padding: 8px; font-weight: 600; text-align: right">Debit</th><th style="padding: 8px; font-weight: 600; text-align: right">Credit</th><th style="padding: 8px 0 8px 8px; font-weight: 600; text-align: right">Balance</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{ledger}}" as="r" hint-placeholder-count="9">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 10px 8px 10px 0; color: #5A635F; white-space: nowrap">{{r.date}}</td>
+<td style="padding: 10px 8px">{{r.desc}}<br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A635F">{{r.ref}}</span></td>
+<td style="padding: 10px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace">{{r.debit}}</td>
+<td style="padding: 10px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace; color: #1C6B44">{{r.credit}}</td>
+<td style="padding: 10px 0 10px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 500">{{r.bal}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const revealed = !!st.revealed;
+const tab = st.tab || 'Overview';
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const pill = (kind) => {
+const m = { ok: ['#E1F2E8', '#1C6B44'], warn: ['#FDEBD3', '#8A4B08'], info: ['#E3ECF9', '#1D4F91'], neutral: ['#EEECE5', '#14201E'] }[kind];
+return 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + m[0] + '; color: ' + m[1];
+};
+const row = (date, desc, ref, debit, credit, bal) => ({ date, desc, ref, debit, credit, bal });
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html'),
+navItem('Tenants & leases', 'TenantLease.dc.html', true),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'),
+navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html')
+],
+contact: [
+{ label: 'Phone', value: revealed ? '0712 345 512' : '0712 ••• 512' },
+{ label: 'National ID', value: revealed ? '27384821' : '••••4821' },
+{ label: 'KRA PIN', value: revealed ? 'A004829317K' : 'A•••••••17K' },
+{ label: 'Email', value: 'peter.otieno@gmail.com' }
+],
+toggle: () => this.setState({ revealed: !revealed }),
+revealLabel: revealed ? 'Hide details' : 'Reveal phone, ID and PIN',
+revealNote: revealed ? 'Reveal logged: Wanjiru Mwangi, 2 Nov 2026 10:14, reason required.' : 'Each reveal is recorded in the audit log with your name and time.',
+tabs: ['Overview', 'Statement', 'Lease', 'Documents', 'Messages', 'Activity'].map(t => ({
+label: t, sel: t === tab ? 'true' : 'false', pick: () => this.setState({ tab: t }),
+style: 'min-height: 44px; padding: 0 16px; background: transparent; border: 0; border-bottom: 3px solid ' + (t === tab ? '#0E4D45' : 'transparent') + '; font: inherit; font-size: 15px; font-weight: ' + (t === tab ? '700' : '500') + '; color: ' + (t === tab ? '#0E4D45' : '#5A635F') + '; cursor: pointer'
+})),
+lease: [
+{ k: 'Start date', v: '1 Feb 2026' },
+{ k: 'End date', v: '31 Jan 2027' },
+{ k: 'Monthly rent', v: 'KES 14,000' },
+{ k: 'Due day', v: '5th of month' },
+{ k: 'Grace period', v: '3 days' },
+{ k: 'Late penalty', v: '5% of unpaid, cap KES 1,000' },
+{ k: 'M-Pesa account no.', v: 'B-12' },
+{ k: 'Notice period', v: '30 days' }
+],
+charges: [
+{ name: 'Service charge', note: 'Fixed monthly', amt: 'KES 1,300' },
+{ name: 'Garbage collection', note: 'Included in service charge', amt: 'KES 0' },
+{ name: 'Water', note: 'Metered · KES 120 per unit', amt: 'Per reading' }
+],
+consents: [
+{ name: 'Rent reminders by SMS', when: 'Recorded 1 Feb 2026 at lease signing', val: 'Yes', pill: pill('ok') },
+{ name: 'Marketing messages', when: 'Recorded 1 Feb 2026 at lease signing', val: 'No', pill: pill('neutral') },
+{ name: 'Share contact with caretaker', when: 'Recorded 1 Feb 2026 at lease signing', val: 'Yes', pill: pill('ok') }
+],
+ledger: [
+row('1 Oct', 'October rent, service charge, garbage, water', 'INV-2026-0412', '16,500', '', '16,500'),
+row('8 Oct', 'Late fee (5% of KES 4,000 unpaid after grace)', 'PEN-0087', '200', '', '16,700'),
+row('9 Oct', 'Payment received · M-Pesa paybill', 'TK2F9RT4KD', '', '16,500', '200'),
+row('1 Nov', 'November rent', 'INV-2026-0538', '14,000', '', '14,200'),
+row('1 Nov', 'Service charge (incl. garbage)', 'INV-2026-0538', '1,300', '', '15,500'),
+row('1 Nov', 'Water 10 units at KES 120', 'INV-2026-0538', '1,200', '', '16,700')
+]
+};
+}
+}
+</script>
+</body>
+</html>

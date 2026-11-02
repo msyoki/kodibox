@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Caretaker job</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 12px">
+<header>
+<p style="margin: 0; font-size: 13px; color: #5A635F">Work order WO-0231 · Riverside Court</p>
+<h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800">Kitchen sink leaking, B-12</h1>
+</header>
+
+<section aria-labelledby="det" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<h2 id="det" style="margin: 0; font-size: 14px; font-weight: 700; color: #5A635F">Details</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.45">Water drips under the sink when the tap runs. Cupboard floor is wet. Reported by Peter Otieno on 31 Oct. Tenant home after 5 pm.</p>
+<div style="display: flex; gap: 8px">
+<sc-for list="{{photos}}" as="p" hint-placeholder-count="3">
+<div role="img" aria-label="{{p.alt}}" style="flex: 1; height: 64px; border-radius: 10px; background: #EEECE5; border: 1px solid #E2E0D8; display: flex; align-items: center; justify-content: center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A635F" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-8 9"></path></svg>
+</div>
+</sc-for>
+</div>
+<span style="font-size: 12px; color: #5A635F">3 photos from tenant</span>
+</section>
+
+<section aria-labelledby="st" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px">
+<h2 id="st" style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #5A635F">Status</h2>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+<span style="{{s.bar}}"></span>
+<span style="{{s.text}}">{{s.label}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="cost" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<h2 id="cost" style="margin: 0; font-size: 14px; font-weight: 700; color: #5A635F">Cost and receipt</h2>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700">
+Cost (KES)
+<input type="text" inputmode="numeric" value="1,800" style="min-height: 48px; padding: 0 12px; border: 1px solid #E2E0D8; border-radius: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 16px; background: #FFFFFF; box-sizing: border-box; width: 100%">
+</label>
+<button type="button" style="align-self: end; min-height: 48px; border-radius: 12px; border: 1px dashed #0E4D45; background: #F1F7F5; color: #0E4D45; font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E4D45" stroke-width="2" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+Receipt photo
+</button>
+</div>
+<p style="margin: 0; font-size: 12px; color: #5A635F">Cost goes to the manager as an expense for approval.</p>
+</section>
+
+<button type="button" style="min-height: 52px; border-radius: 12px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800">Mark done</button>
+<p style="margin: -4px 0 0; font-size: 12px; color: #5A635F; text-align: center">Peter Otieno gets an SMS and app notification.</p>
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const step = (label, state) => ({
+label,
+bar: 'display: block; width: 100%; height: 6px; border-radius: 99px; background: ' + (state === 0 ? '#E2E0D8' : state === 1 ? '#D9822B' : '#0E4D45'),
+text: 'font-size: 12px; font-weight: ' + (state === 1 ? '800' : '600') + '; color: ' + (state === 0 ? '#5A635F' : '#14201E')
+});
+return {
+photos: [{ alt: 'Tenant photo: wet cupboard floor' }, { alt: 'Tenant photo: leaking pipe joint' }, { alt: 'Tenant photo: tap and basin' }],
+steps: [step('Reported', 2), step('Assigned', 2), step('In progress', 1), step('Done', 0)],
+tabs: [tab('Tasks', 'CaretakerHome.dc.html'), tab('Readings', 'Caretaker.dc.html'), tab('Cash', 'CaretakerCash.dc.html'), tab('Jobs', 'CaretakerJob.dc.html', true)]
+};
+}
+}
+</script>
+</body>
+</html>

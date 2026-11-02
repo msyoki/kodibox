@@ -1,0 +1,12 @@
+# Sensitive paths require security review (see docs/SECURITY.md §14).
+# Replace @kodibox/security with the real GitHub team/user once the repo exists.
+/packages/core/ledger/        @kodibox/security
+/packages/core/authz/         @kodibox/security
+/packages/integrations/       @kodibox/security
+/packages/db/migrations/      @kodibox/security
+/packages/config/             @kodibox/security
+/apps/web/src/app/api/webhooks/ @kodibox/security
+/apps/web/src/features/auth/  @kodibox/security
+/.github/workflows/           @kodibox/security
+/.claude/                     @kodibox/security
+/docs/SECURITY.md             @kodibox/security

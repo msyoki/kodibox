@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Caretaker tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 14px">
+<header style="display: flex; justify-content: space-between; align-items: center">
+<div>
+<p style="margin: 0; font-size: 13px; color: #5A635F">Baraka Flats · Mvule Apartments</p>
+<h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800">Today, Mon 2 Nov</h1>
+</div>
+<span style="width: 44px; height: 44px; border-radius: 99px; background: #E2EEEB; color: #0E4D45; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800" aria-label="Otieno Ouma">OO</span>
+</header>
+
+<div role="status" style="display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: #FDEBD3; color: #8A4B08; font-size: 13px; font-weight: 600">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A4B08" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 01-15.5 6.2"></path><path d="M3 12a9 9 0 0115.5-6.2"></path><path d="M18 3v4h-4"></path><path d="M6 21v-4h4"></path></svg>
+<span style="flex: 1">Offline · 4 items waiting to sync</span>
+<button type="button" style="min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #8A4B08; background: transparent; color: #8A4B08; font: inherit; font-size: 13px; font-weight: 700">Sync now</button>
+</div>
+
+<div style="display: flex; justify-content: space-between; font-size: 14px"><strong>1 of 4 tasks done</strong><span style="color: #5A635F">Last synced 9:42 am</span></div>
+
+<section aria-labelledby="tasks" style="display: flex; flex-direction: column; gap: 8px">
+<h2 id="tasks" style="margin: 0; font-size: 16px; font-weight: 800">Today's tasks</h2>
+<sc-for list="{{tasks}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="display: flex; gap: 12px; align-items: center; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px; text-decoration: none; color: #14201E; min-height: 44px">
+<span style="{{t.markStyle}}" aria-hidden="true">{{t.mark}}</span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 15px">{{t.title}}</strong><span style="font-size: 13px; color: #5A635F">{{t.sub}}</span></span>
+<span style="{{t.badgeStyle}}">{{t.badge}}</span>
+</a>
+</sc-for>
+</section>
+
+<section aria-labelledby="sync" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<h2 id="sync" style="margin: 0; font-size: 14px; font-weight: 700; color: #5A635F">Waiting to sync</h2>
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span>{{q.label}}</span><span style="color: #5A635F; font-family: 'IBM Plex Mono', monospace">{{q.when}}</span></div>
+</sc-for>
+</section>
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const mk = (bg, fg) => 'flex: none; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: ' + bg + '; color: ' + fg;
+const bd = (bg, fg) => 'flex: none; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + bg + '; color: ' + fg;
+return {
+tasks: [
+{ href: 'Caretaker.dc.html', mark: 'Rd', markStyle: mk('#E2EEEB', '#0E4D45'), title: 'Readings due: 6 units', sub: 'Mvule Apartments · by 28 Nov', badge: 'Due', badgeStyle: bd('#FDEBD3', '#8A4B08') },
+{ href: 'CaretakerInspection.dc.html', mark: 'Mo', markStyle: mk('#E3ECF9', '#1D4F91'), title: 'Move-out inspection A-07', sub: 'Baraka Flats · 2:00 pm', badge: '2 pm', badgeStyle: bd('#E3ECF9', '#1D4F91') },
+{ href: 'CaretakerJob.dc.html', mark: 'Jb', markStyle: mk('#FDEBD3', '#8A4B08'), title: 'Fix sink B-12', sub: 'Riverside Court · Kitchen sink leaking', badge: 'In progress', badgeStyle: bd('#FDEBD3', '#8A4B08') },
+{ href: 'CaretakerCash.dc.html', mark: 'Ca', markStyle: mk('#E1F2E8', '#1C6B44'), title: 'Collect cash receipts', sub: '2 receipts to record', badge: 'Done', badgeStyle: bd('#E1F2E8', '#1C6B44') }
+],
+queue: [
+{ label: '3 meter readings with photos', when: '8:15 am' },
+{ label: 'Cash entry KES 14,000 · A-03', when: '9:05 am' }
+],
+tabs: [tab('Tasks', 'CaretakerHome.dc.html', true), tab('Readings', 'Caretaker.dc.html'), tab('Cash', 'CaretakerCash.dc.html'), tab('Jobs', 'CaretakerJob.dc.html')]
+};
+}
+}
+</script>
+</body>
+</html>

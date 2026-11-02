@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reconcile payments</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="9">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F"><a href="Main.dc.html">Dashboard</a> / Payments</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Reconcile payments</h1>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Import bank statement</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Record cash payment</button>
+</div>
+</header>
+
+<div role="tablist" aria-label="Payment views" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #E2E0D8">
+<button type="button" role="tab" aria-selected="false" style="min-height: 44px; padding: 0 14px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: #5A635F">All payments</button>
+<button type="button" role="tab" aria-selected="true" style="min-height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid #0E4D45; background: transparent; font: inherit; font-size: 14px; font-weight: 800; color: #14201E">Needs match · 6</button>
+<button type="button" role="tab" aria-selected="false" style="min-height: 44px; padding: 0 14px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: #5A635F">Awaiting approval · 3</button>
+<button type="button" role="tab" aria-selected="false" style="min-height: 44px; padding: 0 14px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: #5A635F">Not rent · 1</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<section aria-label="Unmatched payments" style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0 0 4px; font-size: 13px; color: #5A635F">These payments reached your paybill but we could not tell which unit they belong to.</p>
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="6">
+<button type="button" style="{{q.style}}">
+<span style="display: flex; justify-content: space-between; gap: 12px"><strong style="font-weight: 700; font-size: 15px">{{q.payer}}</strong><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px">{{q.amount}}</span></span>
+<span style="display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: #5A635F"><span style="font-family: 'IBM Plex Mono', monospace">{{q.ref}}</span><span>{{q.when}}</span></span>
+<span style="font-size: 13px; color: #5A635F">Account entered: <strong style="color: #8A4B08">{{q.acc}}</strong></span>
+</button>
+</sc-for>
+</section>
+
+<section aria-labelledby="matchh" style="flex: 2 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px">
+<div>
+<h2 id="matchh" style="margin: 0; font-size: 20px; font-weight: 800">Match KES 15,000 from JOHN K•••</h2>
+<p style="margin: 6px 0 0; font-size: 14px; color: #5A635F">M-Pesa <span style="font-family: 'IBM Plex Mono', monospace">TK2F9RT4KD</span> · Paybill [PAYBILL] · 2 Nov 08:58 · phone 0712 ••• 512 · <strong style="color: #1C6B44">Verified with Safaricom</strong></p>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #5A635F">Suggested matches</h3>
+<sc-for list="{{suggestions}}" as="s" hint-placeholder-count="3">
+<label style="{{s.style}}">
+<input type="radio" name="match" checked="{{s.checked}}" style="width: 20px; height: 20px; accent-color: #0E4D45; margin: 2px 0 0">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+<span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px"><strong style="font-size: 15px">{{s.unit}} · {{s.tenant}}</strong><span style="{{s.conf}}">{{s.confLabel}}</span></span>
+<span style="font-size: 13px; color: #5A635F">{{s.why}}</span>
+<span style="font-size: 13px">Balance due <strong style="font-family: 'IBM Plex Mono', monospace">{{s.balance}}</strong></span>
+</span>
+</label>
+</sc-for>
+</div>
+
+<div style="background: #FAF9F6; border: 1px solid #EEECE5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 14px; font-weight: 700">How KES 15,000 will be applied to B-12</h3>
+<sc-for list="{{alloc}}" as="l" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px"><span>{{l.label}}</span><span style="font-family: 'IBM Plex Mono', monospace">{{l.amount}}</span></div>
+</sc-for>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #E2E0D8; padding-top: 10px; font-size: 14px; font-weight: 700"><span>Remaining balance after this payment</span><span style="font-family: 'IBM Plex Mono', monospace">KES 1,700</span></div>
+<p style="margin: 0; font-size: 12px; color: #5A635F">Oldest invoices first; penalties are paid last. You can change the order in Settings.</p>
+</div>
+
+<label style="display: flex; gap: 10px; align-items: center; font-size: 14px; min-height: 44px">
+<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #0E4D45">
+Remember “B12 ” and this phone number for unit B-12 next time
+</label>
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 15px">Confirm match &amp; send receipt</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 14px">Split across units</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 14px">Mark as not rent</button>
+</div>
+<p style="margin: 0; font-size: 12px; color: #5A635F">Every match is saved in the audit log with your name and the time. Matches can be reversed but never deleted.</p>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() {
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const card = (sel) => 'display: flex; flex-direction: column; gap: 6px; text-align: left; font: inherit; color: #14201E; padding: 14px 16px; border-radius: 12px; cursor: pointer; background: ' + (sel ? '#FFFFFF' : '#FAF9F6') + '; border: ' + (sel ? '2px solid #0E4D45' : '1px solid #E2E0D8');
+const opt = (sel) => 'display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; cursor: pointer; border: ' + (sel ? '2px solid #0E4D45; background: #F1F7F5' : '1px solid #E2E0D8; background: #FFFFFF');
+const conf = (hi) => 'padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + (hi ? '#E1F2E8; color: #1C6B44' : '#EEECE5; color: #4A524E');
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'), navItem('Properties & units', 'Properties.dc.html'), navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Invoices', 'Invoices.dc.html'), navItem('Payments', 'Payments.dc.html', true, '6'), navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'), navItem('Notices & move-outs', 'MoveOut.dc.html'), navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'), navItem('Reports & tax', 'Reports.dc.html'), navItem('Settings', 'Settings.dc.html')
+],
+queue: [
+{ payer: 'JOHN K•••', amount: '15,000', ref: 'TK2F9RT4KD', when: 'Today 08:58', acc: '“B12 ”', style: card(true) },
+{ payer: 'MARY W•••', amount: '12,500', ref: 'TK2D4HN8QS', when: 'Today 07:12', acc: '“rent”', style: card(false) },
+{ payer: 'SAMUEL O•••', amount: '30,000', ref: 'TK1Y7VB2LM', when: 'Yesterday', acc: '“A04 A05”', style: card(false) },
+{ payer: 'ESTHER A•••', amount: '6,200', ref: 'TK1X2CF9RE', when: 'Yesterday', acc: '“0722…”', style: card(false) },
+{ payer: 'BRIAN M•••', amount: '8,000', ref: 'TK1U5KJ3TT', when: '31 Oct', acc: '(blank)', style: card(false) },
+{ payer: 'LUCY N•••', amount: '2,500', ref: 'TK1R8DS6WP', when: '30 Oct', acc: '“water”', style: card(false) }
+],
+suggestions: [
+{ unit: 'B-12 Riverside Court', tenant: 'Peter Otieno', confLabel: 'Strong match', conf: conf(true), why: 'Account “B12 ” is close to unit code B-12, and this phone paid B-12 in September and October.', balance: 'KES 16,700', checked: true, style: opt(true) },
+{ unit: 'B-21 Riverside Court', tenant: 'Joseph Kamau', confLabel: 'Possible', conf: conf(false), why: 'Payer name starts with J. K.; amount matches monthly rent of KES 15,000.', balance: 'KES 15,000', checked: false, style: opt(false) },
+{ unit: 'Search another unit or tenant…', tenant: 'Manual', confLabel: '', conf: 'display: none', why: 'Pick any unit in Mwangi Properties.', balance: '—', checked: false, style: opt(false) }
+],
+alloc: [
+{ label: 'INV-2026-0981 · October water (balance)', amount: '1,200' },
+{ label: 'INV-2026-1104 · November rent', amount: '13,800 of 14,000' },
+{ label: 'INV-2026-1104 · November service charge', amount: '0 of 1,300' },
+{ label: 'Late payment penalty (October)', amount: '0 of 200' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

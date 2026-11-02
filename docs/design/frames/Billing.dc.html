@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kodibox subscription</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F"><a href="Settings.dc.html" style="font-weight: 600">Settings</a> / Subscription</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Kodibox subscription</h1>
+</div>
+<a href="#pay" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px; background: #0E4D45; color: #FFFFFF; font-weight: 700; font-size: 14px; text-decoration: none">Pay invoice by M-Pesa</a>
+</header>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+
+<section aria-labelledby="cur" style="flex: 2 1 460px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px">
+<h2 id="cur" style="margin: 0; font-size: 17px; font-weight: 700">Current plan</h2>
+<span style="display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #E1F2E8; color: #1C6B44">Active</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px">
+<span style="font-size: 26px; font-weight: 800">Standard</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #5A635F">KES 120 / unit / month</span>
+</div>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px">
+<div><dt style="font-size: 13px; color: #5A635F">Units</dt><dd style="margin: 4px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 20px">150</dd></div>
+<div><dt style="font-size: 13px; color: #5A635F">Monthly total</dt><dd style="margin: 4px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 20px">KES 18,000</dd></div>
+<div><dt style="font-size: 13px; color: #5A635F">Next invoice</dt><dd style="margin: 4px 0 0; font-size: 20px; font-weight: 600">1 Dec 2026</dd></div>
+</dl>
+<div style="font-size: 13px; color: #5A635F; line-height: 1.5; padding: 12px 14px; border-radius: 10px; background: #FAF9F6; border: 1px solid #EEECE5">150 units x KES 120 = KES 18,000. Units are counted on the 1st of each month; vacant units still count. Adding a property mid-month is billed pro rata.</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Change plan</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 14px">Export all my data</button>
+</div>
+</section>
+
+<section id="pay" aria-labelledby="paytitle" style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="paytitle" style="margin: 0; font-size: 17px; font-weight: 700">Pay Kodibox by M-Pesa</h2>
+<dl style="margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 14px">
+<dt style="color: #5A635F">Paybill</dt><dd style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 500">[PAYBILL]</dd>
+<dt style="color: #5A635F">Account</dt><dd style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 500">MWANGI-0412</dd>
+<dt style="color: #5A635F">Amount due</dt><dd style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 500">KES 18,000</dd>
+</dl>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #5A635F">
+Phone to prompt
+<input type="tel" value="0712 ••• 512" style="min-height: 44px; border: 1px solid #D9D6CC; border-radius: 10px; padding: 0 12px; font: inherit; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #14201E; box-sizing: border-box; width: 100%">
+</label>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Send M-Pesa prompt</button>
+<p style="margin: 0; font-size: 12px; color: #5A635F; line-height: 1.5">This is the only money Kodibox receives: your subscription and SMS credit. Tenant rent never passes through Kodibox; it goes to your own paybill or bank account.</p>
+</section>
+</div>
+
+<section aria-labelledby="plans" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="plans" style="margin: 0; font-size: 17px; font-weight: 700">Compare plans</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px">
+<sc-for list="{{plans}}" as="p" hint-placeholder-count="4">
+<div style="{{p.card}}">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><strong style="font-size: 17px; font-weight: 800">{{p.name}}</strong><span style="{{p.tag}}">{{p.tagLabel}}</span></div>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500">{{p.price}}</span>
+<span style="font-size: 13px; color: #5A635F">{{p.unit}}</span>
+<ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; flex: 1">
+<sc-for list="{{p.features}}" as="f" hint-placeholder-count="4"><li>{{f}}</li></sc-for>
+</ul>
+<button type="button" style="{{p.btn}}">{{p.btnLabel}}</button>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="inv" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px">
+<h2 id="inv" style="margin: 0; font-size: 17px; font-weight: 700">Kodibox invoices</h2>
+<span style="font-size: 13px; color: #5A635F">Includes SMS credit top-ups</span>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Invoice</th><th style="padding: 8px; font-weight: 600">Date</th><th style="padding: 8px; font-weight: 600">Description</th><th style="padding: 8px; font-weight: 600; text-align: right">Amount</th><th style="padding: 8px; font-weight: 600">M-Pesa ref</th><th style="padding: 8px; font-weight: 600">Status</th><th style="padding: 8px 0 8px 8px; font-weight: 600"><span style="position: absolute; left: -9999px">Download</span></th>
+</tr></thead>
+<tbody>
+<sc-for list="{{invoices}}" as="i" hint-placeholder-count="5">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 11px 8px 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{i.no}}</td>
+<td style="padding: 11px 8px; color: #5A635F">{{i.date}}</td>
+<td style="padding: 11px 8px">{{i.desc}}</td>
+<td style="padding: 11px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace">{{i.amount}}</td>
+<td style="padding: 11px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{i.ref}}</td>
+<td style="padding: 11px 8px"><span style="{{i.pill}}">{{i.status}}</span></td>
+<td style="padding: 11px 0 11px 8px; text-align: right"><a href="#" style="font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; min-height: 44px">PDF</a></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() {
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const pill = (kind) => {
+const m = { ok: ['#E1F2E8', '#1C6B44'], warn: ['#FDEBD3', '#8A4B08'], info: ['#E3ECF9', '#1D4F91'] }[kind];
+return 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + m[0] + '; color: ' + m[1];
+};
+const plan = (name, price, unit, features, current, btnLabel) => ({
+name, price, unit, features, btnLabel: current ? 'Current plan' : btnLabel,
+card: 'background: #FFFFFF; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: ' + (current ? '2px solid #0E4D45' : '1px solid #E2E0D8'),
+tag: current ? 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #E2EEEB; color: #0E4D45' : 'display: none',
+tagLabel: current ? 'Your plan' : '',
+btn: 'min-height: 44px; padding: 0 16px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 14px; ' + (current ? 'border: 0; background: #E2EEEB; color: #0E4D45; cursor: default' : 'border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; cursor: pointer')
+});
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html'),
+navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'),
+navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html', true)
+],
+plans: [
+plan('Starter', 'Free', 'Up to 3 units', ['Rent invoices and M-Pesa matching', 'Tenant statements', 'One user'], false, 'Downgrade'),
+plan('Standard', 'KES 120', 'per unit per month', ['Everything in Starter', 'Water and utility billing', 'Caretaker app with cash approval', 'KRA MRI report and eTIMS receipts'], true, ''),
+plan('Agency', 'KES 100', 'per unit per month, min KES 5,000', ['Everything in Standard', 'Multiple landlords with owner statements', 'Accountant and manager roles', 'Priority support'], false, 'Switch to Agency'),
+plan('Enterprise', 'Custom', 'Volume pricing', ['Everything in Agency', 'Single sign-on and custom retention', 'Dedicated onboarding', 'Service agreement'], false, 'Talk to sales')
+],
+invoices: [
+{ no: 'KB-2026-1101', date: '1 Nov 2026', desc: 'Standard, 150 units, November', amount: 'KES 18,000', ref: 'Due 8 Nov', status: 'Unpaid', pill: pill('warn') },
+{ no: 'KB-2026-1028', date: '28 Oct 2026', desc: 'SMS credit, 2,000 messages', amount: 'KES 1,600', ref: 'TK2D4M7QXB', status: 'Paid', pill: pill('ok') },
+{ no: 'KB-2026-1001', date: '1 Oct 2026', desc: 'Standard, 150 units, October', amount: 'KES 18,000', ref: 'TK1A9W3LPZ', status: 'Paid', pill: pill('ok') },
+{ no: 'KB-2026-0901', date: '1 Sep 2026', desc: 'Standard, 148 units, September', amount: 'KES 17,760', ref: 'SI8R2F6NCV', status: 'Paid', pill: pill('ok') },
+{ no: 'KB-2026-0801', date: '1 Aug 2026', desc: 'Standard, 148 units, August', amount: 'KES 17,760', ref: 'SH5T1K8MYD', status: 'Paid', pill: pill('ok') }
+]
+};
+}
+}
+</script>
+</body>
+</html>

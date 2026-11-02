@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Move-out inspection</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 12px 16px 0; display: flex; flex-direction: column; gap: 10px">
+<header style="display: flex; align-items: center; gap: 8px">
+<a href="CaretakerHome.dc.html" aria-label="Back to tasks" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #E2E0D8; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14201E" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<div>
+<p style="margin: 0; font-size: 12px; color: #5A635F">Baraka Flats · Brian Kiptoo</p>
+<h1 style="margin: 0; font-size: 20px; font-weight: 800">Move-out inspection A-07</h1>
+</div>
+</header>
+
+<sc-for list="{{rooms}}" as="r" hint-placeholder-count="4">
+<section aria-label="{{r.name}}" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h2 style="margin: 0; font-size: 15px; font-weight: 800">{{r.name}}</h2>
+<span style="font-size: 12px; color: #5A635F">{{r.photos}} photos</span>
+</div>
+<div style="display: flex; gap: 6px">
+<sc-for list="{{r.chips}}" as="c" hint-placeholder-count="3">
+<button type="button" style="{{c.style}}">{{c.label}}</button>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 12px; color: #5A635F">{{r.note}}</p>
+</section>
+</sc-for>
+
+<section aria-label="Final handover" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: end">
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700">
+Final water reading
+<input type="text" inputmode="numeric" value="1,842" style="min-height: 44px; padding: 0 10px; border: 1px solid #E2E0D8; border-radius: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 16px; background: #FFFFFF; box-sizing: border-box; width: 100%">
+</label>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 13px; font-weight: 700">
+<input type="checkbox" checked style="width: 22px; height: 22px; accent-color: #0E4D45">
+2 keys returned
+</label>
+</div>
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="flex: 1; height: 56px; border: 1px dashed #5A635F; border-radius: 10px; background: #FAF9F6; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #5A635F">Tenant signature here</div>
+<button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-size: 13px; font-weight: 700">Clear</button>
+</div>
+</section>
+</div>
+
+<div style="background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 10px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<button type="button" style="min-height: 52px; border-radius: 12px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800">Submit inspection</button>
+<p style="margin: 0; font-size: 12px; color: #5A635F; text-align: center">Saved on this phone. The manager reviews any deposit deductions.</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const chip = (label, on, bg, fg) => ({ label, style: 'flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-size: 13px; font-weight: 700; border: 1px solid ' + (on ? fg : '#E2E0D8') + '; background: ' + (on ? bg : '#FFFFFF') + '; color: ' + (on ? fg : '#5A635F') });
+const chips = (sel) => [chip('Good', sel === 0, '#E1F2E8', '#1C6B44'), chip('Fair', sel === 1, '#FDEBD3', '#8A4B08'), chip('Damaged', sel === 2, '#FBE7E1', '#9B2C1A')];
+return {
+rooms: [
+{ name: 'Living room', photos: 3, chips: chips(0), note: 'Walls clean, floor tiles intact.' },
+{ name: 'Kitchen', photos: 4, chips: chips(1), note: 'Sink stained, cabinet hinge loose.' },
+{ name: 'Bedroom', photos: 2, chips: chips(0), note: 'Repainted wall by tenant, no damage.' },
+{ name: 'Bathroom', photos: 5, chips: chips(2), note: 'Cracked basin, shower head missing.' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

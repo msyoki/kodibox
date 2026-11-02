@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Manager home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 12px">
+<header style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
+<div>
+<p style="margin: 0; font-size: 13px; color: #5A635F">Mwangi Properties · November</p>
+<h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800">Hi Wanjiru</h1>
+</div>
+<button type="button" aria-label="Switch property: all properties" style="min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid #E2E0D8; background: #FFFFFF; color: #14201E; font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+All properties
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#14201E" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+</header>
+
+<section aria-labelledby="col" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; gap: 16px; align-items: center">
+<div role="img" aria-label="84 percent of expected rent collected" style="position: relative; width: 104px; height: 104px; flex: none">
+<svg width="104" height="104" viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="#E2E0D8" stroke-width="10"></circle><circle cx="52" cy="52" r="44" fill="none" stroke="#0E4D45" stroke-width="10" stroke-linecap="round" stroke-dasharray="{{ring}}" transform="rotate(-90 52 52)"></circle></svg>
+<span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 500">84%</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px">
+<div><span id="col" style="color: #5A635F">Collected</span><br><strong style="font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 500">KES 1,935,500</strong></div>
+<div><span style="color: #5A635F">Expected</span><br><strong style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500">KES 2,310,000</strong></div>
+</div>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 12px; background: #FBE7E1; color: #9B2C1A; font-size: 14px; font-weight: 700">
+<span>Outstanding</span><span style="font-family: 'IBM Plex Mono', monospace">KES 374,500</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{props}}" as="p" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 112px 1fr 38px; gap: 8px; align-items: center; font-size: 12px">
+<span style="font-weight: 600">{{p.name}}</span>
+<span style="height: 8px; background: #E2E0D8; border-radius: 99px; overflow: hidden"><span style="{{p.bar}}"></span></span>
+<span style="font-family: 'IBM Plex Mono', monospace; text-align: right">{{p.pct}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<nav aria-label="Quick actions" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{actions}}" as="a" hint-placeholder-count="3">
+<a href="{{a.href}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 76px; padding: 8px 4px; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; text-decoration: none; color: #14201E; font-size: 12px; font-weight: 700; text-align: center">
+<span style="width: 32px; height: 32px; border-radius: 10px; background: #E2EEEB; color: #0E4D45; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800" aria-hidden="true">{{a.mark}}</span>
+{{a.label}}
+</a>
+</sc-for>
+</nav>
+
+<section aria-labelledby="att" style="display: flex; flex-direction: column; gap: 8px">
+<h2 id="att" style="margin: 0; font-size: 16px; font-weight: 800">Needs attention</h2>
+<sc-for list="{{items}}" as="i" hint-placeholder-count="3">
+<a href="{{i.href}}" style="display: flex; gap: 10px; align-items: center; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 12px; padding: 10px 14px; min-height: 44px; text-decoration: none; color: #14201E; font-size: 13px">
+<span style="{{i.dot}}"></span>
+<span style="flex: 1"><strong style="display: block; font-size: 14px">{{i.title}}</strong><span style="color: #5A635F">{{i.sub}}</span></span>
+</a>
+</sc-for>
+</section>
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const circ = 2 * Math.PI * 44;
+const bar = (pct) => 'display: block; height: 100%; border-radius: 99px; background: ' + (pct < 80 ? '#D9822B' : '#0E4D45') + '; width: ' + pct + '%';
+const dot = (c) => 'flex: none; width: 10px; height: 10px; border-radius: 99px; background: ' + c;
+return {
+ring: (circ * 0.838).toFixed(1) + ' ' + circ.toFixed(1),
+props: [
+{ name: 'Riverside Court', pct: '91%', bar: bar(91) },
+{ name: 'Baraka Flats', pct: '88%', bar: bar(88) },
+{ name: 'Mvule Apartments', pct: '79%', bar: bar(79) },
+{ name: 'Tumaini Shops', pct: '72%', bar: bar(72) }
+],
+actions: [
+{ mark: 'Rq', label: 'Request payment', href: 'ManagerTenant.dc.html' },
+{ mark: 'Ex', label: 'Record expense', href: '#' },
+{ mark: 'Sm', label: 'Send reminder', href: '#' }
+],
+items: [
+{ href: 'ManagerApprovals.dc.html', dot: dot('#D9822B'), title: '3 cash entries to approve', sub: 'KES 36,000 from Otieno Ouma' },
+{ href: 'ManagerApprovals.dc.html', dot: dot('#D9822B'), title: '2 unmatched M-Pesa payments', sub: 'KES 28,500 waiting for a unit' },
+{ href: 'ManagerAlerts.dc.html', dot: dot('#9B2C1A'), title: 'MRI tax due 20 Nov', sub: 'Gross rent for October ready to file' }
+],
+tabs: [tab('Home', 'ManagerHome.dc.html', true), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html')]
+};
+}
+}
+</script>
+</body>
+</html>

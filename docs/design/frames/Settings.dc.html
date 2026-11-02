@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kodibox settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F">Mwangi Properties · 150 units</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Settings</h1>
+</div>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Invite team member</button>
+</header>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+
+<nav aria-label="Settings sections" style="flex: 1 1 200px; max-width: 260px; min-width: 180px; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{subnav}}" as="s" hint-placeholder-count="7">
+<a href="{{s.href}}" style="{{s.style}}">{{s.label}}</a>
+</sc-for>
+</nav>
+
+<div style="flex: 6 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section aria-labelledby="team" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px">
+<h2 id="team" style="margin: 0; font-size: 17px; font-weight: 700">Team &amp; roles</h2>
+<span style="font-size: 13px; color: #5A635F">6 members · 2FA required for Owner, Manager and Accountant</span>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 700px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Member</th><th style="padding: 8px; font-weight: 600">Role</th><th style="padding: 8px; font-weight: 600">Property scope</th><th style="padding: 8px; font-weight: 600">2FA</th><th style="padding: 8px 0 8px 8px; font-weight: 600">Last active</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{members}}" as="m" hint-placeholder-count="6">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 11px 8px 11px 0"><strong style="font-weight: 700">{{m.name}}</strong><br><span style="font-size: 12px; color: #5A635F">{{m.email}}</span></td>
+<td style="padding: 11px 8px"><span style="{{m.rolePill}}">{{m.role}}</span></td>
+<td style="padding: 11px 8px">{{m.scope}}</td>
+<td style="padding: 11px 8px"><span style="{{m.tfaPill}}">{{m.tfa}}</span></td>
+<td style="padding: 11px 0 11px 8px; color: #5A635F">{{m.last}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<section aria-labelledby="matrix" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px">
+<h2 id="matrix" style="margin: 0 0 4px; font-size: 17px; font-weight: 700">What each role can do</h2>
+<p style="margin: 0 0 12px; font-size: 13px; color: #5A635F">Cash recorded by a Caretaker always needs approval from a Manager or Owner (maker-checker). Nobody can delete a payment; reversals keep the original on record.</p>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Permission</th><th style="padding: 8px; font-weight: 600; text-align: center">Owner</th><th style="padding: 8px; font-weight: 600; text-align: center">Manager</th><th style="padding: 8px; font-weight: 600; text-align: center">Accountant</th><th style="padding: 8px 0 8px 8px; font-weight: 600; text-align: center">Caretaker</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{perms}}" as="p" hint-placeholder-count="6">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 11px 8px 11px 0; font-weight: 600">{{p.name}}</td>
+<sc-for list="{{p.cells}}" as="c" hint-placeholder-count="4">
+<td style="padding: 11px 8px; text-align: center"><span aria-label="{{c.label}}" style="{{c.style}}">{{c.mark}}</span></td>
+</sc-for>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<section aria-labelledby="sec" style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 id="sec" style="margin: 0; font-size: 17px; font-weight: 700">Security</h2>
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: #F1F7F5; border: 1px solid #E2EEEB">
+<span role="switch" aria-checked="true" aria-disabled="true" aria-label="Enforce 2FA for Owner, Manager and Accountant, locked on" style="flex: none; width: 44px; height: 26px; border-radius: 99px; background: #0E4D45; position: relative"><span style="position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 99px; background: #FFFFFF"></span></span>
+<span style="font-size: 14px; line-height: 1.4"><strong style="font-weight: 700">Enforce 2FA for Owner, Manager, Accountant</strong><br><span style="color: #5A635F; font-size: 13px">Locked on. These roles can see money and personal data.</span></span>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700">Active sessions</h3>
+<sc-for list="{{sessions}}" as="s" hint-placeholder-count="3">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid #EEECE5; border-radius: 10px; background: #FAF9F6">
+<span style="font-size: 14px; display: flex; flex-direction: column; gap: 2px"><strong style="font-weight: 600">{{s.device}}</strong><span style="font-size: 12px; color: #5A635F">{{s.where}} · {{s.when}}</span></span>
+<button type="button" onClick="{{s.revoke}}" style="{{s.btn}}">{{s.btnLabel}}</button>
+</div>
+</sc-for>
+</section>
+
+<section aria-labelledby="audit" style="flex: 2 1 480px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px">
+<h2 id="audit" style="margin: 0; font-size: 17px; font-weight: 700">Audit log</h2>
+<a href="#" style="font-size: 14px; font-weight: 600">Open full log</a>
+</div>
+<p style="margin: 0 0 12px; font-size: 13px; color: #5A635F; display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C6B44" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 018 0v3"></path></svg>Tamper-evident: every entry is hash chained to the one before it.</p>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 13px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Time</th><th style="padding: 8px; font-weight: 600">Actor</th><th style="padding: 8px; font-weight: 600">Action</th><th style="padding: 8px; font-weight: 600">IP</th><th style="padding: 8px 0 8px 8px; font-weight: 600">Before to after</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{audit}}" as="a" hint-placeholder-count="5">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 10px 8px 10px 0; color: #5A635F; white-space: nowrap">{{a.time}}</td>
+<td style="padding: 10px 8px">{{a.actor}}</td>
+<td style="padding: 10px 8px; font-weight: 600">{{a.action}}</td>
+<td style="padding: 10px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{a.ip}}</td>
+<td style="padding: 10px 0 10px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{a.change}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+renderVals() {
+const revoked = this.state.revoked || {};
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const sub = (label, href, active) => ({
+label, href,
+style: 'display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#0E4D45' : '#14201E') + '; background: ' + (active ? '#E2EEEB' : 'transparent')
+});
+const pill = (kind) => {
+const m = { ok: ['#E1F2E8', '#1C6B44'], warn: ['#FDEBD3', '#8A4B08'], info: ['#E3ECF9', '#1D4F91'], danger: ['#FBE7E1', '#9B2C1A'], brand: ['#E2EEEB', '#0E4D45'] }[kind];
+return 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + m[0] + '; color: ' + m[1];
+};
+const roleKind = { Owner: 'brand', Manager: 'info', Accountant: 'warn', Caretaker: 'ok' };
+const member = (name, email, role, scope, tfa, last) => ({
+name, email, role, scope, tfa: tfa ? 'On' : 'Off', last,
+rolePill: pill(roleKind[role]),
+tfaPill: pill(tfa ? 'ok' : (role === 'Caretaker' ? 'info' : 'danger'))
+});
+const yes = { mark: '✓', label: 'Allowed', style: 'display: inline-block; width: 26px; height: 26px; line-height: 26px; border-radius: 99px; background: #E1F2E8; color: #1C6B44; font-weight: 800; font-size: 14px' };
+const no = { mark: '–', label: 'Not allowed', style: 'display: inline-block; width: 26px; height: 26px; line-height: 26px; color: #5A635F; font-size: 16px' };
+const row = (name, a) => ({ name, cells: a.map(v => v ? yes : no) });
+const sess = (id, device, where, when, current) => ({
+device, where, when,
+btnLabel: current ? 'This device' : (revoked[id] ? 'Revoked' : 'Revoke'),
+btn: 'min-height: 44px; padding: 0 14px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 13px; ' + (current || revoked[id] ? 'border: 0; background: transparent; color: #5A635F; cursor: default' : 'border: 1px solid #9B2C1A; background: #FFFFFF; color: #9B2C1A; cursor: pointer'),
+revoke: () => { if (!current) this.setState({ revoked: Object.assign({}, revoked, { [id]: true }) }); }
+});
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html'),
+navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'),
+navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html', true)
+],
+subnav: [
+sub('Organization', '#', false),
+sub('Team & roles', 'Settings.dc.html', true),
+sub('Payment sources', '#', false),
+sub('Billing rules', '#', false),
+sub('Security', '#', false),
+sub('Audit log', '#', false),
+sub('Privacy & data', 'Privacy.dc.html', false),
+sub('Subscription', 'Billing.dc.html', false)
+],
+members: [
+member('Wanjiru Mwangi', 'wanjiru@mwangiproperties.co.ke', 'Owner', 'All 4 properties', true, 'Now'),
+member('David Kamau', 'david@mwangiproperties.co.ke', 'Manager', 'Riverside Court, Baraka Flats', true, '2 hours ago'),
+member('Esther Wafula', 'esther@mwangiproperties.co.ke', 'Manager', 'Mvule Apartments, Tumaini Shops', false, '3 days ago'),
+member('Samuel Kiprono', 'samuel@kiprono-accounts.co.ke', 'Accountant', 'All 4 properties (read, export)', true, 'Yesterday'),
+member('Otieno Ouma', '0722 ••• 318', 'Caretaker', 'Baraka Flats, Mvule Apartments', false, '35 minutes ago'),
+member('Joyce Chebet', '0733 ••• 094', 'Caretaker', 'Riverside Court', false, 'Yesterday')
+],
+perms: [
+row('View ledgers', [true, true, true, true]),
+row('Record cash', [true, true, false, true]),
+row('Approve cash', [true, true, false, false]),
+row('Reverse payments', [true, true, false, false]),
+row('Export data', [true, true, true, false]),
+row('Manage team', [true, false, false, false])
+],
+sessions: [
+sess('s1', 'Chrome on Windows', 'Nairobi, Kenya · 41.89.•••.12', 'Active now', true),
+sess('s2', 'Safari on iPhone', 'Nairobi, Kenya · 105.163.•••.40', 'Yesterday, 18:20', false),
+sess('s3', 'Firefox on Mac', 'Mombasa, Kenya · 197.232.•••.7', '28 Oct, 09:05', false)
+],
+audit: [
+{ time: '2 Nov, 09:48', actor: 'David Kamau', action: 'Reversed payment TK1Z0PL2CX', ip: '41.89.•••.12', change: 'KES 12,000 matched A-11 to reversed' },
+{ time: '2 Nov, 09:20', actor: 'Wanjiru Mwangi', action: 'Approved cash receipt #1043', ip: '41.89.•••.12', change: 'pending to approved' },
+{ time: '2 Nov, 07:50', actor: 'Otieno Ouma', action: 'Recorded cash receipt #1043', ip: '105.163.•••.40', change: 'none to KES 9,500 (R-21)' },
+{ time: '1 Nov, 17:02', actor: 'Samuel Kiprono', action: 'Exported October MRI report', ip: '197.232.•••.7', change: 'none to mri-2026-10.csv' },
+{ time: '31 Oct, 11:14', actor: 'Wanjiru Mwangi', action: 'Changed late fee rule', ip: '41.89.•••.12', change: '5% to KES 200 flat' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

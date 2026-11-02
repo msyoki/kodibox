@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kodibox expenses and repairs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F">All properties · November 2026</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Expenses &amp; repairs</h1>
+</div>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Add expense</button>
+</header>
+
+<section aria-labelledby="board" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="board" style="margin: 0; font-size: 17px; font-weight: 700">Maintenance requests</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: start">
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
+<div style="background: #FAF9F6; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px"><strong style="font-size: 14px">{{c.name}}</strong><span style="{{c.countStyle}}">{{c.count}}</span></div>
+<sc-for list="{{c.cards}}" as="k" hint-placeholder-count="2">
+<div style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><span style="font-size: 12px; font-weight: 700; color: #5A635F">{{k.unit}}</span><span style="{{k.prioStyle}}">{{k.prio}}</span></div>
+<strong style="font-size: 14px; font-weight: 700; line-height: 1.3">{{k.title}}</strong>
+<span style="font-size: 12px; color: #5A635F">{{k.by}}</span>
+<span style="font-size: 12px; color: #14201E; border-top: 1px solid #EEECE5; padding-top: 6px">{{k.vendor}}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<section aria-labelledby="exp" style="flex: 3 1 640px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px">
+<h2 id="exp" style="margin: 0; font-size: 17px; font-weight: 700">Expenses</h2>
+<a href="Reports.dc.html" style="font-size: 14px; font-weight: 600">Export for landlords</a>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 820px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Date</th><th style="padding: 8px; font-weight: 600">Property</th><th style="padding: 8px; font-weight: 600">Category</th><th style="padding: 8px; font-weight: 600">Vendor</th><th style="padding: 8px; font-weight: 600; text-align: right">Amount</th><th style="padding: 8px; font-weight: 600">Receipt</th><th style="padding: 8px; font-weight: 600">Recharge tenant</th><th style="padding: 8px 0 8px 8px; font-weight: 600">Landlord</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{exp}}" as="e" hint-placeholder-count="7">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 11px 8px 11px 0; color: #5A635F; white-space: nowrap">{{e.date}}</td>
+<td style="padding: 11px 8px">{{e.prop}}</td>
+<td style="padding: 11px 8px">{{e.cat}}</td>
+<td style="padding: 11px 8px">{{e.vendor}}</td>
+<td style="padding: 11px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace">{{e.amount}}</td>
+<td style="padding: 11px 8px"><span style="{{e.rcptStyle}}">{{e.rcpt}}</span></td>
+<td style="padding: 11px 8px"><span style="{{e.rechStyle}}">{{e.rech}}</span></td>
+<td style="padding: 11px 0 11px 8px; color: #5A635F">{{e.landlord}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<p style="margin: 12px 0 0; font-size: 13px; color: #5A635F">Recharged items are added to the tenant's next invoice as a separate line. Edits are kept as reversals in the audit log.</p>
+</section>
+
+<section aria-labelledby="summ" style="flex: 1 1 280px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 id="summ" style="margin: 0; font-size: 17px; font-weight: 700">November expenses by property</h2>
+<sc-for list="{{summary}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span>{{s.name}}</span><span style="font-family: 'IBM Plex Mono', monospace">{{s.total}}</span></div>
+<div style="height: 10px; background: #EEECE5; border-radius: 99px; overflow: hidden"><div style="{{s.bar}}"></div></div>
+<span style="font-size: 12px; color: #5A635F">{{s.sub}}</span>
+</div>
+</sc-for>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #EEECE5; padding-top: 12px; font-size: 14px; font-weight: 700"><span>Total</span><span style="font-family: 'IBM Plex Mono', monospace">KES 119,300</span></div>
+</section>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const tag = (kind) => {
+const m = { ok: ['#E1F2E8', '#1C6B44'], warn: ['#FDEBD3', '#8A4B08'], danger: ['#FBE7E1', '#9B2C1A'], info: ['#E3ECF9', '#1D4F91'], none: ['#EEECE5', '#5A635F'] }[kind];
+return 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; background: ' + m[0] + '; color: ' + m[1];
+};
+const prio = { High: 'danger', Medium: 'warn', Low: 'none' };
+const card = (unit, title, by, p, vendor) => ({ unit, title, by, prio: p, prioStyle: tag(prio[p]), vendor });
+const col = (name, cards) => ({ name, count: String(cards.length), countStyle: tag('none'), cards });
+const exp = (date, prop, cat, vendor, amount, rcpt, rech, landlord) => ({
+date, prop, cat, vendor, amount, landlord,
+rcpt: rcpt ? 'Attached' : 'Missing', rcptStyle: tag(rcpt ? 'ok' : 'danger'),
+rech: rech ? 'Yes' : 'No', rechStyle: tag(rech ? 'info' : 'none')
+});
+const bar = (pct, c) => 'height: 100%; width: ' + pct + '%; background: ' + (c || '#0E4D45') + '; border-radius: 99px';
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html'),
+navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html', true),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'),
+navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html')
+],
+cols: [
+col('New', [
+card('B-12 · Riverside Court', 'Kitchen tap leaking under sink', 'Peter Otieno via app · 1 Nov', 'Medium', 'Not assigned'),
+card('M-05 · Mvule', 'No water pressure since morning', 'Rehema Juma via app · 2 Nov', 'High', 'Not assigned')
+]),
+col('Assigned', [
+card('C-02 · Riverside Court', 'Bedroom socket sparking', 'Mercy Achieng via app · 30 Oct', 'High', 'Vendor: Kimani Electricals'),
+card('A-04 · Baraka Flats', 'Gate intercom not working', 'Grace Wambui via app · 29 Oct', 'Low', 'Vendor: SecureLink Ltd')
+]),
+col('In progress', [
+card('S-03 · Tumaini Shops', 'Shutter lock jammed', 'Tenant via app · 28 Oct', 'Medium', 'Vendor: Thika Metalworks'),
+card('Common · Baraka Flats', 'Roof gutter blocked', 'Caretaker Otieno Ouma', 'Medium', 'Vendor: Njeri Roofing')
+]),
+col('Done', [
+card('A-11 · Baraka Flats', 'Replace bathroom door handle', 'Faith Njeri via app · 24 Oct', 'Low', 'Vendor: Mwangi Hardware'),
+card('R-21 · Mvule', 'Repaint after leak repair', 'Kevin Mutua via app · 20 Oct', 'Low', 'Vendor: Coastline Painters')
+])
+],
+exp: [
+exp('2 Nov', 'Riverside Court', 'Plumbing', 'Mombasa Pipes Ltd', '6,800', true, true, 'Mr. J. Kariuki'),
+exp('1 Nov', 'Mvule Apartments', 'Electricity (common)', 'Kenya Power', '18,900', true, false, 'Estate of A. Said'),
+exp('31 Oct', 'Baraka Flats', 'Security', 'SecureLink Ltd', '24,000', true, false, 'Mrs. R. Wanjiku'),
+exp('30 Oct', 'Tumaini Shops', 'Repairs', 'Thika Metalworks', '9,500', false, true, 'Tumaini Holdings'),
+exp('28 Oct', 'Riverside Court', 'Cleaning', 'BrightCare Services', '15,000', true, false, 'Mr. J. Kariuki'),
+exp('26 Oct', 'Baraka Flats', 'Roofing', 'Njeri Roofing', '32,400', true, false, 'Mrs. R. Wanjiku'),
+exp('24 Oct', 'Mvule Apartments', 'Painting', 'Coastline Painters', '12,700', true, true, 'Estate of A. Said')
+],
+summary: [
+{ name: 'Baraka Flats', total: 'KES 56,400', sub: 'Security, roofing, intercom', bar: bar(100) },
+{ name: 'Mvule Apartments', total: 'KES 31,600', sub: 'Common power, painting', bar: bar(56) },
+{ name: 'Riverside Court', total: 'KES 21,800', sub: 'Plumbing, cleaning', bar: bar(39) },
+{ name: 'Tumaini Shops', total: 'KES 9,500', sub: 'Shutter repair, 1 receipt missing', bar: bar(17, '#D9822B') }
+]
+};
+}
+}
+</script>
+</body>
+</html>

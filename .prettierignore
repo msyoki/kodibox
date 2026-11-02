@@ -1,0 +1,12 @@
+node_modules
+.next
+dist
+.turbo
+coverage
+pnpm-lock.yaml
+docs
+.claude
+CLAUDE.md
+README.md
+SECURITY.md
+.github

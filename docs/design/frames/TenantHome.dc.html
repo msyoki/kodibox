@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tenant home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 16px">
+<header style="display: flex; justify-content: space-between; align-items: center">
+<div>
+<p style="margin: 0; font-size: 13px; color: #5A635F">B-12 · Riverside Court</p>
+<h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800">Hi Peter</h1>
+</div>
+<button type="button" aria-label="Notifications" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #E2E0D8; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14201E" stroke-width="2" aria-hidden="true"><path d="M6 16V11a6 6 0 1112 0v5l2 2H4l2-2z"></path><path d="M10 20a2 2 0 004 0"></path></svg>
+</button>
+</header>
+
+<section aria-labelledby="due" style="background: #0E4D45; color: #FFFFFF; border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div>
+<p id="due" style="margin: 0; font-size: 13px; color: #CFE3DE">Amount due by 5 November</p>
+<p style="margin: 4px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 34px; font-weight: 500; letter-spacing: -1px">KES 16,700</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #D7E7E3">
+<sc-for list="{{lines}}" as="l" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between"><span>{{l.label}}</span><span style="font-family: 'IBM Plex Mono', monospace">{{l.amount}}</span></div>
+</sc-for>
+</div>
+<a href="TenantPay.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #F0B54A; color: #14201E; text-decoration: none; font-size: 16px; font-weight: 800">Pay with M-Pesa</a>
+<p style="margin: 0; font-size: 12px; color: #CFE3DE; text-align: center">Or Paybill <strong style="color: #FFFFFF">[PAYBILL]</strong> · Account <strong style="color: #FFFFFF">B-12</strong></p>
+</section>
+
+<nav aria-label="Quick actions" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{actions}}" as="a" hint-placeholder-count="4">
+<a href="{{a.href}}" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; text-decoration: none; color: #14201E; font-size: 12px; font-weight: 600; text-align: center">
+<span style="width: 32px; height: 32px; border-radius: 10px; background: #E2EEEB; color: #0E4D45; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800" aria-hidden="true">{{a.mark}}</span>
+{{a.label}}
+</a>
+</sc-for>
+</nav>
+
+<section aria-labelledby="req" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px; display: flex; gap: 12px; align-items: center">
+<span style="flex: none; width: 10px; height: 10px; border-radius: 99px; background: #D9822B"></span>
+<div style="flex: 1; font-size: 13px"><strong id="req" style="display: block; font-size: 14px">Kitchen sink leaking</strong><span style="color: #5A635F">Plumber booked · Wed 4 Nov, 10:00</span></div>
+<a href="#" style="font-size: 13px; font-weight: 700">View</a>
+</section>
+
+<section aria-labelledby="rec" style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 id="rec" style="margin: 0; font-size: 16px; font-weight: 800">Recent receipts</h2><a href="#" style="font-size: 13px; font-weight: 700">Statement</a></div>
+<sc-for list="{{receipts}}" as="r" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 12px; padding: 12px 14px">
+<span style="display: flex; flex-direction: column; gap: 2px; font-size: 14px"><strong style="font-weight: 700">{{r.title}}</strong><span style="font-size: 12px; color: #5A635F; font-family: 'IBM Plex Mono', monospace">{{r.ref}}</span></span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{r.amount}}</span>
+</div>
+</sc-for>
+</section>
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+return {
+lines: [
+{ label: 'November rent', amount: '14,000' },
+{ label: 'Service charge', amount: '1,300' },
+{ label: 'Water · October (13 units)', amount: '1,200' },
+{ label: 'Late fee · October', amount: '200' }
+],
+actions: [
+{ mark: 'St', label: 'Statement', href: 'TenantStatement.dc.html' }, { mark: 'Fx', label: 'Report issue', href: 'TenantRequest.dc.html' },
+{ mark: 'Nt', label: 'Notices', href: 'TenantNotices.dc.html' }, { mark: 'Dc', label: 'Lease', href: 'TenantNotices.dc.html' }
+],
+receipts: [
+{ title: 'October rent', ref: 'TJ9K2LQ7XA · 3 Oct', amount: '15,300' },
+{ title: 'September rent', ref: 'TI4B8MN2VD · 4 Sep', amount: '15,300' },
+{ title: 'August rent', ref: 'TH1Q5WE9RS · 2 Aug', amount: '16,100' }
+],
+tabs: [tab('Home', 'TenantHome.dc.html', true), tab('Payments', 'TenantStatement.dc.html'), tab('Requests', 'TenantRequest.dc.html'), tab('Profile', 'TenantProfile.dc.html')]
+};
+}
+}
+</script>
+</body>
+</html>

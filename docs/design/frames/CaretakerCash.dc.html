@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Record cash</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 12px">
+<header>
+<p style="margin: 0; font-size: 13px; color: #5A635F">Baraka Flats</p>
+<h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800">Record cash payment</h1>
+</header>
+
+<section aria-label="New cash entry" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700">
+Tenant and unit
+<select style="min-height: 48px; padding: 0 12px; border: 1px solid #E2E0D8; border-radius: 12px; font: inherit; font-size: 15px; background: #FFFFFF; color: #14201E; box-sizing: border-box; width: 100%">
+<option>A-03 · Grace Wanjiku</option>
+<option>A-07 · Brian Kiptoo</option>
+<option>B-12 · Peter Otieno</option>
+</select>
+</label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700">
+Amount (KES)
+<input type="text" inputmode="numeric" value="14,000" style="min-height: 48px; padding: 0 12px; border: 2px solid #0E4D45; border-radius: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 18px; background: #FFFFFF; box-sizing: border-box; width: 100%">
+</label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700">
+Receipt book no.
+<input type="text" value="RB-004521" style="min-height: 48px; padding: 0 12px; border: 1px solid #E2E0D8; border-radius: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 16px; background: #FFFFFF; box-sizing: border-box; width: 100%">
+</label>
+</div>
+<button type="button" style="min-height: 48px; border-radius: 12px; border: 1px dashed #0E4D45; background: #F1F7F5; color: #0E4D45; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E4D45" stroke-width="2" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+Photo of paper receipt (required)
+</button>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700">
+Note (optional)
+<input type="text" value="Paid November rent in full" style="min-height: 44px; padding: 0 12px; border: 1px solid #E2E0D8; border-radius: 12px; font: inherit; font-size: 14px; background: #FFFFFF; box-sizing: border-box; width: 100%">
+</label>
+<p role="note" style="margin: 0; padding: 10px 12px; border-radius: 10px; background: #E3ECF9; color: #1D4F91; font-size: 13px; font-weight: 600">Goes to manager for approval before it counts.</p>
+<button type="button" style="min-height: 52px; border-radius: 12px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800">Submit for approval</button>
+</section>
+
+<section aria-labelledby="mine" style="display: flex; flex-direction: column; gap: 8px">
+<h2 id="mine" style="margin: 0; font-size: 14px; font-weight: 700; color: #5A635F">My entries</h2>
+<sc-for list="{{entries}}" as="e" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 12px; padding: 10px 14px">
+<span style="display: flex; flex-direction: column; gap: 2px; font-size: 14px"><strong>{{e.unit}}</strong><span style="font-size: 12px; color: #5A635F; font-family: 'IBM Plex Mono', monospace">{{e.book}} · {{e.date}}</span></span>
+<span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{e.amount}}</span><span style="{{e.style}}">{{e.status}}</span></span>
+</div>
+</sc-for>
+</section>
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const bd = (bg, fg) => 'padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; background: ' + bg + '; color: ' + fg;
+const pend = bd('#FDEBD3', '#8A4B08'), ok = bd('#E1F2E8', '#1C6B44'), no = bd('#FBE7E1', '#9B2C1A');
+return {
+entries: [
+{ unit: 'A-03 · Grace Wanjiku', book: 'RB-004518', date: '2 Nov', amount: '14,000', status: 'Pending', style: pend },
+{ unit: 'A-11 · Kevin Mutiso', book: 'RB-004517', date: '1 Nov', amount: '9,500', status: 'Approved', style: ok },
+{ unit: 'B-04 · Faith Achieng', book: 'RB-004515', date: '30 Oct', amount: '12,000', status: 'Rejected', style: no },
+{ unit: 'A-02 · Hassan Abdi', book: 'RB-004512', date: '29 Oct', amount: '13,500', status: 'Approved', style: ok }
+],
+tabs: [tab('Tasks', 'CaretakerHome.dc.html'), tab('Readings', 'Caretaker.dc.html'), tab('Cash', 'CaretakerCash.dc.html', true), tab('Jobs', 'CaretakerJob.dc.html')]
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Payment receipt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px">
+
+<header style="display: flex; align-items: center; gap: 12px">
+<a href="TenantHome.dc.html" aria-label="Back to home" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #E2E0D8; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14201E" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 20px; font-weight: 800">Receipt</h1>
+</header>
+
+<section role="status" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px">
+<div style="width: 64px; height: 64px; border-radius: 99px; background: #E1F2E8; display: flex; align-items: center; justify-content: center">
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1C6B44" stroke-width="2.5" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</div>
+<h2 style="margin: 6px 0 0; font-size: 18px; font-weight: 800; color: #1C6B44">Payment received</h2>
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 32px; font-weight: 500; letter-spacing: -1px">KES 16,700</p>
+<p style="margin: 0; font-size: 13px; color: #5A635F">2 November 2026 · 09:41</p>
+</section>
+
+<section aria-label="Payment details" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 4px 16px; display: flex; flex-direction: column">
+<sc-for list="{{details}}" as="d" hint-placeholder-count="4">
+<div style="{{d.style}}"><span style="color: #5A635F">{{d.label}}</span><span style="{{d.vstyle}}">{{d.value}}</span></div>
+</sc-for>
+</section>
+
+<section aria-labelledby="alloc" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<h3 id="alloc" style="margin: 0; font-size: 14px; font-weight: 800">Allocated to</h3>
+<sc-for list="{{alloc}}" as="a" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span>{{a.label}}</span><span style="font-family: 'IBM Plex Mono', monospace">{{a.amount}}</span></div>
+</sc-for>
+<div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #EEECE5; padding-top: 10px; margin-top: 2px; font-size: 14px; font-weight: 800"><span>New balance</span><span style="font-family: 'IBM Plex Mono', monospace; padding: 4px 10px; border-radius: 99px; background: #E1F2E8; color: #1C6B44">KES 0</span></div>
+</section>
+
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5A635F; text-align: center">Your money went directly to your landlord’s paybill. Kodibox never holds it. A copy was sent to 0712 ••• 512 by SMS.</p>
+
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button type="button" style="min-height: 52px; border-radius: 14px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Share</button>
+<button type="button" style="min-height: 52px; border-radius: 14px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Download PDF</button>
+</div>
+<a href="TenantHome.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 56px; border-radius: 14px; background: #0E4D45; color: #FFFFFF; text-decoration: none; font-size: 17px; font-weight: 800">Back home</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const row = (label, value, mono, last) => ({
+label, value,
+style: 'display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; font-size: 14px' + (last ? '' : '; border-bottom: 1px solid #EEECE5'),
+vstyle: 'text-align: right; font-weight: 700' + (mono ? "; font-family: 'IBM Plex Mono', monospace" : '')
+});
+return {
+details: [
+row('M-Pesa code', 'TK2H8L3M9P', true),
+row('Paid to', 'Mwangi Properties', false),
+row('Paybill / account', '[PAYBILL] · B-12', true),
+row('Paid from', '0712 ••• 512', true, true)
+],
+alloc: [
+{ label: 'Water · October', amount: '1,200' },
+{ label: 'November rent', amount: '14,000' },
+{ label: 'Service charge', amount: '1,300' },
+{ label: 'Late fee · October', amount: '200' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "@kodibox/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "test:e2e": "echo \"e2e not implemented until E-05\""
+  },
+  "dependencies": {
+    "@kodibox/config": "workspace:*",
+    "@kodibox/core": "workspace:*",
+    "next": "^15.5.28",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^15.5.28",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^4.3.3"
+  }
+}

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kodibox reports and tax</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F">Mwangi Properties · 4 properties · 150 units</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Reports &amp; tax</h1>
+</div>
+<p role="status" aria-live="polite" style="{{toastStyle}}">{{toast}}</p>
+</header>
+
+<section aria-labelledby="mri" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div>
+<span style="display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #E3ECF9; color: #1D4F91">Featured</span>
+<h2 id="mri" style="margin: 8px 0 2px; font-size: 20px; font-weight: 800">Monthly Rental Income (MRI) tax · October 2026</h2>
+<p style="margin: 0; font-size: 14px; color: #5A635F">One return figure per landlord. Residential rent actually received in October, by landlord.</p>
+</div>
+<div style="text-align: right; font-size: 14px">
+<span style="display: block; color: #5A635F">Filing due</span>
+<strong style="font-size: 18px">20 Nov 2026</strong>
+<span style="display: block; color: #8A4B08; font-size: 13px; font-weight: 600">18 days left</span>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch">
+<label style="flex: 1 1 200px; background: #FAF9F6; border: 1px solid #EEECE5; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A635F">
+Tax rate (as configured)
+<span style="display: flex; align-items: center; gap: 8px"><input type="text" value="7.5" readonly aria-describedby="ratenote" style="width: 70px; min-height: 44px; box-sizing: border-box; border: 1px solid #D9D6CC; border-radius: 8px; padding: 0 10px; font-family: 'IBM Plex Mono', monospace; font-size: 18px; background: #FFFFFF; color: #14201E"><strong style="font-size: 18px; color: #14201E">%</strong></span>
+<span id="ratenote" style="font-size: 12px; color: #8A4B08; font-weight: 600">Rate as configured — verify with KRA</span>
+</label>
+<div style="flex: 1 1 200px; background: #FAF9F6; border: 1px solid #EEECE5; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A635F">
+Gross residential rent received
+<strong style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 500; color: #14201E">{{totalGross}}</strong>
+<span>3 landlords · 3 residential properties</span>
+</div>
+<div style="flex: 1 1 200px; background: #E2EEEB; border: 1px solid #C9D9D5; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #0A3C36">
+Tax payable (total)
+<strong style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 500">{{totalTax}}</strong>
+<span>Payable by each landlord to KRA</span>
+</div>
+</div>
+
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 14px">
+<caption style="position: absolute; left: -9999px">MRI per landlord, October 2026</caption>
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Landlord</th><th style="padding: 8px; font-weight: 600">Property</th><th style="padding: 8px; font-weight: 600; text-align: right">Gross residential rent</th><th style="padding: 8px; font-weight: 600; text-align: right">Rate</th><th style="padding: 8px; font-weight: 600; text-align: right">Tax payable</th><th style="padding: 8px 0 8px 8px; font-weight: 600">Due</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{landlords}}" as="l" hint-placeholder-count="3">
+<tr style="border-top: 1px solid #EEECE5">
+<td style="padding: 12px 8px 12px 0"><strong style="font-weight: 700">{{l.name}}</strong></td>
+<td style="padding: 12px 8px">{{l.prop}}</td>
+<td style="padding: 12px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace">{{l.gross}}</td>
+<td style="padding: 12px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace">7.5%</td>
+<td style="padding: 12px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 500">{{l.tax}}</td>
+<td style="padding: 12px 0 12px 8px; color: #5A635F">20 Nov</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch">
+<div style="flex: 1 1 280px; background: #FDEBD3; color: #8A4B08; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5">
+<strong style="display: block">Commercial units excluded</strong>
+Tumaini Shops (24 units, KES 50,000 received) is commercial and is not part of MRI. Handle it under your landlord's other tax treatment.
+</div>
+<div style="flex: 1 1 280px; background: #E1F2E8; color: #1C6B44; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5">
+<strong style="display: block">eTIMS-ready receipts: 131 of 134 payments</strong>
+3 October payments have no receipt yet (cash, awaiting approval). Approve them first so they are included.
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<button type="button" onClick="{{dlKra}}" style="min-height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer">Download for KRA iTax</button>
+<button type="button" onClick="{{dlPdf}}" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer">Landlord copies (PDF)</button>
+<span style="font-size: 13px; color: #5A635F">Kodibox prepares the figures only. Filing and payment happen on iTax, with each landlord's own PIN.</span>
+</div>
+</section>
+
+<section aria-labelledby="cat" style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 id="cat" style="margin: 0; font-size: 17px; font-weight: 700">All reports</h2>
+<span style="font-size: 13px; color: #5A635F">Every export is logged with who, when and which filters.</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px">
+<sc-for list="{{reports}}" as="r" hint-placeholder-count="7">
+<article style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="flex: none; width: 36px; height: 36px; border-radius: 10px; background: #E2EEEB; display: flex; align-items: center; justify-content: center">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E4D45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>
+</span>
+<h3 style="margin: 0; font-size: 16px; font-weight: 700">{{r.title}}</h3>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.45; color: #5A635F; flex: 1">{{r.desc}}</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" onClick="{{r.csv}}" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 13px; cursor: pointer">CSV</button>
+<button type="button" onClick="{{r.xls}}" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 13px; cursor: pointer">Excel</button>
+<button type="button" onClick="{{r.pdf}}" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 13px; cursor: pointer">PDF</button>
+</div>
+</article>
+</sc-for>
+</div>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const fmt = (n) => n.toLocaleString('en-US');
+const rows = [
+{ name: 'Joseph Kariuki', prop: 'Riverside Court, Kilimani', g: 471200 },
+{ name: 'Grace Wanjiku', prop: 'Baraka Flats, Ruaka', g: 226400 },
+{ name: 'Hassan Said', prop: 'Mvule Apartments, Nyali', g: 241000 }
+];
+const landlords = rows.map(r => ({ name: r.name, prop: r.prop, gross: 'KES ' + fmt(r.g), tax: 'KES ' + fmt(Math.round(r.g * 0.075)) }));
+const gross = rows.reduce((a, r) => a + r.g, 0);
+const tax = rows.reduce((a, r) => a + Math.round(r.g * 0.075), 0);
+const log = (msg) => () => this.setState({ toast: msg });
+const exp = (name, fmtName) => log('Export logged: ' + name + ' (' + fmtName + ') by Wanjiru Mwangi, ' + '2 Nov 2026');
+const mk = (title, desc) => ({ title, desc, csv: exp(title, 'CSV'), xls: exp(title, 'Excel'), pdf: exp(title, 'PDF') });
+const toast = (this.state && this.state.toast) || '';
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html'),
+navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'),
+navItem('Reports & tax', 'Reports.dc.html', true),
+navItem('Settings', 'Settings.dc.html')
+],
+toast,
+toastStyle: toast ? 'margin: 0; padding: 10px 14px; border-radius: 10px; background: #E1F2E8; color: #1C6B44; font-size: 13px; font-weight: 600; max-width: 460px' : 'margin: 0; min-height: 0',
+landlords,
+totalGross: 'KES ' + fmt(gross),
+totalTax: 'KES ' + fmt(tax),
+dlKra: exp('MRI October 2026, iTax file', 'CSV'),
+dlPdf: exp('MRI October 2026, landlord copies', 'PDF'),
+reports: [
+mk('Rent roll', 'Every unit, tenant, rent, deposit held and lease dates as at today.'),
+mk('Arrears aging', 'Balances by 0-30, 31-60, 61-90 and 90+ days, per tenant and property.'),
+mk('Collections by property', 'Expected vs collected for any month, with channel and unmatched amounts.'),
+mk('Income & expenses', 'Rent, utilities and repair costs per property, ready for landlord statements.'),
+mk('Tenant statements', 'Full ledger per tenant: charges, payments, reversals and running balance.'),
+mk('Occupancy', 'Vacant, occupied and notice-to-vacate units with days vacant.'),
+mk('Payment channel mix', 'Share of M-Pesa paybill, STK push, bank transfer and cash, by month.')
+]
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Payments statement</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 14px">
+<header>
+<p style="margin: 0; font-size: 13px; color: #5A635F">B-12 · Riverside Court</p>
+<h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800">Payments</h1>
+</header>
+
+<section aria-labelledby="bal" style="background: #0E4D45; color: #FFFFFF; border-radius: 18px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center">
+<div>
+<p id="bal" style="margin: 0; font-size: 13px; color: #CFE3DE">Current balance · due 5 Nov</p>
+<p style="margin: 2px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 500; letter-spacing: -1px">KES 16,700</p>
+</div>
+<a href="TenantPay.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border-radius: 12px; background: #F0B54A; color: #14201E; text-decoration: none; font-size: 14px; font-weight: 800">Pay</a>
+</section>
+
+<div role="group" aria-label="Filter by month" style="display: flex; gap: 8px">
+<sc-for list="{{months}}" as="m" hint-placeholder-count="3">
+<button type="button" onClick="{{m.pick}}" aria-pressed="{{m.pressed}}" style="{{m.style}}">{{m.label}}</button>
+</sc-for>
+</div>
+
+<section aria-label="Statement" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 8px 14px; background: #FAF9F6; border-bottom: 1px solid #EEECE5; font-size: 11px; font-weight: 700; color: #5A635F; text-transform: uppercase; letter-spacing: 0.4px"><span>Entry</span><span style="width: 78px; text-align: right">Amount</span><span style="width: 66px; text-align: right">Balance</span></div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+<div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid #EEECE5">
+<span style="display: flex; flex-direction: column; gap: 1px; font-size: 13px; min-width: 0"><strong style="font-weight: 700">{{r.title}}</strong><span style="font-size: 11px; color: #5A635F; font-family: 'IBM Plex Mono', monospace">{{r.sub}}</span></span>
+<span style="{{r.astyle}}">{{r.amount}}</span>
+<span style="width: 66px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A635F">{{r.bal}}</span>
+</div>
+</sc-for>
+</section>
+<p style="margin: 0; font-size: 12px; color: #5A635F">Invoices add to what you owe. Payments reduce it. Corrections show as new lines and nothing is deleted.</p>
+</div>
+
+<div style="padding: 10px 16px; background: #F6F5F1">
+<button type="button" style="width: 100%; min-height: 48px; border-radius: 14px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Download statement PDF</button>
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const sel = (this.state && this.state.m) || 'nov';
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const inv = (title, sub, amount, bal) => ({ title, sub, amount: '+' + amount, bal, astyle: "width: 78px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; color: #14201E" });
+const pay = (title, sub, amount, bal) => ({ title, sub, amount: '-' + amount, bal, astyle: "width: 78px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; color: #1C6B44" });
+const data = {
+nov: [
+inv('Late fee · October', 'Invoice · 5 Nov', '200', '16,700'),
+inv('Water · October (13 units)', 'Invoice · 1 Nov', '1,200', '16,500'),
+inv('Service charge', 'Invoice · 1 Nov', '1,300', '15,300'),
+inv('November rent', 'Invoice · 1 Nov', '14,000', '14,000')
+],
+oct: [
+pay('Payment · M-Pesa', 'TJ9K2LQ7XA · 3 Oct', '15,300', '0'),
+inv('Service charge', 'Invoice · 1 Oct', '1,300', '15,300'),
+inv('October rent', 'Invoice · 1 Oct', '14,000', '14,000')
+],
+sep: [
+pay('Payment · M-Pesa', 'TI4B8MN2VD · 4 Sep', '15,300', '0'),
+inv('Service charge', 'Invoice · 1 Sep', '1,300', '15,300'),
+inv('September rent', 'Invoice · 1 Sep', '14,000', '14,000')
+]
+};
+const mk = (key, label) => ({
+label, pressed: sel === key ? 'true' : 'false',
+pick: () => this.setState({ m: key }),
+style: 'min-height: 44px; padding: 0 16px; border-radius: 99px; font: inherit; font-size: 13px; cursor: pointer; ' + (sel === key ? 'border: 1px solid #0E4D45; background: #E2EEEB; color: #0E4D45; font-weight: 700' : 'border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font-weight: 600')
+});
+return {
+months: [mk('nov', 'Nov 2026'), mk('oct', 'Oct 2026'), mk('sep', 'Sep 2026')],
+rows: data[sel],
+tabs: [tab('Home', 'TenantHome.dc.html'), tab('Payments', 'TenantStatement.dc.html', true), tab('Requests', 'TenantRequest.dc.html'), tab('Profile', 'TenantProfile.dc.html')]
+};
+}
+}
+</script>
+</body>
+</html>

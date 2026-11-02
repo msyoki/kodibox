@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kodibox landlords</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F">Agency mode · you manage properties on behalf of landlords</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Landlords</h1>
+</div>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Add landlord client</button>
+</header>
+
+<section aria-labelledby="clients" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px">
+<h2 id="clients" style="margin: 0; font-size: 17px; font-weight: 700">Landlord clients · November 2026 to date</h2>
+<span style="font-size: 13px; color: #5A635F">Select a row to see its remittance statement.</span>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 860px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #5A635F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px">
+<th style="padding: 8px 8px 8px 0; font-weight: 600">Landlord</th><th style="padding: 8px; font-weight: 600">Properties</th><th style="padding: 8px; font-weight: 600; text-align: right">Units</th><th style="padding: 8px; font-weight: 600; text-align: right">Collected</th><th style="padding: 8px; font-weight: 600">Commission rule</th><th style="padding: 8px; font-weight: 600">Remittance due</th><th style="padding: 8px 0 8px 8px; font-weight: 600"><span style="position: absolute; left: -9999px">Select</span></th>
+</tr></thead>
+<tbody>
+<sc-for list="{{clients}}" as="c" hint-placeholder-count="4">
+<tr style="{{c.rowStyle}}">
+<td style="padding: 10px 8px 10px 0"><strong style="font-weight: 700">{{c.name}}</strong><br><span style="font-size: 12px; color: #5A635F">{{c.portal}}</span></td>
+<td style="padding: 10px 8px">{{c.prop}}</td>
+<td style="padding: 10px 8px; text-align: right">{{c.units}}</td>
+<td style="padding: 10px 8px; text-align: right; font-family: 'IBM Plex Mono', monospace">{{c.collected}}</td>
+<td style="padding: 10px 8px">{{c.rule}}</td>
+<td style="padding: 10px 8px"><span style="{{c.duePill}}">{{c.due}}</span></td>
+<td style="padding: 10px 0 10px 8px; text-align: right"><button type="button" onClick="{{c.select}}" aria-pressed="{{c.pressed}}" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer">{{c.btn}}</button></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<section aria-labelledby="stmt" style="flex: 2 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px">
+<div>
+<h2 id="stmt" style="margin: 0; font-size: 17px; font-weight: 700">Remittance statement · {{sel.name}}</h2>
+<p style="margin: 4px 0 0; font-size: 13px; color: #5A635F">{{sel.prop}} · November 2026 to date · remit by {{sel.dueFull}}</p>
+</div>
+<span style="{{sel.statusPill}}">{{sel.status}}</span>
+</div>
+
+<div style="border: 1px solid #EEECE5; border-radius: 10px; overflow: hidden; font-size: 15px">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; background: #FAF9F6"><span>Rent and charges collected</span><span style="font-family: 'IBM Plex Mono', monospace">KES {{sel.collected}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid #EEECE5"><span>Less commission <span style="color: #5A635F; font-size: 13px">({{sel.rule}})</span></span><span style="font-family: 'IBM Plex Mono', monospace">− KES {{sel.commission}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid #EEECE5"><span>Less approved expenses <span style="color: #5A635F; font-size: 13px">({{sel.expNote}})</span></span><span style="font-family: 'IBM Plex Mono', monospace">− KES {{sel.expenses}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 16px; border-top: 2px solid #0E4D45; background: #E2EEEB; font-weight: 800"><span>Amount to remit to landlord</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 18px">KES {{sel.remit}}</span></div>
+</div>
+<p style="margin: 0; font-size: 13px; color: #5A635F; font-family: 'IBM Plex Mono', monospace">{{sel.collected}} − {{sel.commission}} − {{sel.expenses}} = {{sel.remit}}</p>
+
+<div style="background: #E3ECF9; color: #1D4F91; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5">
+<strong style="display: block">Kodibox does not move money</strong>
+Pay the landlord from your own bank or M-Pesa, then record the bank reference here. The remittance is logged and can be reversed with a reason; it is never deleted.
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px">
+<label style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: #5A635F">
+Bank or M-Pesa reference
+<input type="text" value="{{refValue}}" placeholder="e.g. EQ-55102977" onInput="{{onRef}}" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D9D6CC; border-radius: 10px; padding: 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #14201E; background: #FFFFFF">
+</label>
+<button type="button" onClick="{{markRemitted}}" style="min-height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer">Mark remitted (record bank ref)</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer">Statement PDF</button>
+</div>
+<p role="status" aria-live="polite" style="{{msgStyle}}">{{msg}}</p>
+</section>
+
+<section aria-labelledby="portal" style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="portal" style="margin: 0; font-size: 17px; font-weight: 700">Landlord portal</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5A635F">Give {{sel.name}} a read-only view of his properties, collections, remittance statements and repair costs. He cannot change anything or see other landlords.</p>
+<ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.7">
+<li>Collections vs expected</li>
+<li>Remittance history and statements</li>
+<li>Occupancy and open repairs with costs</li>
+</ul>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: #5A635F">
+Invite by email
+<input type="email" value="{{sel.email}}" readonly style="min-height: 44px; box-sizing: border-box; border: 1px solid #D9D6CC; border-radius: 10px; padding: 0 12px; font: inherit; font-size: 14px; color: #14201E; background: #FAF9F6">
+</label>
+<a href="LandlordPortal.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border-radius: 10px; background: #0E4D45; color: #FFFFFF; font-weight: 700; font-size: 14px; text-decoration: none">Invite to read-only portal</a>
+<a href="LandlordPortal.dc.html" style="font-size: 14px; font-weight: 600">Preview what he will see</a>
+<span style="font-size: 12px; color: #5A635F; line-height: 1.5">He signs in with a one-time link and 2FA. Access is logged and you can revoke it any time.</span>
+</section>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const fmt = (n) => n.toLocaleString('en-US');
+const st = this.state || {};
+const selId = st.sel || 0;
+const remitted = st.remitted || {};
+const refs = st.refs || {};
+const pill = (bg, fg) => 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + bg + '; color: ' + fg;
+const data = [
+{ name: 'Joseph Kariuki', prop: 'Riverside Court', propFull: 'Riverside Court, Kilimani', units: 48, collected: 498300, pct: 8, expenses: 12500, expNote: 'lift repair, B block', due: '5 Dec', dueFull: '5 Dec 2026', email: 'j.kariuki@example.co.ke' },
+{ name: 'Grace Wanjiku', prop: 'Baraka Flats', propFull: 'Baraka Flats, Ruaka', units: 36, collected: 238700, pct: 8, expenses: 8400, expNote: 'borehole pump service', due: '5 Dec', dueFull: '5 Dec 2026', email: 'grace.wanjiku@example.co.ke' },
+{ name: 'Hassan Said', prop: 'Mvule Apartments', propFull: 'Mvule Apartments, Nyali', units: 42, collected: 245500, pct: 7, expenses: 0, expNote: 'none this month', due: '5 Dec', dueFull: '5 Dec 2026', email: 'hassan.said@example.co.ke' },
+{ name: 'Tumaini Traders Ltd', prop: 'Tumaini Shops', propFull: 'Tumaini Shops, Thika Road (commercial)', units: 24, collected: 50000, pct: 10, expenses: 3200, expNote: 'security lights', due: '5 Dec', dueFull: '5 Dec 2026', email: 'accounts@tumainitraders.example' }
+];
+const calc = (d) => { const commission = Math.round(d.collected * d.pct / 100); return { commission, remit: d.collected - commission - d.expenses }; };
+const clients = data.map((d, i) => {
+const c = calc(d);
+const isSel = i === selId;
+const done = !!remitted[i];
+return {
+name: d.name, prop: d.prop, units: d.units, collected: 'KES ' + fmt(d.collected),
+portal: i === 0 ? 'Portal invited' : 'No portal access',
+rule: d.pct + '% of collections',
+due: done ? 'Remitted' : d.due + ' · KES ' + fmt(c.remit),
+duePill: done ? pill('#E1F2E8', '#1C6B44') : pill('#FDEBD3', '#8A4B08'),
+rowStyle: 'border-top: 1px solid #EEECE5; background: ' + (isSel ? '#F1F7F5' : 'transparent'),
+btn: isSel ? 'Selected' : 'View statement',
+pressed: isSel ? 'true' : 'false',
+select: () => this.setState({ sel: i, msg: '' })
+};
+});
+const d = data[selId];
+const c = calc(d);
+const done = !!remitted[selId];
+const sel = {
+name: d.name, prop: d.propFull, email: d.email, dueFull: d.dueFull,
+collected: fmt(d.collected), commission: fmt(c.commission), expenses: fmt(d.expenses), remit: fmt(c.remit),
+rule: d.pct + '% of collections', expNote: d.expNote,
+status: done ? 'Remitted · ref ' + remitted[selId] : 'Awaiting remittance',
+statusPill: done ? pill('#E1F2E8', '#1C6B44') : pill('#FDEBD3', '#8A4B08')
+};
+const msg = st.msg || '';
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html'),
+navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html', true),
+navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html')
+],
+clients,
+sel,
+refValue: refs[selId] !== undefined ? refs[selId] : '',
+onRef: (e) => { const r = Object.assign({}, refs); r[selId] = e.target.value; this.setState({ refs: r }); },
+markRemitted: () => {
+const ref = (refs[selId] || '').trim();
+if (!ref) { this.setState({ msg: 'Enter the bank or M-Pesa reference before marking as remitted.' }); return; }
+const r = Object.assign({}, remitted); r[selId] = ref;
+this.setState({ remitted: r, msg: 'Recorded: KES ' + fmt(c.remit) + ' remitted to ' + d.name + ', ref ' + ref + '. Added to the audit log.' });
+},
+msg,
+msgStyle: msg ? 'margin: 0; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; background: ' + (msg.indexOf('Recorded') === 0 ? '#E1F2E8' : '#FBE7E1') + '; color: ' + (msg.indexOf('Recorded') === 0 ? '#1C6B44' : '#9B2C1A') : 'margin: 0'
+};
+}
+}
+</script>
+</body>
+</html>
