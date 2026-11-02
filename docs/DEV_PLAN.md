@@ -49,7 +49,7 @@ M1-12 notifications ── M1-13 penalties ── M1-14 dashboard ── M1-15 r
 
 ### Sprint 0 (Wk 1, 2–6 Nov): foundations
 - [x] E-01 Monorepo scaffold (pnpm, Turborepo, TS strict, ESLint, Prettier, env validation, docker compose)
-- [ ] E-02 CI pipeline + Renovate + gitleaks pre-commit
+- [x] E-02 CI pipeline + Renovate + gitleaks pre-commit
 - [ ] Legal kickoff: L-01 advocate engaged, L-05 Daraja sandbox account and AT sandbox created
 - **Demo:** `pnpm dev` boots web and worker against local Postgres and Redis; CI is green on an empty PR.
 

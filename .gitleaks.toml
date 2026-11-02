@@ -1,0 +1,29 @@
+title = "Kodibox gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Non-secret placeholders, docs and test fixtures"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''^docs/''',
+  '''(^|/)(__fixtures__|fixtures)/''',
+  '''\.(test|spec)\.[cm]?[jt]sx?$''',
+  '''pnpm-lock\.yaml$''',
+]
+
+# Daraja credentials are alphanumeric strings; flag when assigned to a named key.
+[[rules]]
+id = "daraja-consumer-secret"
+description = "Safaricom Daraja consumer secret"
+regex = '''(?i)consumer[_-]?secret["'\s:=]{1,5}["']?([A-Za-z0-9]{32,64})["']?'''
+secretGroup = 1
+keywords = ["consumer_secret", "consumersecret", "consumer-secret"]
+
+[[rules]]
+id = "daraja-passkey"
+description = "Safaricom Daraja Lipa na M-Pesa passkey"
+regex = '''(?i)pass[_-]?key["'\s:=]{1,5}["']?([A-Za-z0-9]{40,80})["']?'''
+secretGroup = 1
+keywords = ["passkey", "pass_key", "pass-key"]
