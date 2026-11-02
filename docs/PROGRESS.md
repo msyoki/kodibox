@@ -9,8 +9,8 @@
 | Track | Done | In progress | Pending |
 |---|---|---|---|
 | Planning & docs | 9 | 0 | 0 |
-| Prototype (clickable UI on demo data) | 0 | 7 | 0 |
-| Phase 0 engineering | 2 | 1 | 5 |
+| Prototype (clickable UI on demo data) | 1 | 5 | 1 |
+| Phase 0 engineering | 4 | 0 | 4 |
 | Phase 0 legal | 0 | 0 | 6 |
 | Phase 1 MVP | 0 | 0 | 18 |
 | Phase 2+ | 0 | 0 | see PROJECT_PLAN.md |
@@ -34,11 +34,11 @@ Goal: see and test the whole product now. Screens live in `apps/web` and read fr
 | ID | Scope | Status |
 |---|---|---|
 | P-01 | App shell, design tokens, UI kit, demo data layer, sign-in and onboarding screens | ✅ |
-| P-02 | Dashboard, payments reconciliation, invoices | ⏳ |
-| P-03 | Properties and units, tenants and leases, bulk import | ⏳ |
-| P-04 | Tickets, repairs and expenses, move-outs and deposits, utilities | ⏳ |
-| P-05 | Messages, reports and MRI tax, landlords/agency, landlord portal, settings, privacy, subscription | ⏳ |
-| P-06 | Mobile views (tenant, caretaker, manager) as responsive web routes under `/m` | ⏳ |
+| P-02 | Dashboard, payments reconciliation, invoices | 🔄 |
+| P-03 | Properties and units, tenants and leases, bulk import | 🔄 |
+| P-04 | Tickets, repairs and expenses, move-outs and deposits, utilities | 🔄 |
+| P-05 | Messages, reports and MRI tax, landlords/agency, landlord portal, settings, privacy, subscription | 🔄 |
+| P-06 | Mobile views (tenant, caretaker, manager) as responsive web routes under `/m` | 🔄 |
 | P-07 | Click-through QA pass, demo banner, shareable preview deploy (ask before deploying) | ⏳ |
 
 ## Phase 0: engineering
@@ -46,8 +46,8 @@ Goal: see and test the whole product now. Screens live in `apps/web` and read fr
 |---|---|---|---|
 | E-01 | Monorepo scaffold | ✅ | on main |
 | E-02 | CI pipeline | ✅ | on main; mark checks required on GitHub |
-| E-03 | Database, RLS, migrations | 🔄 | branch feat/E-03-db; fixing security review findings |
-| E-04 | Auth with 2FA | ⏳ | after E-03 |
+| E-03 | Database, RLS, migrations | ✅ | on main; passed 3 security review rounds, 35 db tests |
+| E-04 | Auth with 2FA | ⏳ | next; carry E-03 notes (verify email before binding, rate-limit org creation) |
 | E-05 | Orgs, roles, `can()` authz | ⏳ | |
 | E-06 | Audit hash chain, PII encryption, log redaction | ⏳ | |
 | E-07 | App shell / UI kit | ✅ | delivered through P-01 (shadcn not used; own UI kit) |
