@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tickets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="9">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F">Complaints, repairs and billing queries from tenants</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Tickets</h1>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<label style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: 1px solid #D9D6CC; border-radius: 10px; padding: 0 12px; min-height: 44px; min-width: 240px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A635F" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="position: absolute; left: -9999px">Search tickets</span>
+<input type="search" placeholder="Search ticket, tenant or unit" style="border: 0; outline: 0; font: inherit; font-size: 14px; flex: 1; background: transparent">
+</label>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Log ticket for a tenant</button>
+</div>
+</header>
+
+<section aria-label="Ticket figures" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+<div style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 16px 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; font-weight: 600; color: #5A635F">{{k.label}}</span>
+<span style="{{k.valStyle}}">{{k.value}}</span>
+<span style="font-size: 13px; color: #5A635F">{{k.sub}}</span>
+</div>
+</sc-for>
+</section>
+
+<section aria-label="Filters" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: #5A635F; flex: 1 1 150px">
+{{f.label}}
+<select style="min-height: 44px; border: 1px solid #D9D6CC; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; color: #14201E; padding: 0 10px">
+<sc-for list="{{f.options}}" as="o" hint-placeholder-count="4"><option>{{o}}</option></sc-for>
+</select>
+</label>
+</sc-for>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<section aria-labelledby="lst" style="flex: 1 1 460px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h2 id="lst" style="margin: 0; font-size: 17px; font-weight: 700">Open tickets</h2>
+<span style="font-size: 13px; color: #5A635F">Most urgent first</span>
+</div>
+<sc-for list="{{tickets}}" as="t" hint-placeholder-count="7">
+<a href="#" style="{{t.card}}">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+<span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A635F">{{t.id}}</span><span style="{{t.typeChip}}">{{t.type}}</span><span style="{{t.urgChip}}">{{t.urgency}}</span></span>
+<span style="{{t.slaStyle}}">{{t.sla}}</span>
+</div>
+<strong style="font-size: 15px; font-weight: 700">{{t.title}}</strong>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: #5A635F">
+<span>{{t.unit}} · {{t.tenant}}</span>
+<span style="display: flex; align-items: center; gap: 8px"><span>{{t.assignee}}</span><span style="{{t.statusChip}}">{{t.status}}</span></span>
+</div>
+</a>
+</sc-for>
+</section>
+
+<section aria-labelledby="det" style="flex: 1.4 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5A635F">TCK-0142</span>
+<span style="display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #E3ECF9; color: #1D4F91">Complaint · Neighbour / noise</span>
+<span style="display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #FDEBD3; color: #8A4B08">High</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #E2EEEB; color: #0A3C36">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 018 0v3"></path></svg>Reporter identity hidden from B-14</span>
+</div>
+<h2 id="det" style="margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -0.3px">Noise from B-14 after 11pm</h2>
+<p style="margin: 0; font-size: 14px; color: #5A635F">Peter Otieno · B-12 · Riverside Court · opened Sat 31 Oct, 23:48 · Assigned to <strong style="color: #14201E">Otieno Ouma (caretaker)</strong></p>
+</div>
+
+<div role="group" aria-label="Status" style="display: flex; flex-direction: column; gap: 8px">
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="6">
+<li style="{{s.style}}">{{s.label}}</li>
+</sc-for>
+</ol>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #5A635F">
+<span>SLA: acknowledge within 24h (emergency 1h) · <strong style="color: #1C6B44">Acknowledged in 6h</strong></span>
+<span>Overdue tickets escalate to the Owner</span>
+<span>Tenant can reopen after Resolved or Closed</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 15px; font-weight: 700">Conversation</h3>
+<sc-for list="{{thread}}" as="m" hint-placeholder-count="3">
+<div style="{{m.box}}">
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; font-size: 12px; color: #5A635F"><strong style="{{m.whoStyle}}">{{m.who}}</strong><span>{{m.when}}</span></div>
+<sc-if value="{{m.internal}}" hint-placeholder-val="{{ false }}">
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: #8A4B08">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><path d="M4 4l16 16"></path></svg>Internal — tenant can't see this</span>
+</sc-if>
+<p style="margin: 0; font-size: 14px; line-height: 1.5">{{m.text}}</p>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #EEECE5; padding-top: 14px">
+<div role="group" aria-label="Reply type" style="display: inline-flex; align-self: flex-start; background: #EEECE5; border-radius: 12px; padding: 3px">
+<button type="button" onClick="{{setPublic}}" aria-pressed="{{pubPressed}}" style="{{pubStyle}}">Public reply</button>
+<button type="button" onClick="{{setInternal}}" aria-pressed="{{intPressed}}" style="{{intStyle}}">Internal note</button>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700">
+<span style="color: #5A635F">{{replyHint}}</span>
+<textarea rows="3" placeholder="{{placeholder}}" style="{{boxStyle}}"></textarea>
+</label>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-size: 14px; font-weight: 600">Attach photo</button>
+<button type="button" style="{{sendStyle}}">{{sendLabel}}</button>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #EEECE5; padding-top: 14px">
+<h3 style="margin: 0; font-size: 15px; font-weight: 700">Actions</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end">
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: #5A635F; flex: 1 1 170px">
+Assign to
+<select style="min-height: 44px; border: 1px solid #D9D6CC; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; color: #14201E; padding: 0 10px">
+<option>Otieno Ouma (caretaker)</option><option>Kamau Plumbing (vendor)</option><option>Brightline Electricals (vendor)</option><option>Wanjiru Mwangi (Owner)</option>
+</select>
+</label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: #5A635F; flex: 1 1 170px">
+Change status
+<select onChange="{{changeStatus}}" style="min-height: 44px; border: 1px solid #D9D6CC; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; color: #14201E; padding: 0 10px">
+<sc-for list="{{statusOptions}}" as="o" hint-placeholder-count="6"><option value="{{o.value}}" selected="{{o.selected}}">{{o.label}}</option></sc-for>
+</select>
+</label>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #9B2C1A; background: #FFFFFF; color: #9B2C1A; font: inherit; font-size: 14px; font-weight: 700">Escalate to owner</button>
+<a href="Maintenance.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; background: #0E4D45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 700">Create work order</a>
+<button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-size: 14px; font-weight: 600">Link invoice (billing queries)</button>
+</div>
+<p style="margin: 0; font-size: 13px; color: #5A635F; line-height: 1.5">Complaints about staff are routed straight to the Owner. For this neighbour complaint, B-14 only sees that a noise complaint was received, never who raised it. Every change is recorded in the audit log.</p>
+</div>
+
+</section>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const s = this.state || {};
+const internal = !!s.internal;
+const stIdx = s.st === undefined ? 1 : s.st;
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const C = { ok: ['#E1F2E8', '#1C6B44'], warn: ['#FDEBD3', '#8A4B08'], bad: ['#FBE7E1', '#9B2C1A'], info: ['#E3ECF9', '#1D4F91'], mute: ['#EEECE5', '#14201E'] };
+const ch = (k) => 'display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + C[k][0] + '; color: ' + C[k][1];
+const sla = (k) => 'font-size: 12px; font-weight: 700; color: ' + ({ ok: '#1C6B44', warn: '#8A4B08', bad: '#9B2C1A' }[k]);
+const card = (sel) => 'display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 12px; text-decoration: none; color: #14201E; box-sizing: border-box; background: ' + (sel ? '#F1F7F5' : '#FAF9F6') + '; border: ' + (sel ? '2px solid #0E4D45' : '1px solid #EEECE5');
+const T = (id, type, tk, title, unit, tenant, urg, uk, status, sk, assignee, slaText, slk, sel) => ({ id, type, typeChip: ch(tk), title, unit, tenant, urgency: urg, urgChip: ch(uk), status, statusChip: ch(sk), assignee, sla: slaText, slaStyle: sla(slk), card: card(sel) });
+const statuses = ['New', 'Acknowledged', 'In progress', 'Waiting on tenant', 'Resolved', 'Closed'];
+const seg = (on, dark) => 'min-height: 44px; padding: 0 16px; border: 0; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; ' + (on ? (dark ? 'background: #F0B54A; color: #14201E' : 'background: #FFFFFF; color: #0E4D45') : 'background: transparent; color: #5A635F');
+const msgBox = (bg, bd) => 'display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 12px; background: ' + bg + '; border: ' + bd;
+const thread = [
+{ who: 'Peter Otieno (tenant)', whoStyle: 'color: #14201E', when: 'Sat 31 Oct, 23:48', text: 'Loud music and shouting from B-14 again after 11pm. This is the third weekend. I have a young child who cannot sleep. Please keep my name out of it, I live next door.', internal: false, box: msgBox('#FAF9F6', '1px solid #EEECE5') },
+{ who: 'Wanjiru Mwangi (Manager)', whoStyle: 'color: #0E4D45', when: 'Sun 1 Nov, 06:10 · public reply', text: 'Thank you for telling us, Peter. We have received your complaint and the caretaker will speak to the other household this week. Quiet hours are 10pm to 6am under the house rules. Your name will not be shared.', internal: false, box: msgBox('#E2EEEB', '1px solid #C5DCD6') },
+{ who: 'Wanjiru Mwangi (Manager)', whoStyle: 'color: #8A4B08', when: 'Sun 1 Nov, 06:25', text: 'B-14 had a written warning in September for the same reason. If it repeats, issue a formal notice. Do not mention B-12 when speaking to them.', internal: true, box: msgBox('#FDEBD3', '1px dashed #D9822B') }
+];
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'),
+navItem('Properties & units', 'Properties.dc.html'),
+navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Tickets', 'Tickets.dc.html', true, '9'),
+navItem('Invoices', 'Invoices.dc.html'),
+navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'),
+navItem('Expenses & repairs', 'Maintenance.dc.html'),
+navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'),
+navItem('Landlords', 'Agency.dc.html'),
+navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html')
+],
+kpis: [
+{ label: 'Open', value: '9', sub: '3 new today · 2 waiting on tenant', valStyle: "font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 500" },
+{ label: 'SLA breached', value: '2', sub: '1 emergency · 1 escalated to Owner', valStyle: "font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 500; color: #9B2C1A" },
+{ label: 'Avg resolve', value: '2.4 days', sub: 'Last 30 days · target 3 days', valStyle: "font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 500" },
+{ label: 'Satisfaction', value: '4.3/5', sub: '31 ratings from tenants', valStyle: "font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 500" }
+],
+filters: [
+{ label: 'Type', options: ['All types', 'Repair', 'Complaint', 'Billing query', 'Other'] },
+{ label: 'Status', options: ['Open (not closed)', 'New', 'Acknowledged', 'In progress', 'Waiting on tenant', 'Resolved', 'Closed'] },
+{ label: 'Property', options: ['All properties', 'Riverside Court', 'Baraka Flats', 'Mvule Apartments', 'Tumaini Shops'] },
+{ label: 'Urgency', options: ['Any urgency', 'Emergency', 'High', 'Normal', 'Low'] },
+{ label: 'Assigned to', options: ['Anyone', 'Otieno Ouma (caretaker)', 'Kamau Plumbing (vendor)', 'Owner', 'Unassigned'] }
+],
+tickets: [
+T('TCK-0141', 'Complaint', 'info', 'Caretaker was rude', 'A-04', 'Grace Wambui', 'High', 'warn', 'New', 'mute', 'Routed to Owner', 'Overdue 5h', 'bad', false),
+T('TCK-0138', 'Repair', 'warn', 'No water since morning', 'M-03', 'Amina Hassan', 'Emergency', 'bad', 'In progress', 'warn', 'Kamau Plumbing', 'Overdue 2h', 'bad', false),
+T('TCK-0140', 'Billing query', 'mute', 'Charged twice for water', 'C-02', 'Mercy Achieng', 'Normal', 'mute', 'New', 'mute', 'Unassigned', 'Ack due in 3h', 'warn', false),
+T('TCK-0142', 'Complaint', 'info', 'Noise from B-14 after 11pm', 'B-12', 'Peter Otieno', 'High', 'warn', 'Acknowledged', 'info', 'Otieno Ouma', 'Resolve in 2d', 'ok', true),
+T('TCK-0139', 'Repair', 'warn', 'Kitchen sink leaking', 'B-12', 'Peter Otieno', 'Normal', 'mute', 'In progress', 'warn', 'Caretaker Otieno', 'Visit Wed 10:00', 'ok', false),
+T('TCK-0137', 'Other', 'mute', 'Parking sticker for second car', 'R-21', 'Kevin Mutua', 'Low', 'mute', 'Waiting on tenant', 'info', 'Wanjiru Mwangi', 'Paused', 'ok', false),
+T('TCK-0136', 'Complaint', 'info', 'Garbage not collected for a week', 'A-11', 'Faith Njeri', 'Normal', 'mute', 'Resolved', 'ok', 'Otieno Ouma', 'Awaiting rating', 'ok', false)
+],
+steps: statuses.map((l, i) => ({ label: (i < stIdx ? 'Done · ' : '') + l, style: 'padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 700; ' + (i === stIdx ? 'background: #0E4D45; color: #FFFFFF' : (i < stIdx ? 'background: #E1F2E8; color: #1C6B44' : 'background: #EEECE5; color: #5A635F')) })),
+statusOptions: statuses.map((l, i) => ({ value: String(i), label: l, selected: i === stIdx })),
+changeStatus: (e) => this.setState({ st: parseInt(e.target.value, 10) }),
+thread,
+setPublic: () => this.setState({ internal: false }),
+setInternal: () => this.setState({ internal: true }),
+pubPressed: internal ? 'false' : 'true',
+intPressed: internal ? 'true' : 'false',
+pubStyle: seg(!internal, false),
+intStyle: seg(internal, true),
+replyHint: internal ? "Internal note · Internal — tenant can't see this" : 'Public reply · Peter Otieno will see this',
+placeholder: internal ? 'Note for staff and the Owner only' : 'Write a reply to the tenant',
+boxStyle: 'padding: 12px 14px; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 500; resize: vertical; color: #14201E; ' + (internal ? 'border: 1px dashed #D9822B; background: #FDEBD3' : 'border: 1px solid #C9C6BB; background: #FFFFFF'),
+sendLabel: internal ? 'Save internal note' : 'Send public reply',
+sendStyle: 'min-height: 44px; padding: 0 18px; border-radius: 10px; border: 0; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; ' + (internal ? 'background: #F0B54A; color: #14201E' : 'background: #0E4D45; color: #FFFFFF')
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ticket detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 20px 16px 16px; display: flex; flex-direction: column; gap: 14px">
+
+<header style="display: flex; align-items: center; gap: 12px">
+<a href="TenantRequest.dc.html" aria-label="Back to Help and tickets" style="flex: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid #E2E0D8; background: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14201E" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<div style="min-width: 0">
+<h1 style="margin: 0; font-size: 19px; font-weight: 800">Kitchen sink leaking</h1>
+<p style="margin: 2px 0 0; font-size: 12px; color: #5A635F; font-family: 'IBM Plex Mono', monospace">TCK-0139 · Repair · opened 29 Oct</p>
+</div>
+</header>
+
+<section aria-labelledby="tl" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 0">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
+<h2 id="tl" style="margin: 0; font-size: 15px; font-weight: 800">Progress</h2>
+<span style="{{chipStyle}}">{{chipLabel}}</span>
+</div>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+<sc-for list="{{timeline}}" as="t" hint-placeholder-count="4">
+<li style="display: flex; gap: 12px; align-items: flex-start; min-height: 40px">
+<span style="{{t.dot}}" aria-hidden="true">{{t.mark}}</span>
+<span style="display: flex; flex-direction: column; gap: 1px; padding-bottom: 8px"><strong style="{{t.titleStyle}}">{{t.title}}</strong><span style="font-size: 12px; color: #5A635F">{{t.when}}</span></span>
+</li>
+</sc-for>
+</ol>
+</section>
+
+<section aria-labelledby="th" style="display: flex; flex-direction: column; gap: 8px">
+<h2 id="th" style="margin: 0; font-size: 15px; font-weight: 800">Messages</h2>
+<sc-for list="{{thread}}" as="m" hint-placeholder-count="3">
+<div style="{{m.box}}">
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: #5A635F"><strong style="color: #14201E">{{m.who}}</strong><span>{{m.when}}</span></div>
+<p style="margin: 0; font-size: 14px; line-height: 1.45">{{m.text}}</p>
+</div>
+</sc-for>
+<div style="display: flex; gap: 8px; align-items: flex-end">
+<label style="flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: #5A635F">
+Add a message
+<textarea rows="2" placeholder="Write to Wanjiru" style="padding: 10px 12px; border: 1px solid #C9C6BB; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 500; background: #FFFFFF; color: #14201E; resize: none"></textarea>
+</label>
+<button type="button" aria-label="Add photo" style="flex: none; width: 48px; height: 48px; border-radius: 12px; background: #FFFFFF; border: 1px dashed #8A918D; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0E4D45" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg>
+</button>
+<button type="button" style="flex: none; min-height: 48px; padding: 0 16px; border-radius: 12px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Send</button>
+</div>
+</section>
+
+<sc-if value="{{resolved}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="fx" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<h2 id="fx" style="margin: 0; font-size: 15px; font-weight: 800">Was this fixed?</h2>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{fixedYes}}" style="flex: 1; min-height: 48px; border-radius: 12px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Yes, fixed</button>
+<button type="button" onClick="{{reopen}}" style="flex: 1; min-height: 48px; border-radius: 12px; border: 1px solid #9B2C1A; background: #FFFFFF; color: #9B2C1A; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Reopen</button>
+</div>
+<div role="group" aria-labelledby="rt" style="display: flex; flex-direction: column; gap: 6px">
+<span id="rt" style="font-size: 13px; font-weight: 700">Rate the resolution <span style="font-weight: 500; color: #5A635F">{{ratingText}}</span></span>
+<div style="display: flex; gap: 4px">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="5">
+<button type="button" onClick="{{st.pick}}" aria-label="{{st.label}}" aria-pressed="{{st.pressed}}" style="width: 48px; height: 48px; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" fill="{{st.fill}}" stroke="{{st.stroke}}" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2 6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3z"></path></svg>
+</button>
+</sc-for>
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; color: #5A635F; line-height: 1.4">{{footNote}}</p>
+</section>
+</sc-if>
+
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const s = this.state || {};
+const reopened = !!s.reopened, fixed = !!s.fixed;
+const rating = s.rating || 0;
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const dotOn = 'flex: none; width: 24px; height: 24px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; background: #0E4D45; color: #FFFFFF';
+const dotOff = 'flex: none; width: 24px; height: 24px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; background: #EEECE5; color: #5A635F; border: 1px solid #D9D6CC';
+const done = !reopened;
+const ev = (title, when, on) => ({ title, when, mark: on ? '✓' : '', dot: on ? dotOn : dotOff, titleStyle: 'font-size: 14px; font-weight: ' + (on ? '700' : '600') + '; color: ' + (on ? '#14201E' : '#5A635F') });
+const msg = (who, when, text, mine) => ({ who, when, text, box: 'display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; border-radius: 12px; ' + (mine ? 'background: #FAF9F6; border: 1px solid #EEECE5; margin-right: 32px' : 'background: #E2EEEB; border: 1px solid #C5DCD6; margin-left: 32px') });
+const chipBase = 'flex: none; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; ';
+return {
+chipLabel: reopened ? 'Reopened' : 'Resolved',
+chipStyle: chipBase + (reopened ? 'background: #FDEBD3; color: #8A4B08' : 'background: #E1F2E8; color: #1C6B44'),
+timeline: [
+ev('Received', 'Thu 29 Oct, 18:42', true),
+ev('Acknowledged by Wanjiru', 'Fri 30 Oct, 08:05', true),
+ev('Plumber assigned, Wed 10:00', 'Fri 30 Oct, 08:20', true),
+reopened ? ev('Reopened by you', 'Today', true) : ev('Resolved', 'Wed 4 Nov, 11:30', true)
+],
+thread: [
+msg('You', 'Thu 29 Oct, 18:42', 'Water keeps dripping under the kitchen sink and the cupboard floor is soaked. Photo attached.', true),
+msg('Wanjiru (Manager)', 'Fri 30 Oct, 08:20', 'Thanks Peter. A plumber is booked for Wed 4 Nov at 10:00. Please be home or leave a key with caretaker Otieno.', false),
+msg('Wanjiru (Manager)', 'Wed 4 Nov, 11:30', 'The plumber replaced the worn trap and tested it. Please tell us if it is dry.', false)
+],
+resolved: true,
+fixedYes: () => this.setState({ fixed: true, reopened: false }),
+reopen: () => this.setState({ reopened: true, fixed: false }),
+ratingText: rating ? '· ' + rating + ' of 5' : '· tap a star',
+stars: [1, 2, 3, 4, 5].map(n => ({ label: n + (n === 1 ? ' star' : ' stars'), pressed: rating === n ? 'true' : 'false', fill: n <= rating ? '#F0B54A' : 'none', stroke: n <= rating ? '#8A4B08' : '#5A635F', pick: () => this.setState({ rating: n }) })),
+footNote: reopened ? 'Ticket reopened. The manager has been notified and will reply within 24 hours.' : (fixed ? 'Thank you. The ticket will close automatically in 3 days.' : 'If it is not fixed, tap Reopen and add a message. Your rating helps us improve.'),
+tabs: [tab('Home', 'TenantHome.dc.html'), tab('Payments', 'TenantStatement.dc.html'), tab('Requests', 'TenantRequest.dc.html', true), tab('Profile', 'TenantProfile.dc.html')]
+};
+}
+}
+</script>
+</body>
+</html>
