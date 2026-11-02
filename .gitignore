@@ -11,3 +11,6 @@ next-env.d.ts
 *.pem
 *.key
 .DS_Store
+
+# local git worktrees used by agents
+.claude/worktrees/

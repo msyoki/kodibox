@@ -33,7 +33,7 @@ Goal: see and test the whole product now. Screens live in `apps/web` and read fr
 
 | ID | Scope | Status |
 |---|---|---|
-| P-01 | App shell, design tokens, UI kit, demo data layer, sign-in and onboarding screens | 🔄 |
+| P-01 | App shell, design tokens, UI kit, demo data layer, sign-in and onboarding screens | ✅ |
 | P-02 | Dashboard, payments reconciliation, invoices | ⏳ |
 | P-03 | Properties and units, tenants and leases, bulk import | ⏳ |
 | P-04 | Tickets, repairs and expenses, move-outs and deposits, utilities | ⏳ |
@@ -50,7 +50,7 @@ Goal: see and test the whole product now. Screens live in `apps/web` and read fr
 | E-04 | Auth with 2FA | ⏳ | after E-03 |
 | E-05 | Orgs, roles, `can()` authz | ⏳ | |
 | E-06 | Audit hash chain, PII encryption, log redaction | ⏳ | |
-| E-07 | App shell / UI kit | 🔄 | delivered through P-01 |
+| E-07 | App shell / UI kit | ✅ | delivered through P-01 (shadcn not used; own UI kit) |
 | E-08 | Staging environment | ⏳ | |
 
 ## Phase 0: legal & business (owner: founder)

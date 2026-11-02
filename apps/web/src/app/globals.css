@@ -1,38 +1,46 @@
 @import 'tailwindcss';
 
-:root {
-  --kb-bg: #f6f5f1;
-  --kb-surface: #ffffff;
-  --kb-border: #e2e0d8;
-  --kb-divider: #eeece5;
-  --kb-soft: #faf9f6;
-  --kb-text: #14201e;
-  --kb-muted: #5a635f;
-  --kb-brand: #0e4d45;
-  --kb-brand-dark: #0a3c36;
-  --kb-brand-soft: #e2eeeb;
-  --kb-amber: #f0b54a;
-  --kb-warning: #d9822b;
-  --kb-danger: #9b2c1a;
-  --kb-ok: #1c6b44;
-  --kb-info: #1d4f91;
-}
+/* Design tokens from docs/design/SCREEN_SPEC.md. Use as bg-brand, text-muted, rounded-card, etc. */
+@theme {
+  --color-bg: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-border: #e2e0d8;
+  --color-border-strong: #d9d6cc;
+  --color-divider: #eeece5;
+  --color-soft: #faf9f6;
+  --color-text: #14201e;
+  --color-muted: #5a635f;
+  --color-brand: #0e4d45;
+  --color-brand-dark: #0a3c36;
+  --color-brand-soft: #e2eeeb;
+  --color-brand-tint: #f1f7f5;
+  --color-brand-line: #2b6a61;
+  --color-on-brand: #d7e7e3;
+  --color-amber: #f0b54a;
+  --color-warning: #d9822b;
+  --color-danger: #9b2c1a;
+  --color-danger-soft: #fbe7e1;
+  --color-ok: #1c6b44;
+  --color-ok-soft: #e1f2e8;
+  --color-warn: #8a4b08;
+  --color-warn-soft: #fdebd3;
+  --color-info: #1d4f91;
+  --color-info-soft: #e3ecf9;
 
-@theme inline {
-  --color-bg: var(--kb-bg);
-  --color-surface: var(--kb-surface);
-  --color-border: var(--kb-border);
-  --color-text: var(--kb-text);
-  --color-muted: var(--kb-muted);
-  --color-brand: var(--kb-brand);
-  --color-brand-dark: var(--kb-brand-dark);
-  --color-amber: var(--kb-amber);
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-panel: 16px;
+
   --font-sans: var(--font-manrope), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
 body {
-  background: var(--kb-bg);
-  color: var(--kb-text);
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-sans);
+}
+
+a {
+  color: var(--color-brand);
 }

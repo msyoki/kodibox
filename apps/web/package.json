@@ -15,9 +15,11 @@
   "dependencies": {
     "@kodibox/config": "workspace:*",
     "@kodibox/core": "workspace:*",
+    "clsx": "^2.1.1",
     "next": "^15.5.28",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.5.28",
