@@ -30,8 +30,16 @@ describe('seed guard', () => {
     await expect(
       seed(
         { app: 'postgres://x:x@127.0.0.1:1/n', migrator: 'postgres://x:x@127.0.0.1:1/n' },
-        { NODE_ENV: 'production' },
+        { NODE_ENV: 'production', ALLOW_DB_SEED: '1' },
       ),
     ).rejects.toThrow(/production/);
+  });
+
+  it('requires an explicit ALLOW_DB_SEED=1 opt-in', async () => {
+    const urls = { app: 'postgres://x:x@127.0.0.1:1/n', migrator: 'postgres://x:x@127.0.0.1:1/n' };
+    await expect(seed(urls, { NODE_ENV: 'development' })).rejects.toThrow(/ALLOW_DB_SEED=1/);
+    await expect(seed(urls, { NODE_ENV: 'test', ALLOW_DB_SEED: 'true' })).rejects.toThrow(
+      /ALLOW_DB_SEED=1/,
+    );
   });
 });

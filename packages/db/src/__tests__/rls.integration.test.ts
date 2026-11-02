@@ -615,5 +615,36 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
       );
       expect(sys?.actorUserId).toBeNull();
     });
+
+    it('re-checks the caller role after locks: revoked or concurrently revoked callers are rejected', async () => {
+      const USER_G = '019a1000-0000-7000-8000-0000000000e4'; // manager in org D
+      const USER_H = '019a1000-0000-7000-8000-0000000000e5'; // tenant in org D
+      await t.admin.sql`insert into users (id, email, display_name) values
+        (${USER_G}, 'g@example.test', 'G'), (${USER_H}, 'h@example.test', 'H')`;
+      await t.admin.sql`insert into memberships (organization_id, user_id, role, status) values
+        (${ORG_D}, ${USER_G}, 'manager', 'active'), (${ORG_D}, ${USER_H}, 'tenant', 'active')`;
+      const g = await mid(ORG_D, USER_G, 'manager');
+      const h = await mid(ORG_D, USER_H, 'tenant');
+      // concurrent: another transaction holds the caller's row and revokes it before committing
+      const { pending: running } = await t.admin.sql.begin(async (tx) => {
+        await tx`select 1 from memberships where id = ${g} for update`;
+        const pending = call(ORG_D, USER_G, sql`select revoke_membership(${h}::uuid)`).then(
+          () => 'ok' as const,
+          (e: unknown) => e,
+        );
+        await new Promise((r) => setTimeout(r, 700)); // let the call block on the caller lock
+        await tx`update memberships set status = 'revoked' where id = ${g}`;
+        return { pending };
+      });
+      const settled = await running;
+      expect(settled).not.toBe('ok');
+      expect(pgMatches(/not allowed/)(settled)).toBe(true);
+      // sequential: the already revoked caller is rejected for both functions
+      await expect(
+        call(ORG_D, USER_G, sql`select change_membership_role(${h}::uuid, 'accountant')`),
+      ).rejects.toSatisfy(pgMatches(/not allowed/));
+      const [row] = await t.admin.sql`select status, role from memberships where id = ${h}`;
+      expect(row).toEqual({ status: 'active', role: 'tenant' });
+    });
   });
 });

@@ -24,7 +24,7 @@ Drizzle ORM + PostgreSQL 16 + Row-Level Security. See `docs/adr/0005-postgres-rl
 | web / worker (runtime)   | `DATABASE_URL` (kodibox_app)                      | `MIGRATION_DATABASE_URL`, `DATABASE_ADMIN_URL`  |
 | migrate job (CI/deploy)  | `MIGRATION_DATABASE_URL` (kodibox_migrator)       | admin URL, runtime secrets                      |
 | bootstrap (once per env) | `DATABASE_ADMIN_URL`, `KODIBOX_*_PASSWORD`        | runtime/migrator URLs                           |
-| seed (dev/test only)     | `DATABASE_URL` (kodibox_app)                      | refuses to run when NODE_ENV=production         |
+| seed (dev/test only)     | `DATABASE_URL` (kodibox_app)                      | refuses NODE_ENV=production; needs ALLOW_DB_SEED=1         |
 
 `packages/config` rejects, in production, a runtime env that contains the migrator/admin URLs or a
 `DATABASE_URL` user other than `kodibox_app`. Bootstrap refuses passwords containing `change-me`
@@ -62,7 +62,7 @@ is not an oracle-free signal of whether the user pre-existed. E-04 must treat pr
 unverified, verify email ownership before binding credentials or calling `accept_invite`, and reset
 `display_name` on email verification.
 
-Seed (`db:seed`, dev/test only): inserts the demo owner via `MIGRATION_DATABASE_URL` (the migrator has a
+Seed (`db:seed`, dev/test only; requires `ALLOW_DB_SEED=1` and refuses NODE_ENV=production): inserts the demo owner via `MIGRATION_DATABASE_URL` (the migrator has a
 users insert policy for this; the app role does not), then calls `create_organization` as the app role.
 An existing demo user means "already seeded" and the seed does nothing. Needs both URLs set.
 

@@ -8,7 +8,7 @@ const DEMO_OWNER_EMAIL = 'owner@example.test';
 const PLACEHOLDER_ORG = '019a0000-0000-7000-8000-0000000000ff'; // create_organization ignores the context org
 
 /**
- * Dev/test only (refuses when NODE_ENV=production). The app role cannot create users or orgs
+ * Dev/test only: refuses when NODE_ENV=production and requires ALLOW_DB_SEED=1. The app role cannot create users or orgs
  * directly, so the seed uses two connections:
  *  1. kodibox_migrator (MIGRATION_DATABASE_URL) inserts the demo owner user. This is the
  *     "migrator-only path": users has a migrator policy for it and the app role has no INSERT.
@@ -23,6 +23,8 @@ export async function seed(
 ): Promise<void> {
   if (env.NODE_ENV === 'production')
     throw new Error('db:seed refuses to run when NODE_ENV=production');
+  if (env.ALLOW_DB_SEED !== '1')
+    throw new Error('db:seed is dev/test only: set ALLOW_DB_SEED=1 to opt in explicitly');
   const migrator = postgres(urls.migrator, { max: 1, onnotice: () => undefined });
   let ownerId: string;
   try {

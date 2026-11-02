@@ -286,13 +286,18 @@ BEGIN
   IF v_org IS NULL OR p_membership_id IS NULL OR p_role IS NULL THEN
     RAISE EXCEPTION 'organization context required' USING ERRCODE = 'insufficient_privilege';
   END IF;
+  -- lock all active owners of the org so concurrent demotions cannot both pass the last-owner check
+  PERFORM 1 FROM public.memberships m
+    WHERE m.organization_id = v_org AND m.role = 'owner' AND m.status = 'active' FOR UPDATE;
+  -- lock the caller's own active membership too, then read the caller's role AFTER all locks are held,
+  -- so a caller demoted/revoked concurrently cannot act on a stale role
+  PERFORM 1 FROM public.memberships m
+    WHERE m.organization_id = v_org AND m.user_id = public.app_current_user_id()
+      AND m.status = 'active' FOR UPDATE;
   v_caller_role := public.membership_actor_role(v_org);
   IF v_caller_role IS NULL THEN
     RAISE EXCEPTION 'not allowed' USING ERRCODE = 'insufficient_privilege';
   END IF;
-  -- lock all active owners of the org so concurrent demotions cannot both pass the last-owner check
-  PERFORM 1 FROM public.memberships m
-    WHERE m.organization_id = v_org AND m.role = 'owner' AND m.status = 'active' FOR UPDATE;
   SELECT * INTO v_target FROM public.memberships m
     WHERE m.id = p_membership_id AND m.organization_id = v_org FOR UPDATE;
   IF NOT FOUND THEN
@@ -322,12 +327,17 @@ BEGIN
   IF v_org IS NULL OR p_membership_id IS NULL THEN
     RAISE EXCEPTION 'organization context required' USING ERRCODE = 'insufficient_privilege';
   END IF;
+  PERFORM 1 FROM public.memberships m
+    WHERE m.organization_id = v_org AND m.role = 'owner' AND m.status = 'active' FOR UPDATE;
+  -- lock the caller's own active membership too, then read the caller's role AFTER all locks are held,
+  -- so a caller demoted/revoked concurrently cannot act on a stale role
+  PERFORM 1 FROM public.memberships m
+    WHERE m.organization_id = v_org AND m.user_id = public.app_current_user_id()
+      AND m.status = 'active' FOR UPDATE;
   v_caller_role := public.membership_actor_role(v_org);
   IF v_caller_role IS NULL THEN
     RAISE EXCEPTION 'not allowed' USING ERRCODE = 'insufficient_privilege';
   END IF;
-  PERFORM 1 FROM public.memberships m
-    WHERE m.organization_id = v_org AND m.role = 'owner' AND m.status = 'active' FOR UPDATE;
   SELECT * INTO v_target FROM public.memberships m
     WHERE m.id = p_membership_id AND m.organization_id = v_org FOR UPDATE;
   IF NOT FOUND THEN
