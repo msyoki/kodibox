@@ -4,13 +4,13 @@
 > Related: `docs/PROJECT_PLAN.md` (Phase 2 M2-01/M2-02, Phase 3 M3-01, M3-08), `docs/ARCHITECTURE.md` §12, `docs/SECURITY.md` §4.9 and §6
 
 ## 1. Goals
-- Give tenants a 2-tap "pay rent" experience (STK Push) with receipts and statements on their phone.
+- Give tenants a clear "how to pay" screen (paybill, till or bank details with copy buttons), a one-tap "I've paid" proof submission, and receipts and statements on their phone.
 - Give caretakers a field tool that works with no signal: meter readings, cash entries, inspections, jobs.
 - Give owners and managers an "on the go" console: approve, reconcile, nudge, and see alerts.
 - Stay light: run well on low-end Android and 3G, minimal data use.
 - Follow every product rule: Kodibox never holds money, all money changes are audited and reversible, 2FA for owners/managers, no eviction or lockout features.
 
-Non-goals: full back-office (invoicing runs, lease authoring, reports) stays on web; no in-app money movement beyond triggering STK Push through the backend.
+Non-goals: full back-office (invoicing runs, lease authoring, reports) stays on web; no in-app money movement. Kodibox shows payment instructions and receives payment proofs only (ADR 0007).
 
 ## 2. One app, role-based experiences (decision)
 **Decision: ship one Expo app with three role experiences (tenant, caretaker, manager/landlord), not three apps.**
@@ -35,8 +35,8 @@ Design frames live in the design project; filenames are `*.dc.html`.
 ### 3.2 Tenant (tabs: Home, Payments, Requests, Profile)
 | Screen | Frame | Notes |
 |---|---|---|
-| Home (amount due, quick actions, receipts) | `TenantHome` | Single balance card, Pay with M-Pesa |
-| Pay (STK Push prompt, status) | `TenantPay` | Backend initiates STK; app only waits for result |
+| Home (amount due, quick actions, receipts) | `TenantHome` | Single balance card, "How to pay" and "I've paid" actions |
+| Pay (payment instructions, "I've paid" proof, status) | `TenantPay` | Paybill or till number and account reference (unit code) with copy buttons; proof by pasted M-Pesa SMS or slip photo; status "pending verification" until matched or approved |
 | Receipt | `TenantReceipt` | Shareable PDF, M-Pesa code |
 | Statement | `TenantStatement` | Payments tab; current statement only cached |
 | Requests: create repair or complaint ticket, list | `TenantRequest` | Photos and video, urgency, preferred access times, emergency guidance ("Fire, gas leak or break-in? Call 999 or 112 first."), status list |
@@ -57,9 +57,9 @@ Design frames live in the design project; filenames are `*.dc.html`.
 | Screen | Frame | Notes |
 |---|---|---|
 | Home (collected vs expected, quick actions, attention list, property switcher) | `ManagerHome` | Read-mostly dashboard |
-| Approvals (cash, unmatched M-Pesa, flagged readings) | `ManagerApprovals` | Biometric/2FA step-up on every approve |
-| Tenant search and quick card | `ManagerTenant` | Call, SMS, STK request, statement |
-| Alerts inbox | `ManagerAlerts` | Payments, failed SMS, lease ending, MRI due, security alerts, ticket SLA breaches (escalated to Owner) |
+| Approvals (tenant payment claims, unmatched statement lines, cash entries, flagged readings) | `ManagerApprovals` | Biometric/2FA step-up on every approve; claims show the proof and the open balance |
+| Tenant search and quick card | `ManagerTenant` | Call, SMS, payment reminder, statement |
+| Alerts inbox | `ManagerAlerts` | Payments, statement import reminders with open claim count, failed SMS, lease ending, MRI due, security alerts, ticket SLA breaches (escalated to Owner) |
 
 ## 4. Technology
 | Concern | Choice |
@@ -107,12 +107,12 @@ Shared code: Zod schemas and money/date helpers come from workspace packages; th
 Aligned with `docs/SECURITY.md` §4.9 and §6.1.
 - **Auth:** short-lived access token (about 15 min) plus **rotating refresh token** (single-use, reuse detection revokes the family). Better Auth bearer sessions under `/api/v1`.
 - **Device binding:** refresh token tied to a device id and key generated at first login; new device login triggers OTP and a notification to the user ("new sign-in" alert, see `ManagerAlerts`). Sessions are listed and revocable remotely.
-- **Biometric:** unlock after backgrounding; **step-up (biometric or TOTP)** for approvals, STK requests from the manager console, exports and viewing full statements.
+- **Biometric:** unlock after backgrounding; **step-up (biometric or TOTP)** for approvals (claims, unmatched lines, cash), exports and viewing full statements.
 - **Storage:** tokens only in `expo-secure-store`; no PII in AsyncStorage; app-switcher masking and backup exclusion.
 - **Transport:** TLS 1.2+, **certificate pinning for the API domain** as a considered control (pin to intermediate/SPKI with backup pins and a rotation plan; kill switch via remote config so a bad pin cannot brick the app). Decide in an ADR before MA-10.
 - **Device integrity:** root/jailbreak and emulator signals, plus Play Integrity / App Attest for high-risk endpoints. Treated as a **risk signal** (extra step-up, flagged session), not a hard block, to avoid locking out legitimate low-end devices.
 - **Screenshot blocking** (`FLAG_SECURE`, iOS blur on app switch) on sensitive screens: login/OTP, approvals, tenant card, statements, signature capture.
-- **No secrets in the bundle:** only the public API base URL and public client identifiers. All third-party keys (Daraja, SMS, storage) stay on the server.
+- **No secrets in the bundle:** only the public API base URL and public client identifiers. All third-party keys (SMS, storage, email) stay on the server.
 - **OTA updates:** EAS Update with **code signing enabled**, staged rollouts, instant rollback, and JS-only changes; anything touching native modules, permissions or auth requires a store release. Runtime version pinned to the native build.
 - Server enforces everything: rate limits, `can()`, RLS and audit events are identical to web.
 
@@ -125,10 +125,10 @@ Aligned with `docs/SECURITY.md` §4.9 and §6.1.
 - Retention follows `docs/SECURITY.md` §10; device caches are wiped on logout.
 
 ## 7. Payments
-- STK Push is initiated **only by the backend** (`POST /api/v1/payments/stk`); the app sends the invoice id and shows a pending state, then polls or receives a push for the result.
-- The app **never collects, sees or stores the M-Pesa PIN**; the PIN is entered on the Safaricom prompt on the tenant's phone.
-- Display paybill/account fallback (`[PAYBILL]`, unit code) for tenants who prefer to pay manually.
-- Idempotency key on every STK request; duplicates within a window return the existing request.
+- Payment instructions come from the backend (`GET /api/v1/payment-instructions`): paybill or till number, bank details, and the exact account reference (the tenant's unit code), each with a copy button. Invoices and receipts show the same details.
+- "I've paid" submits a **payment claim** (`POST /api/v1/payment-claims`): either the pasted M-Pesa confirmation SMS or a slip photo. The backend parses it. The claim shows as "pending verification" until a statement line matches it or a manager approves it. Every submission carries an idempotency key; duplicates return the existing claim.
+- Pasted SMS text is cleared from the app outbox after a successful submit. The app keeps no copy of the text.
+- Kodibox never initiates a payment, and the app **never collects, sees or stores the M-Pesa PIN** or any payment-rail credential (ADR 0007).
 - Caretaker cash entries are maker-checker: pending until a manager approves with step-up. Rejections are visible with a reason.
 - No card entry, no wallet, no money held by Kodibox (CLAUDE.md rule 2).
 
@@ -151,19 +151,19 @@ Aligned with `docs/SECURITY.md` §4.9 and §6.1.
 
 ## 10. Milestones
 Phase 2 delivers a mobile-friendly **PWA** first (cheaper to validate, no store dependency):
-- M2-01 Tenant portal (PWA): login by phone + OTP, invoices, statements, STK pay, receipts. Its API routes (`/api/v1`) and designs are reused by the app.
+- M2-01 Tenant portal (PWA): login by phone + OTP, invoices, statements, payment instructions, "I've paid" proof submission, receipts. Its API routes (`/api/v1`) and designs are reused by the app.
 - M2-02 Caretaker app view (PWA, offline-capable readings and checklists): proves the outbox and idempotency design before native.
 
 Phase 3 **M3-01 Native mobile app (Expo)** is split into sub-tasks, one PR each:
-- [ ] MA-01 Scaffold `apps/mobile`: Expo, Expo Router, TypeScript strict, workspace packages, lint, CI build, EAS project.
+- [x] MA-01 Scaffold `apps/mobile`: Expo, Expo Router, TypeScript strict, workspace packages, lint, CI build, EAS project.
 - [ ] MA-02 API client: OpenAPI-generated types, fetch wrapper, TanStack Query setup, Zod response validation, error model.
 - [ ] MA-03 Auth: `AppLogin`, OTP, TOTP, token storage in secure-store, rotating refresh, device binding, remote revoke.
 - [ ] MA-04 Biometric unlock and step-up, app-switcher masking, screenshot blocking, role switcher.
-- [ ] MA-05 Tenant core: `TenantHome`, `TenantPay` (STK via backend), `TenantReceipt`, `TenantStatement`.
+- [ ] MA-05 Tenant core: `TenantHome`, `TenantPay` (payment instructions and "I've paid" proof submission), `TenantReceipt`, `TenantStatement`.
 - [ ] MA-06 Tenant extras: `TenantRequest` (create/list tickets with photos and video), `TenantTicket` (detail, public thread, rating), `TenantNotices`, `TenantProfile` (consents, data requests).
 - [ ] MA-07 Offline engine: SQLite outbox, idempotency keys, sync worker, conflict rules, attachment upload, sync status UI.
 - [ ] MA-08 Caretaker screens: `CaretakerHome`, `Caretaker` (readings), `CaretakerCash`, `CaretakerInspection`, `CaretakerJob` (repair jobs opened from a ticket; internal notes only, no complainant identity).
-- [ ] MA-09 Manager screens: `ManagerHome`, `ManagerApprovals`, `ManagerTenant`, `ManagerAlerts` with step-up on approvals.
+- [ ] MA-09 Manager screens: `ManagerHome`, `ManagerApprovals` (tenant payment claims, unmatched statement lines, cash entries), `ManagerTenant`, `ManagerAlerts` with step-up on approvals.
 - [ ] MA-10 Push notifications (Expo Notifications, FCM/APNs), no-PII payloads, preferences; certificate pinning ADR and implementation.
 - [ ] MA-11 i18n English/Kiswahili (aligns with M3-08), low-end and 3G optimisation pass, bundle-size budget in CI.
 - [ ] MA-12 Hardening and release: Maestro e2e, device matrix, pentest fixes (H-01), store forms, EAS Update signing, closed beta then production on Play, then App Store.
@@ -177,8 +177,8 @@ Rough timing: MA-01 to MA-04 in weeks 20-22, MA-05 to MA-09 in weeks 23-27, MA-1
 | Cold start on mid-range Android | under 3 s |
 | APK / AAB download size | under 30 MB |
 | Offline sync success without manual retry | at least 98% |
-| STK Push success to receipt shown | median under 30 s |
-| Share of tenants paying via app (6 months post launch) | track, set target after beta |
+| Payment claim to verified (statement match or approval) | track median; set target after pilot |
+| Share of tenants submitting a payment proof via app (6 months post launch) | track, set target after beta |
 | Cash entries approved or rejected within 24 h | at least 90% |
 | Store rating | at least 4.2 |
 
@@ -187,3 +187,4 @@ Rough timing: MA-01 to MA-04 in weeks 20-22, MA-05 to MA-09 in weeks 23-27, MA-1
 - Whether to require Play Integrity for all manager approvals or only above a KES threshold.
 - WhatsApp opt-in flows (M3-02) reusing push preferences.
 - Whether landlords of agencies (read-only portal) get a fourth role group in the app or stay web-only at launch.
+- Whether a slip photo should be OCR-parsed on device or only on the server (server-side parsing is the default; device OCR would need its own privacy review).

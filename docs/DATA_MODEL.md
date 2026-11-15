@@ -29,8 +29,14 @@ erDiagram
   units ||--o{ meter_readings : metered
   leases ||--o{ invoices : billed
   invoices ||--o{ invoice_lines : has
-  payment_sources ||--o{ payments : receives
-  payments ||--o{ allocations : "applied by"
+  payment_sources ||--o{ statement_imports : "imported for"
+  statement_imports ||--o{ payment_records : yields
+  payment_sources ||--o{ payment_records : receives
+  tenants ||--o{ payment_claims : submits
+  payment_claims |o--o| payment_records : "confirmed as"
+  payment_records ||--o{ reconciliation_matches : "matched by"
+  invoices ||--o{ reconciliation_matches : "matched to"
+  payment_records ||--o{ allocations : "applied by"
   invoices ||--o{ allocations : "settled by"
   leases ||--o{ credits : holds
   leases ||--o{ deposits : secures
@@ -52,7 +58,6 @@ erDiagram
   organizations ||--o{ message_templates : defines
   users ||--o{ consents : grants
   organizations ||--o{ audit_events : logs
-  organizations ||--o{ webhook_events : receives
   users ||--o{ data_subject_requests : files
 ```
 
@@ -74,7 +79,7 @@ Property owners when the org is an agency (a landlord org has exactly one defaul
 `organization_id`, `landlord_id`, `name`, `code text` (short, unique per org), `address jsonb` (county, town, estate, street), `geo point null`, `type (apartment|bungalow|commercial|mixed|hostel)`, `payment_source_id null` (default collection account), `settings jsonb`, `deleted_at`. Unique(organization_id, code). Index (organization_id, landlord_id).
 
 ### units
-`organization_id`, `property_id`, `code text` (**the paybill account number**, e.g. `A12`; globally unique per org via `UNIQUE(organization_id, code_normalized)`), `code_normalized` (upper, no spaces/hyphens, generated), `label`, `floor`, `bedrooms`, `type`, `rent_minor bigint` (list price), `status (vacant|occupied|reserved|maintenance)`, `meter_ids jsonb`. Index (organization_id, property_id, status).
+`organization_id`, `property_id`, `code text` (**the account reference tenants quote on paybill, till or bank**, e.g. `A12`; unique per org via `UNIQUE(organization_id, code_normalized)`), `code_normalized` (upper, no spaces/hyphens, generated), `label`, `floor`, `bedrooms`, `type`, `rent_minor bigint` (list price), `status (vacant|occupied|reserved|maintenance)`, `meter_ids jsonb`. Index (organization_id, property_id, status).
 
 ### tenants (the renting person/company)
 `organization_id`, `user_id null` (portal login), `kind (individual|company)`, `full_name` [PII], `national_id` [ENC][PII] + `national_id_hash`, `kra_pin` [ENC] (optional, companies), `primary_phone` [ENC][PII] + `phone_hash`, `email` [PII], `dob` [PII] optional, `nationality`, `employer` optional, `status (prospect|active|former)`, `retention_until date`. Index (organization_id, phone_hash), (organization_id, national_id_hash). Collect minimum; ID optional for rent-only use unless org requires lease.
@@ -97,20 +102,34 @@ Emergency contact, guarantor, co-tenant, billing contact. `organization_id`, `te
 ### invoice_lines
 `organization_id`, `invoice_id`, `kind (rent|charge|utility|penalty|deposit|adjustment|credit_applied)`, `description`, `quantity numeric`, `unit_amount_minor`, `amount_minor`, `source_type`, `source_id` (lease_charge, meter_reading, penalty rule), `income_account_id`, `vat_bps int default 0`. Unique(invoice_id, source_type, source_id) where source_id not null. Sum(amount_minor) = invoices.total_minor (checked on issue and in verifier).
 
-### payments
-Observed receipts only (money already at landlord's account). `organization_id`, `payment_source_id`, `lease_id null`, `tenant_id null`, `method (mpesa_stk|mpesa_c2b|bank|cash|cheque|other)`, `external_ref text` (TransID/bank ref), `amount_minor`, `received_at timestamptz`, `payer_name` [PII], `payer_msisdn` [ENC][PII] + `payer_hash`, `account_ref text` (BillRefNumber as received), `status (pending_clearance|unmatched|matched|allocated|reversed|rejected)`, `allocated_minor`, `unallocated_minor`, `webhook_event_id null`, `ledger_transaction_id`, `recorded_by null`, `note`. **Unique(organization_id, method, external_ref)** where external_ref not null. Index (organization_id, status, received_at), (organization_id, lease_id).
+### payment_records
+Normalised payment evidence, one row per payment line, whatever its source. Money already sits in the landlord's account; Kodibox records what it reconciles, never what it holds. `organization_id`, `payment_source_id` (required; manual entries use the property's default source), `statement_import_id null`, `source (import|claim|manual)`, `method (mpesa_paybill|mpesa_till|bank|cash|cheque|other)`, `external_ref text null` (M-Pesa transaction code or bank reference), `amount_minor bigint CHECK > 0`, `currency char(3) default 'KES'`, `paid_at timestamptz`, `payer_name` [PII], `payer_phone` [ENC][PII] + `payer_phone_hash` (HMAC, for matching), `account_ref text` (account reference as received, normalised for matching), `raw_line_enc bytea` [ENC] (raw statement line or pasted message), `status (matched|unmatched|ignored|pending_verification)`, `match_confidence smallint null`, `allocated_minor`, `unallocated_minor`, `lease_id null`, `tenant_id null`, `ledger_transaction_id null`, `recorded_by null`, `note`, `reversed_at null`. **Unique(organization_id, payment_source_id, external_ref)** where external_ref not null (re-import is a no-op). A claim and a statement line for the same payment merge into one row. Fingerprint fallback (amount, paid_at date, account_ref) flags suspected duplicates in the queue. Index (organization_id, status, paid_at), (organization_id, lease_id), (organization_id, payer_phone_hash).
+- Cheques stay `pending_verification` until cleared. Caretaker cash entries stay `pending_verification` until approved (maker-checker).
+- Rows are never deleted; a wrong match is undone by a reversing ledger transaction and `reversed_at`.
 
 ### payment_sources
-Landlord-owned collection accounts. `organization_id`, `landlord_id`, `kind (paybill|till|bank|cash)`, `shortcode text`, `label`, `bank_name`, `account_no` [ENC], `daraja_consumer_key` [ENC], `daraja_consumer_secret` [ENC], `passkey` [ENC], `initiator_credential` [ENC], `callback_token_hash` (secret path token; compared constant-time), `c2b_registered_at`, `status (active|disabled)`, `last_webhook_at`. Secrets are write-only in UI (never read back, only "rotate"). Unique(kind, shortcode) globally enough to route webhooks (where kind in paybill/till); resolution function is `SECURITY DEFINER` and returns only org_id.
+Landlord-owned collection accounts that tenants pay into. `organization_id`, `landlord_id`, `kind (mpesa_paybill|mpesa_till|bank)`, `label`, `number_normalised text` (paybill or till number, digits only), `display_details jsonb` (bank name, branch, account name, paybill/till display text), `account_no` [ENC] (bank account number, shown masked), `account_reference_rule jsonb` (e.g. unit code, uppercased, no spaces or hyphens; plus the exact text tenants must enter), `is_default bool`, `status (active|disabled)`. No payment-rail credentials are stored (ADR 0007). Unique(organization_id, kind, number_normalised). Index (organization_id, landlord_id).
+
+### statement_imports
+One uploaded statement file. `organization_id`, `payment_source_id`, `uploaded_by`, `document_id` (raw file, kind `statement`, encrypted), `file_sha256 text`, `parser (mpesa_paybill_csv|mpesa_till_csv|mpesa_xlsx|bank_csv|bank_xlsx|mapped_template|ofx)`, `column_mapping_template_id null`, `status (uploaded|scanning|parsing|preview|committed|failed|cancelled)`, `period_from date null`, `period_to date null`, `rows_total`, `rows_new`, `rows_duplicate`, `rows_error`, `rows_matched`, `rows_unmatched`, `error_report jsonb` (row numbers and reason codes only, no cell values), `committed_by null`, `committed_at null`, `retention_until date`. Index (organization_id, payment_source_id, created_at). Raw file retention per `SECURITY.md` section 7.
+
+### column_mapping_templates
+Saved column layouts for files that match no built-in parser. `organization_id`, `payment_source_id`, `name`, `header_fingerprint text` (hash of normalised header row), `mapping jsonb` (which column is external_ref, amount (in/out or signed), paid_at and date format, payer name, payer phone, account_ref, balance; never formulas), `created_by`, `last_used_at`. Unique(organization_id, payment_source_id, header_fingerprint).
+
+### payment_claims
+Tenant-submitted proof of payment, held pending verification. `organization_id`, `tenant_id`, `lease_id`, `invoice_id null`, `channel (sms_paste|slip_upload)`, `external_ref text null` (M-Pesa code or bank reference parsed from the proof), `claimed_amount_minor bigint CHECK > 0`, `claimed_paid_on date`, `account_ref_claimed text null`, `raw_text_enc bytea` [ENC] null (pasted SMS), `document_id null` (slip photo, kind `receipt`, encrypted), `status (pending_verification|matched|approved|rejected|withdrawn)`, `payment_record_id null` (set on match or approval), `decided_by_user_id null`, `decided_at null`, `reject_reason text null` (short, no PII), `submitted_at`. A claim never posts to the ledger by itself. Partial unique (organization_id, external_ref) where status in (pending_verification, approved) blocks duplicate claims. Index (organization_id, status, submitted_at), (organization_id, tenant_id).
+
+### reconciliation_matches
+Match suggestions and decisions between a payment record and a lease or invoice, so every match is explainable. `organization_id`, `payment_record_id`, `lease_id`, `invoice_id null`, `score smallint` (0 to 100), `reasons jsonb` (which signals matched: account_ref, payer_phone_hash, amount_window, name), `method (auto|manual_confirm|split|reassign)`, `status (suggested|accepted|rejected|superseded)`, `decided_by null`, `decided_at null`, `ledger_transaction_id null`. Accepted matches lead to allocations. Index (organization_id, payment_record_id), (organization_id, status).
 
 ### allocations
-Link between a payment and an invoice (or line). `organization_id`, `payment_id`, `invoice_id`, `invoice_line_id null`, `amount_minor > 0`, `allocated_at`, `allocated_by (system|user_id)`, `reversed_by_allocation_id null`, `ledger_transaction_id`. Amounts are never updated; a reversal sets `reversed_at` and posts a reversing ledger transaction. Index (organization_id, payment_id), (organization_id, invoice_id). Invariant: sum(allocations per payment) <= payment.amount_minor; sum per invoice <= invoice.total_minor.
+Link between a payment record and an invoice (or line). `organization_id`, `payment_record_id`, `invoice_id`, `invoice_line_id null`, `amount_minor > 0`, `allocated_at`, `allocated_by (system|user_id)`, `reconciliation_match_id null`, `reversed_by_allocation_id null`, `ledger_transaction_id`. Amounts are never updated; a reversal sets `reversed_at` and posts a reversing ledger transaction. Index (organization_id, payment_record_id), (organization_id, invoice_id). Invariant: sum(allocations per payment record) <= payment_records.amount_minor; sum per invoice <= invoice.total_minor.
 
 ### credits
-Overpayment or goodwill balances held for a lease. `organization_id`, `lease_id`, `source_payment_id null`, `kind (overpayment|goodwill|refund_pending)`, `amount_minor`, `remaining_minor`, `status (open|consumed|refunded)`. Applied automatically at next invoice issue as allocation(s); `remaining_minor` decremented in the same transaction as the ledger entry. Index (organization_id, lease_id, status).
+Overpayment or goodwill balances held for a lease. `organization_id`, `lease_id`, `source_payment_record_id null`, `kind (overpayment|goodwill|refund_pending)`, `amount_minor`, `remaining_minor`, `status (open|consumed|refunded)`. Applied automatically at next invoice issue as allocation(s); `remaining_minor` decremented in the same transaction as the ledger entry. Index (organization_id, lease_id, status).
 
 ### deposits
-`organization_id`, `lease_id`, `kind (rent|security|water|key)`, `amount_minor`, `received_payment_id`, `status (held|partially_refunded|refunded|forfeited)`, `refund_due_date`, `refunded_minor`, `deductions jsonb` (list of {reason, amount_minor, evidence_document_id}), `settlement_ledger_transaction_id`. Held as a liability (account 2100). Refund workflow requires manager approval; refund paid outside Kodibox (bank/M-Pesa by landlord), then recorded.
+`organization_id`, `lease_id`, `kind (rent|security|water|key)`, `amount_minor`, `received_payment_record_id`, `status (held|partially_refunded|refunded|forfeited)`, `refund_due_date`, `refunded_minor`, `deductions jsonb` (list of {reason, amount_minor, evidence_document_id}), `settlement_ledger_transaction_id`. Held as a liability (account 2100). Refund workflow requires manager approval; refund paid outside Kodibox (bank/M-Pesa by landlord), then recorded.
 
 ### expenses
 `organization_id`, `property_id`, `landlord_id`, `category (repairs|utilities|security|management_fee|tax|other)`, `vendor`, `amount_minor`, `incurred_on date`, `paid_on null`, `paid_from_source_id null`, `receipt_document_id`, `maintenance_request_id null`, `ledger_transaction_id`, `status (draft|approved|paid|void)`, `submitted_by`, `ticket_id null` (repair ticket that spawned the expense, M2-05). Index (organization_id, property_id, incurred_on).
@@ -129,7 +148,7 @@ Header of a balanced posting. `organization_id`, `occurred_at timestamptz`, `pos
 - Index (organization_id, account_id, transaction_id), (organization_id, lease_id), (transaction_id).
 
 ### tickets (replaces `maintenance_requests`)
-Tenant or staff-raised repair, complaint, billing query or other issue. `organization_id`, `property_id`, `unit_id null` (required for repair and billing query), `tenant_id null`, `raised_by_user_id`, `channel (portal|app|staff_call|sms|whatsapp)`, `type (repair|complaint|billing_query|other)`, `category text` (CHECK per type; complaint subjects: `neighbour_noise|security|cleanliness_garbage|staff_conduct|landlord_management|other`), `title`, `description` [PII], `subject_party_note` [PII] null (complaints only; names or describes the party complained about; visible to managers and Owner only), `identity_private bool default false` (neighbour complaints: tenant identity hidden from the other party; managers still see it), `preferred_access` [PII] null, `urgency (emergency|high|normal|low)`, `status (new|acknowledged|in_progress|waiting_on_tenant|resolved|closed)`, `assignee_type (caretaker|staff|vendor) null`, `assignee_user_id null`, `vendor text null`, `work_order_id null` (M2-05), `linked_invoice_id null`, `linked_payment_id null`, `linked_ledger_transaction_id null` (credit note or reversal; never deletion), `sla_ack_due_at`, `sla_resolve_due_at`, `sla_breached_at null`, `escalated_to_user_id null` (Owner), `acknowledged_at`, `resolved_at`, `auto_close_at` (resolved_at + 7 days; cleared on reopen), `closed_at`, `rating smallint null CHECK (rating between 1 and 5)`, `rating_comment` [PII] null. Index (organization_id, status, urgency, sla_resolve_due_at), (organization_id, unit_id, type, created_at) for repeat-issue reports, (organization_id, tenant_id).
+Tenant or staff-raised repair, complaint, billing query or other issue. `organization_id`, `property_id`, `unit_id null` (required for repair and billing query), `tenant_id null`, `raised_by_user_id`, `channel (portal|app|staff_call|sms|whatsapp)`, `type (repair|complaint|billing_query|other)`, `category text` (CHECK per type; complaint subjects: `neighbour_noise|security|cleanliness_garbage|staff_conduct|landlord_management|other`), `title`, `description` [PII], `subject_party_note` [PII] null (complaints only; names or describes the party complained about; visible to managers and Owner only), `identity_private bool default false` (neighbour complaints: tenant identity hidden from the other party; managers still see it), `preferred_access` [PII] null, `urgency (emergency|high|normal|low)`, `status (new|acknowledged|in_progress|waiting_on_tenant|resolved|closed)`, `assignee_type (caretaker|staff|vendor) null`, `assignee_user_id null`, `vendor text null`, `work_order_id null` (M2-05), `linked_invoice_id null`, `linked_payment_record_id null`, `linked_ledger_transaction_id null` (credit note or reversal; never deletion), `sla_ack_due_at`, `sla_resolve_due_at`, `sla_breached_at null`, `escalated_to_user_id null` (Owner), `acknowledged_at`, `resolved_at`, `auto_close_at` (resolved_at + 7 days; cleared on reopen), `closed_at`, `rating smallint null CHECK (rating between 1 and 5)`, `rating_comment` [PII] null. Index (organization_id, status, urgency, sla_resolve_due_at), (organization_id, unit_id, type, created_at) for repeat-issue reports, (organization_id, tenant_id).
 - Complaints about a manager or caretaker set `assignee_user_id` to the Owner, never to the accused person.
 - Expenses link back via `expenses.ticket_id`.
 
@@ -160,9 +179,6 @@ Vacation, entry, rent increase, arrears, eviction-stage notices. `organization_i
 ### audit_events
 Append-only (same trigger protection). `organization_id null` (null for platform events), `actor_user_id`, `actor_role`, `action text` (e.g. `payment.allocate`), `entity_type`, `entity_id`, `before jsonb`, `after jsonb` (PII fields redacted/masked), `ip inet`, `user_agent`, `request_id`, `at timestamptz`. Monthly partitioning deferred (ADR 0006). Index (organization_id, entity_type, entity_id, at desc). Retention per SECURITY.md.
 
-### webhook_events
-Raw inbound, idempotent. Not tenant-scoped at ingest (org unknown yet); `organization_id null` until resolved; RLS permits insert by ingest role, select by org once resolved. `provider (mpesa_c2b|mpesa_stk|bank_x)`, `external_id text` (TransID / CheckoutRequestID), `payload_enc bytea` [ENC] (raw body), `headers_redacted jsonb`, `source_ip inet`, `signature_valid bool`, `status (received|processing|processed|failed|ignored)`, `attempts int`, `next_attempt_at`, `error`, `received_at`, `processed_at`. **Unique(provider, external_id)**; insert uses `ON CONFLICT DO NOTHING` (duplicate delivery returns 200). Index (status, next_attempt_at).
-
 ### data_subject_requests
 `organization_id`, `requester_user_id null`, `requester_tenant_id null`, `kind (access|rectification|erasure|portability|objection|restriction)`, `status (received|verifying|in_progress|completed|rejected)`, `received_at`, `due_at` (received + 30 days), `identity_verified_at`, `handler_id`, `outcome_note`, `export_document_id null`. Erasure is anonymisation where ledger/tax retention applies (identifiers scrubbed, financial rows retained, 7 years). Index (organization_id, status, due_at).
 
@@ -170,7 +186,7 @@ Raw inbound, idempotent. Not tenant-scoped at ingest (org unknown yet); `organiz
 
 1. Every financial event is a `ledger_transaction` with >= 2 `ledger_entries` where debits = credits per currency. Entries are never updated or deleted.
 2. A mistake is corrected by a `reversal` transaction (`reverses_transaction_id`) that posts the mirror entries, then a fresh correct transaction. A transaction can be reversed at most once.
-3. Idempotency: every posting carries a deterministic `idempotency_key` (`invoice:{id}`, `payment:{provider}:{ref}`, `alloc:{payment}:{invoice}`), enforced by unique constraint.
+3. Idempotency: every posting carries a deterministic `idempotency_key` (`invoice:{id}`, `payment:{payment_source_id}:{external_ref}`, `alloc:{payment_record}:{invoice}`), enforced by unique constraint.
 4. Normal sides: assets and expenses increase by debit; liabilities, equity and income by credit.
 5. Seed accounts per landlord sub-ledger: `1100 Cash/Collections (landlord's account, memo)`, `1200 Tenant Receivables (AR)`, `1900 Suspense (unmatched)`, `2100 Deposits Held`, `2200 Tenant Credits`, `4100 Rent Income`, `4200 Utility Income`, `4300 Penalty Income`, `4400 Other Income`, `5xxx Expenses`, `2300 Owed to Landlord / 4500 Management Fee Income` (agency only).
 6. "Cash" accounts are memo reflections of the landlord's own bank/M-Pesa balance; they record what we observed, not funds Kodibox holds (ADR 0003).
@@ -184,7 +200,7 @@ Raw inbound, idempotent. Not tenant-scoped at ingest (org unknown yet); `organiz
 | 4100 Rent Income | | 20,000 |
 | 4200 Utility Income | | 1,500 |
 
-**B. M-Pesa payment 21,500 received, matched to L1** (`payment:mpesa_c2b:SGL7XYZ1`)
+**B. M-Pesa payment 21,500 imported from the paybill statement, matched to L1** (`payment:{payment_source_id}:SGL7XYZ1`)
 | Account | Dr | Cr |
 |---|---|---|
 | 1100 Cash/Collections | 21,500 | |
@@ -205,7 +221,7 @@ Waiver: reversal of the same (Dr 4300 / Cr 1200), reason in audit.
 **F. Deposit refund minus damages (3,000 repairs, 2,000 unpaid water)**
 Settlement transaction: Dr 2100 40,000; Cr 4400 Other Income (damages recovered) 3,000; Cr 1200 AR (clears arrears 2,000); Cr 1100 Cash 35,000 (refund paid by landlord from own account, recorded once confirmed). Debits 40,000 = credits 40,000. If damages cost real repairs, a separate expense Dr 5100 / Cr 1100.
 
-**G. Reversal**: Payment SGL7XYZ1 was mis-assigned. Post reversal tx R (`reverses_transaction_id = B`): Dr 1200 21,500 / Cr 1100 21,500, mark allocations `reversed_at`, payment `reversed`; then re-record against correct lease. Original rows untouched.
+**G. Reversal**: Payment SGL7XYZ1 was mis-assigned. Post reversal tx R (`reverses_transaction_id = B`): Dr 1200 21,500 / Cr 1100 21,500, mark allocations `reversed_at`, payment record `reversed_at` set; then re-match against the correct lease (`reconciliation_matches` row, new allocation). Original rows untouched.
 
 **H. Credit note for wrongly billed water 1,500**: Dr 4200 1,500 / Cr 1200 1,500 (reversal of the line), invoice re-issued or adjustment line added.
 
@@ -214,7 +230,7 @@ Settlement transaction: Dr 2100 40,000; Cr 4400 Other Income (damages recovered)
 Truth is `ledger_entries`. For speed we keep denormalised balances, updated **in the same transaction** as the posting.
 
 - `ledger_balances` (organization_id, account_id, lease_id null, `balance_minor` signed in normal-side terms, `last_entry_id`, `version`). `core/ledger.post()` returns balance deltas; the repo applies `INSERT ... ON CONFLICT DO UPDATE SET balance_minor = balance_minor + delta` inside the posting transaction. Row locks serialise concurrent postings on one lease.
-- `invoices.paid_minor/balance_minor`, `payments.allocated_minor/unallocated_minor`, `credits.remaining_minor` are likewise updated atomically with their allocations, with CHECK constraints (`balance_minor = total_minor - paid_minor`, `allocated_minor <= amount_minor`).
+- `invoices.paid_minor/balance_minor`, `payment_records.allocated_minor/unallocated_minor`, `credits.remaining_minor` are likewise updated atomically with their allocations, with CHECK constraints (`balance_minor = total_minor - paid_minor`, `allocated_minor <= amount_minor`).
 - Lease/tenant statements and arrears dashboards read `ledger_balances` and open invoices only (never sum all entries online).
 - **Nightly `ledger-verify` job** per org: (1) every transaction sums to zero; (2) recompute balances from `ledger_entries` and compare to `ledger_balances`; (3) recompute invoice paid/balance from `allocations`; (4) ensure AR by lease = sum of open invoice balances minus credits; (5) every payment is fully either allocated, credited, or in suspense. Any mismatch pages on-call, writes an `audit_events` row, and (never auto-fixes silently) produces a repair proposal executed via explicit adjustment transactions. Runs also after restores (`backup-verify`).
 - Month-end: `period_closes` snapshot (org, period, balances hash) makes closed periods immutable; late postings go to the current period with `occurred_at` preserved.

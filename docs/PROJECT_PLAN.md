@@ -4,7 +4,7 @@
 > Inputs: `docs/research/bomahut-analysis.md`, `docs/research/legal-compliance-kenya.md`
 
 ## 1. Vision
-Kodibox is the rent management system Kenyan landlords, agents and tenants trust. It collects rent straight into the landlord's own M-Pesa paybill/till or bank account and reconciles every shilling automatically. It keeps an auditable ledger, gives tenants a self-service portal, and produces KRA-ready reports. It is built privacy-first under the Data Protection Act 2019.
+Kodibox is the rent management system Kenyan landlords, agents and tenants trust. Tenants pay rent straight into the landlord's own M-Pesa paybill/till or bank account, and Kodibox reconciles every statement line, tenant payment proof and manual entry against the ledger (ADR 0007). It keeps an auditable ledger, gives tenants a self-service portal, and produces KRA-ready reports. It is built privacy-first under the Data Protection Act 2019.
 
 ## 2. Problem & opportunity (from the Bomahut teardown)
 Bomahut proves demand for the following:
@@ -18,7 +18,7 @@ Publicly visible gaps that Kodibox targets:
 
 | Gap | Kodibox answer |
 |---|---|
-| No tenant portal or mobile app | Tenant PWA (Phase 2) and a native app (Phase 3), with STK Push "pay now" in 2 taps and SMS/USSD fallback |
+| No tenant portal or mobile app | Tenant PWA (Phase 2) and a native app (Phase 3), with clear payment instructions, a one-tap "I've paid" proof submission and SMS/USSD fallback |
 | No caretaker workflow | Caretaker role with offline meter readings, photo evidence, move-in/out checklists |
 | No maintenance tickets; passive tenant side | Tenant repair and complaint tickets (M1-18 staff intake, M2-11 tenant app/portal) with SLAs, escalation to the Owner, audited thread and ratings |
 | Thin lease and deposit lifecycle | Full lease lifecycle: digital lease, deposit held as liability, move-out inspection, deposit refund statement |
@@ -40,11 +40,11 @@ Publicly visible gaps that Kodibox targets:
 
 ### Phase 0: Foundations, legal & scaffold (Weeks 1–3)
 Legal and business tasks run in parallel with engineering:
-- [ ] L-01 Register the company and engage a Kenyan advocate (fintech/data protection) for an opinion on the reconciliation-only model under the NPS Act (ADR-0003).
+- [ ] L-01 Register the company and engage a Kenyan advocate (fintech/data protection) for an opinion on the reconciliation-only model under the NPS Act (ADR-0003, ADR-0007).
 - [ ] L-02 Register with ODPC as data controller and processor, and appoint a DPO (can be outsourced).
 - [ ] L-03 Draft and review legal documents with the advocate: Terms of Service, Privacy Notice, Data Processing Agreement (landlord = controller, Kodibox = processor), tenant-facing privacy notice, and SMS consent wording.
 - [ ] L-04 Run a DPIA for the core platform (template in `docs/PRIVACY_BY_DESIGN.md`).
-- [ ] L-05 Apply for Safaricom Daraja production access and register SMS sender IDs (Africa's Talking).
+- [ ] L-05 Register SMS sender IDs (Africa's Talking).
 - [ ] L-06 Verify the open legal items flagged `[CHECK]` in `docs/research/legal-compliance-kenya.md`: current MRI rate/thresholds, eTIMS applicability to residential rent, record-retention period, and Landlord & Tenant Bill status.
 
 Engineering tasks:
@@ -65,28 +65,28 @@ Engineering tasks:
 - [ ] M1-03 Leases: start/end, rent, deposit, recurring charges (service charge, garbage, parking), due day, grace period, penalty rule (flat or % with cap). Move-in pro-rating.
 - [ ] M1-04 `packages/core/ledger`: chart of accounts, double-entry posting, reversals, balances + nightly verifier.
 - [ ] M1-05 Billing engine: monthly invoice run job (idempotent per lease+period), invoice numbering per org, PDF invoices.
-- [ ] M1-06 Payment sources: connect the landlord's own paybill/till (Daraja credentials encrypted), C2B URL registration, health check.
-- [ ] M1-07 C2B confirmation webhook: verification, idempotency, Transaction Status re-check, auto-match by account number/phone, auto-allocation oldest-first, overpayment to credit.
-- [ ] M1-08 Unmatched payments queue: manual match/split with audit trail.
-- [ ] M1-09 STK Push "request payment" from the dashboard and a tenant pay link.
+- [ ] M1-06 Payment instructions per property or landlord: paybill/till/bank details (`payment_sources`) and account reference rules (unit code), shown on invoices, reminders and receipts, with copy buttons.
+- [ ] M1-07 Statement import: M-Pesa paybill/till and bank CSV/XLSX parsers behind the `PaymentSource` interface, column-mapping templates per org and account, dedupe on (org, payment source, external ref), import preview with row errors before commit.
+- [ ] M1-08 Reconciliation engine and unmatched queue: confidence-scored matching (account reference, payer, amount and date), auto-allocation oldest-first above threshold, overpayment to credit, manual confirm/split/reassign, all postings through the ledger and audited.
+- [ ] M1-09 Tenant payment claims: paste the M-Pesa confirmation SMS or upload a slip, parsed into a claim marked pending verification; matched to a statement line, or approved/rejected by a manager.
 - [ ] M1-10 Manual payments (cash/cheque/bank deposit) with maker-checker approval for caretaker-entered cash.
 - [ ] M1-11 Receipts (SMS + PDF) and tenant statements.
 - [ ] M1-12 Notifications: SMS (Africa's Talking) and email; templates; reminder schedule (before due, on due, overdue); opt-out handling; delivery logs; per-org SMS credit wallet billed by Kodibox (SMS fees only, never rent).
 - [ ] M1-13 Penalties job (after grace period, idempotent) with waiver workflow.
 - [ ] M1-14 Dashboard: collected vs expected, arrears aging (0–30/31–60/61–90/90+), occupancy, recent payments.
 - [ ] M1-15 Reports: rent roll, arrears, collections by property, Excel/CSV/PDF export (exports audited and permission-gated).
-- [ ] M1-16 Onboarding wizard: org → property → units → payment source → import tenants → first invoice run, in under 15 minutes.
+- [ ] M1-16 Onboarding wizard: org → property → units → payment instructions → import tenants → first invoice run → first statement import, in under 15 minutes.
 - [ ] M1-17 Subscription billing for Kodibox itself (plans, trial, invoices to the org).
 - [ ] M1-18 Basic ticket intake (staff-logged + manager inbox, repair & complaint types, statuses, assignment, audit).
 
 **Exit criteria:**
-- A pilot with 3–5 landlords (~200 units) running live M-Pesa for 1 full month.
+- A pilot with 3–5 landlords (~200 units) importing live M-Pesa and bank statements for 1 full month.
 - Over 95% of payments auto-matched.
 - The ledger verifier reports zero discrepancies.
 - The security-reviewer and an external mini-pentest find no critical or high issues.
 
 ### Phase 2: Differentiators (Weeks 12–19)
-- [ ] M2-01 Tenant portal (PWA): invoices, statements, pay via STK, receipts, notices, maintenance requests, document access. Login by phone + OTP.
+- [ ] M2-01 Tenant portal (PWA): invoices, statements, payment instructions with copy buttons, "I've paid" proof submission, receipts, notices, maintenance requests, document access. Login by phone + OTP. No in-app payment initiation.
 - [ ] M2-02 Caretaker app view: offline-capable meter readings with photo, move-in/out inspection checklists.
 - [ ] M2-03 Utility billing: metered water/electricity (tiered tariffs), shared-meter apportioning, bulk reading upload.
 - [ ] M2-04 Deposits lifecycle: held as liability, move-out deductions with evidence, refund statement, and handover to the landlord's own payment process (Kodibox doesn't disburse).
@@ -95,8 +95,12 @@ Engineering tasks:
 - [ ] M2-07 Notices: vacation notices, rent-increase notices from advocate-reviewed templates with configurable notice periods. No automated eviction, lockout or distress features (legal).
 - [ ] M2-08 MRI tax report: monthly gross residential rent per landlord, KRA-format export, deadline reminders (20th).
 - [ ] M2-09 Data subject rights tooling: export, rectification, erasure with legal-hold exceptions, DSR request tracker with SLA.
-- [ ] M2-10 Bank integrations: one bank (e.g. Equity/KCB/Co-op) paybill or statement callbacks; bank statement CSV import + matcher.
+- [ ] M2-10 Bank statement layouts: saved parsers for common bank CSV/XLSX exports (e.g. Equity, KCB, Co-op) and OFX import. No bank APIs or callbacks (ADR 0007).
 - [ ] M2-11 Tenant tickets in tenant portal/app: create with photos, thread, notifications, SLAs & escalation, ratings, reports.
+- [ ] M2-12 Payment notification forwarding (ADR 0007 addendum): per-org inbound email address, registered senders only, SPF/DKIM alignment, parse M-Pesa/bank alert emails into unverified records; upload fallback.
+- [ ] M2-13 Property-prefixed account references (`<PROPERTY_CODE>-<UNIT>`, unique per org + payment source) on pay instructions, invoices and reminders; legacy unit-only refs still match when unambiguous.
+- [ ] M2-14 Reversals/refunds in reconciliation (M-Pesa Linked Transaction ID, bank reversal lines) posting ledger reversing entries; aggregated-settlement detection that prompts for the M-Pesa transaction report.
+- [ ] M2-15 Text-based PDF statement extraction behind the same parsers and limits (no OCR in v1).
 
 ### Phase 3: Scale & reach (Weeks 20–30)
 - [ ] M3-01 Native mobile app (Expo) for tenants, caretakers and managers/landlords; push notifications. Broken down into MA-01…MA-12 in `docs/MOBILE_APP_PLAN.md`.
@@ -110,7 +114,7 @@ Engineering tasks:
 
 ### Phase 4: Hardening & general availability (overlaps Phase 3)
 - [ ] H-01 Independent penetration test (web, API, mobile) and remediation.
-- [ ] H-02 Load test: invoice run for 50k units under 10 min; webhook burst of 200 req/s.
+- [ ] H-02 Load test: invoice run for 50k units under 10 min; statement import and claim-submission bursts at pilot-scale peaks.
 - [ ] H-03 Backup restore drill; DR runbook validated (RPO 15m / RTO 4h).
 - [ ] H-04 Incident response tabletop exercise, including the ODPC 72-hour breach notification.
 - [ ] H-05 Public trust page: security, privacy, status page, uptime SLA.
@@ -152,9 +156,9 @@ Revisit any of these only with an ADR, an advocate's opinion and the relevant li
   - Migrations include RLS.
   - Audit events exist for state changes.
   - Docs are updated.
-  - `security-reviewer` has run on PRs touching auth, money, PII or webhooks.
+  - `security-reviewer` has run on PRs touching auth, money, PII or statement and claim imports.
   - `compliance-reviewer` has run on PRs touching PII, notifications, tax or notices.
-- Environments: local → staging (sandbox Daraja) → production. Feature flags for gradual rollout.
+- Environments: local → staging (synthetic statement fixtures) → production. Feature flags for gradual rollout.
 
 ## 9. Pricing hypothesis (validate in the pilot)
 | Plan | Price | Includes |
@@ -162,15 +166,15 @@ Revisit any of these only with an ADR, an advocate's opinion and the relevant li
 | Starter | Free, ≤ 3 units | Invoicing, M-Pesa reconciliation, receipts, tenant portal |
 | Standard | KSh 120/unit/month (min KSh 1,000) | Everything incl. utility billing, reports, MRI report |
 | Agency | KSh 100/unit/month (min KSh 5,000) | Multi-landlord, commissions, remittances, landlord portal |
-| Enterprise | Custom | SLA, bank integrations, API |
+| Enterprise | Custom | SLA, bank statement layouts, API |
 
 SMS is billed at cost plus a small margin from a prepaid SMS wallet. Kodibox never touches rent money.
 
 ## 10. Risks & mitigations
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Daraja production approval delays per landlord paybill | High | High | Start L-05 early; support bank-statement import and manual matching as a fallback |
-| Legal reclassification as a payment service provider | Low | High | Reconciliation-only (ADR-0003), advocate opinion (L-01) |
+| Slow recognition because landlords forget to import statements | High | High | Tenant claims show as "pending verification" at once; import reminders (daily or weekly, configurable) show the open claim count; penalties and arrears reminders skip tenants with a pending claim inside the grace window; one-tap import guidance for the M-Pesa portal export |
+| Legal reclassification as a payment service provider | Low | High | Reconciliation-only (ADR-0003, ADR-0007), advocate opinion (L-01) |
 | Data breach of tenant PII | Med | High | `docs/SECURITY.md` controls, encryption, pentest, IR runbook |
 | Ledger bugs causing wrong balances | Med | High | Double-entry invariants, property-based tests, nightly verifier |
 | Low adoption by small landlords | Med | Med | Free tier, 15-minute onboarding, CSV import from Excel/Bomahut exports |

@@ -9,21 +9,21 @@ Status: living document. Stack decisions are fixed in `CLAUDE.md`; changes need 
 | Correctness of money | Integer minor units, double-entry ledger, append-only, nightly verifier. Zero tolerance for drift. |
 | Tenant isolation | RLS on every tenant-scoped table; a bug in app code must not leak across organizations. |
 | Security / privacy | DPA 2019 by design: field-level encryption, masked logs, consent, retention (see `SECURITY.md`). |
-| Reliability | Webhooks acknowledged < 1 s and processed asynchronously, idempotent. No lost payments. |
-| Availability | 99.9% monthly for web and webhook ingress. Worker outage degrades freshness, not correctness. |
+| Reliability | Statement files and tenant proofs stored before parsing; imports and claims idempotent on (org, payment source, external ref). No lost payment evidence. |
+| Availability | 99.9% monthly for web. Worker outage delays reconciliation freshness, not correctness. |
 | Recoverability | RPO 15 min, RTO 4 h. |
 | Auditability | Every money, lease, role, or settings change writes `audit_events`. |
 | Operability | One Docker image per app, structured logs, traces, alerts on reconciliation lag. |
 | Cost / simplicity | One Postgres, one Redis, one object store. Modular monolith, not microservices. |
 
-Non-goals: holding client funds (ADR 0003), being a payment processor, multi-currency FX (KES only at launch; `currency` column exists for the future).
+Non-goals: holding client funds (ADR 0003), being a payment processor, initiating or detecting payments through payment rails (ADR 0007), multi-currency FX (KES only at launch; `currency` column exists for the future).
 
 ## 2. Monorepo layout
 
 ```
 kodibox/
 ├─ apps/
-│  ├─ web/                 Next.js 15 (RSC, Server Actions, route handlers /api/v1, webhooks)
+│  ├─ web/                 Next.js 15 (RSC, Server Actions, route handlers /api/v1, statement and proof uploads)
 │  │  └─ src/
 │  │     ├─ app/           routes (App Router), (public), (dashboard), (tenant-portal), api/
 │  │     ├─ features/<feature>/{components,actions,queries,schemas}
@@ -32,8 +32,8 @@ kodibox/
 │  └─ mobile/              Expo / React Native (Phase 3), consumes REST /api/v1
 ├─ packages/
 │  ├─ db/                  Drizzle schema, migrations, RLS policies, `withOrg(tx)` helper, seed
-│  ├─ core/                PURE domain logic: ledger/, billing/, allocation/, penalties/, proration/, authz/
-│  ├─ integrations/        mpesa/ (Daraja), bank/, sms/ (Africa's Talking), email/, etims/, storage/
+│  ├─ core/                PURE domain logic: ledger/, billing/, allocation/, penalties/, proration/, reconciliation/, authz/
+│  ├─ integrations/        payment-sources/ (M-Pesa paybill/till statement, bank CSV/XLSX, SMS proof parser), sms/ (Africa's Talking), email/, etims/, storage/
 │  ├─ ui/                  shared shadcn-based components, tokens
 │  └─ config/              env.ts (Zod), tsconfig, eslint, constants (roles, permissions list)
 ├─ docs/                   ARCHITECTURE, DATA_MODEL, SECURITY, PROJECT_PLAN, adr/, research/
@@ -121,61 +121,54 @@ Platform-admin paths use a separate `withPlatformAdmin()` helper that sets `app.
 - A tenant (person) who logs in is a `user` with a `tenant` membership linked to a `tenants` row. One person can rent in several organizations.
 - **Landlord-on-behalf (agencies)**: an agency org manages properties for several landlords. `landlords` rows (within the agency org) own `properties`. Each landlord can have its own `payment_sources`, statements, and remittance reports. Landlords may optionally be invited as a read-only `owner`-lite membership scoped to their `landlord_id` (Phase 2). Isolation between landlords inside one agency is by app-level `can()` scope, not RLS; isolation between agencies is RLS.
 
-## 6. Payment flows
+## 6. Payment evidence and reconciliation
 
-Kodibox never receives funds. Money lands in the landlord's paybill/till/bank account; Kodibox observes and reconciles (ADR 0003).
+Kodibox never receives funds and never initiates or detects payments (ADR 0003, ADR 0007). Tenants pay outside Kodibox into the landlord's own paybill, till or bank account. Kodibox reconciles the evidence that the landlord or tenant brings in: statement imports, tenant payment claims and manual entries. All three go through the same pipeline.
 
-### 6.1 STK Push initiated by tenant
+### 6.1 Payment instructions
 
-```mermaid
-sequenceDiagram
-  participant T as Tenant app
-  participant W as Web
-  participant D as Daraja
-  participant Q as Worker
-  T->>W: Pay KES X for invoice (idempotency-key)
-  W->>W: can(), Zod, create payment_intent(pending)
-  W->>D: STK Push (shortcode of landlord source, AccountReference=unit code)
-  D-->>W: CheckoutRequestID
-  D-->>T: PIN prompt on phone
-  D->>W: callback /api/webhooks/mpesa/stk/{secret}
-  W->>W: verify IP+path token, store raw (encrypted) in webhook_events (unique on CheckoutRequestID)
-  W-->>D: 200 immediately
-  Q->>Q: process: create payment(received), ledger post, auto-allocate
-  Q-->>T: SMS/in-app receipt
-```
-A missed callback is recovered by a delayed `stk-status-poll` job calling Transaction Status Query.
+Each property or landlord has `payment_sources` (`mpesa_paybill`, `mpesa_till` or `bank`) with display details and an account reference rule. Tenants see the paybill or till number, the exact account reference to use (their unit code), and bank details, each with a copy button. Invoices, reminders, receipts and the tenant portal repeat the same instructions. The account reference is the main matching key, so it must be correct everywhere. No payment-rail credentials are stored.
 
-### 6.2 C2B paybill (account number = unit code)
+### 6.2 Statement import, tenant claims and manual entries
 
 ```mermaid
 sequenceDiagram
+  participant L as Landlord or manager
   participant T as Tenant
-  participant S as Safaricom
   participant W as Web
   participant Q as Worker
-  T->>S: Pay to paybill, account = unit code (e.g. KB-A12)
-  S->>W: Validation (optional, if enabled) then Confirmation
-  W->>W: verify, insert webhook_events ON CONFLICT(provider,external_id=TransID) DO NOTHING
-  W-->>S: {"ResultCode":0}
-  Q->>Q: resolve payment_source by BusinessShortCode, unit by BillRefNumber
-  alt matched
-    Q->>Q: payment(matched) + ledger + allocate
-  else unmatched
-    Q->>Q: payment(unmatched) -> reconciliation queue
-  end
+  L->>W: Upload M-Pesa or bank statement (CSV/XLSX)
+  W->>W: can(payments:import), type/size checks, store file encrypted, enqueue
+  W-->>L: Import queued, preview when parsed
+  Q->>Q: statement-parse: scan, parse via PaymentSource, normalise to payment_records
+  Q->>Q: dedupe on (org, payment_source, external_ref); re-import is a no-op
+  T->>W: Paste M-Pesa SMS or upload slip (claim)
+  W->>Q: store claim (pending_verification)
+  Q->>Q: reconcile-match: merge with statement line if one exists
+  Q->>Q: match, auto-allocate above threshold, else unmatched queue
+  L->>W: Approve or reject a claim, or confirm a queued match
+  W->>W: can(), audit, post via ledger
 ```
-Unit codes are unique per org, short, case/space/hyphen-normalised on match. Multi-tenant paybills (agency using one shortcode) resolve org via `payment_sources.shortcode`.
 
-### 6.3 Bank callback
+Steps:
 
-Banks that offer webhooks/statement APIs post to `/api/webhooks/bank/{provider}/{secret}`; others use scheduled statement pulls or CSV/MT940 import (`bank-statement-import` job). All normalise into `webhook_events` then the same `payment` pipeline, with reference matching on narrative (unit code, lease number).
+1. **Parse**: the `statement-parse` job reads the stored file and applies a known layout (M-Pesa paybill/till export, bank CSV/XLSX) or a saved column-mapping template for the org and payment source. Parse errors are reported per row; the import is previewed before anything is committed.
+2. **Normalise**: each line becomes a `payment_records` row (`source`, `external_ref`, `amount_minor`, `currency`, `paid_at`, payer name and hashed payer phone, `account_ref`, encrypted raw line).
+3. **Dedupe**: unique on (organization_id, payment_source_id, external_ref). Without a reference, an amount and date fingerprint flags a suspected duplicate for review. A tenant claim and the statement line for the same payment merge into one record.
+4. **Match**: `reconcile-match` scores each record. Account reference (unit code or lease reference) carries the most weight, then a known payer phone or name for that lease, then amount close to the open balance within a date window.
+5. **Allocate**: above the auto-match threshold, the record is allocated oldest-first through the ledger (6.4). Below it, the record goes to the unmatched queue (section 7).
+6. **Tenant claims** (paste an M-Pesa SMS or upload a bank slip or receipt photo) are parsed for transaction code, amount, date and account reference, then stored as `payment_claims` with status `pending_verification`. A claim changes nothing in the ledger until a statement line confirms it or a manager approves it. Approval and rejection are audited.
+7. **Manual entries** (cash, cheque, deposit) are recorded with method, reference, received date and optional receipt photo. A caretaker's cash entry needs maker-checker approval. Duplicate references per payment source trigger a warning. Cheques stay `pending_verification` and post to the ledger only when cleared.
 
-### 6.4 Manual cash / cheque entry
+Every step writes `audit_events` (actor, IP, user agent, file hash, counts).
 
-Manager/accountant/caretaker (if permitted) records a payment with method, reference, received date, and optional receipt photo. Creates `payment(source='manual')`, requires a unique reference per method (duplicate warning), is audited, and can be reversed only by a reversing ledger transaction. Cheques start `pending_clearance` and post to ledger only on `cleared`.
+### 6.3 Parser interface
 
-### 6.5 Auto-allocation and overpayment
+Statement parsers and any future feed implement one `PaymentSource` interface in `packages/integrations/payment-sources`. Each parser turns its input into `PaymentRecord`s and never touches the database. Parsers available at launch: M-Pesa paybill/till statement, bank CSV/XLSX and column-mapping template, tenant SMS proof text. OFX is a later addition. A direct rail feed may be added only through a new ADR, as an optional per-org plug-in that produces the same `PaymentRecord`s.
+
+### 6.4 Auto-allocation and overpayment
+
+### 6.4 Auto-allocation and overpayment
 
 ```mermaid
 flowchart LR
@@ -192,7 +185,15 @@ Allocation order is configurable per org (default: oldest due first; line priori
 
 ## 7. Reconciliation queue
 
-Unmatched payments (unknown unit code, shortcode mismatch, duplicate-looking amounts) land in `payments.status = 'unmatched'`. The queue UI shows payer name (masked), MSISDN (masked), amount, reference, age. Actions: assign to unit/lease (re-runs allocation), split across leases, mark as non-rent income, refund-outside-system (note only), or reject with reason. Aging alerts at 24 h and 72 h. A daily `reconcile-sweep` job retries auto-match using fuzzy reference rules and the payer's phone history.
+The unmatched queue holds `payment_records` with status `unmatched` (unknown account reference, unknown payer, amount far from any open balance, suspected duplicate) and `payment_claims` with status `pending_verification`. The queue UI shows payer name (masked), payer phone (masked), amount, reference, source, age. Actions:
+
+- **Confirm** a suggested match (one tap), or assign to a unit/lease (re-runs allocation).
+- **Split** across leases or invoices.
+- **Reassign** to another lease; the original match is reversed through the ledger, never edited.
+- **Ignore** as non-rent income, with a note.
+- **Approve or reject** a claim, with a reason on rejection.
+
+Every action writes `audit_events`. Aging alerts at 24 h and 72 h. An hourly `reconcile-sweep` job re-runs matching for queued records and claims, using fuzzy reference rules and the payer's phone history.
 
 ## 8. Billing engine
 
@@ -201,7 +202,7 @@ Pure logic in `packages/core/billing`; scheduling in the worker.
 - **Invoice run**: monthly per lease on `billing_day` (default 1st, generated 5 days ahead if org opts in). Idempotency key `invoice:{lease_id}:{period_start}`; unique constraint prevents duplicates.
 - **Lines**: rent (from lease terms at that date), recurring `lease_charges` (garbage, security, service charge, parking), metered utilities from approved `meter_readings`, carried credits applied as allocations, and arrears shown as informational balance (arrears are not re-billed).
 - **Metered utilities**: consumption = reading - previous reading; unit price or tiered tariff; estimated reading allowed with flag; disputed readings block that line only.
-- **Penalties**: `penalty_rule` per org/property (flat or % of overdue rent, one-off or per-period, cap). Applied by `penalty-run` after `due_date + grace_days`; idempotent per `invoice_id + rule_id + period`. Waivable with reason (reversing entry, audited).
+- **Penalties**: `penalty_rule` per org/property (flat or % of overdue rent, one-off or per-period, cap). Applied by `penalty-run` after `due_date + grace_days`; idempotent per `invoice_id + rule_id + period`. Waivable with reason (reversing entry, audited). Skipped for tenants with a pending payment claim inside the grace window.
 - **Deposits**: held as a **liability** (`deposits_held`), not income; refunds computed at move-out minus documented deductions (see DATA_MODEL).
 - **Pro-rating**: move-in/out mid-month charges `rent * days_occupied / days_in_month` using integer math with largest-remainder rounding; rule configurable (daily vs 30-day basis).
 - **Corrections**: never edit an issued invoice; issue credit note (reversal) and re-issue.
@@ -243,16 +244,15 @@ Flow: domain event -> `notifications` row (queued) -> `notify` job -> channel ad
 
 | Job | Schedule (Africa/Nairobi) | Idempotency key |
 |---|---|---|
-| `webhook-process` | on enqueue | `webhook_events.id` |
+| `statement-parse` | on upload (scan, then parse, then preview) | `statement:{import_id}` |
+| `reconcile-match` | on record or claim ingest, and after a statement commit | `match:{payment_record}:{attempt-hour}` |
 | `invoice-run` | daily 02:00, handles leases due | `invoice:{lease}:{period}` |
 | `penalty-run` | daily 03:00 | `penalty:{invoice}:{rule}:{period}` |
 | `reminder-run` | daily 09:00 (pre-due, due, overdue) | `rem:{invoice}:{stage}` |
+| `import-reminder` | daily or weekly per org setting, 09:00 | `import-rem:{org}:{date}` (includes open claim count) |
 | `reconcile-sweep` | hourly | `recon:{payment}:{attempt-hour}` |
-| `stk-status-poll` | +60 s, +5 min after STK | `stk:{checkout_request_id}` |
-| `bank-statement-import` | every 30 min per source | `bank:{source}:{txn_ref}` |
 | `ledger-verify` | nightly 01:00 | `verify:{org}:{date}` |
 | `notify` | on enqueue | `notification.id` |
-| `webhook-retry` | every 5 min (exponential, max 24 h) | `webhook_events.id:{attempt}` |
 | `retention-purge` | weekly Sun 04:00 | `retention:{table}:{week}` |
 | `dsr-export` | on request | `dsr.id` |
 | `tickets.sla-check` | every 5 min | `sla:{ticket}:{ack\|resolve}` |
@@ -276,15 +276,15 @@ Justification: (1) Expo clients and future third parties (accountants, landlord 
 - Logs: structured JSON via pino, OpenTelemetry exporter; redaction list for phone, ID, PIN, tokens, payload bodies. Correlation id per request and per job.
 - Traces: OTel on web, worker, DB, outbound HTTP.
 - Errors: Sentry with PII scrubbing (`beforeSend`).
-- Metrics and alerts: webhook latency, queue depth/age, unmatched payments age, ledger-verify failures (page), STK success rate, SMS delivery rate, DB replication lag.
+- Metrics and alerts: statement parse failures and row error rate, queue depth/age, unmatched records and pending claims age, auto-match rate, ledger-verify failures (page), SMS delivery rate, DB replication lag.
 - Health: `/healthz` (liveness), `/readyz` (DB + Redis).
 
 ## 14. Environments
 
 | Env | Purpose | Data |
 |---|---|---|
-| local | docker compose: Postgres 16, Redis, MinIO, mailpit; Daraja sandbox | seed data only |
-| staging | prod-like, Daraja sandbox, Testcontainers-style ephemeral DBs for PRs | synthetic only |
+| local | docker compose: Postgres 16, Redis, MinIO, mailpit; synthetic statement fixtures | seed data only |
+| staging | prod-like, Testcontainers-style ephemeral DBs for PRs, synthetic statement fixtures | synthetic only |
 | prod | live | real; access via audited break-glass |
 
 Config via env vars validated by `packages/config/env.ts`; secrets from the platform secret manager.
@@ -297,21 +297,21 @@ Config via env vars validated by `packages/config/env.ts`; secrets from the plat
   - *Managed Postgres abroad* (e.g. AWS eu-west/af-south-1 Cape Town, Neon/Supabase): best tooling, PITR, read replicas; cross-border transfer under DPA 2019 s.48-50 requires a lawful basis (adequate safeguards/contract with processor DPA, SCCs-style clauses, data subject consent where needed) and possibly registration notes with ODPC. Latency from Nairobi 100-150 ms to Cape Town/Europe.
   - *Kenyan host* (e.g. Safaricom Cloud, Liquid, iXAfrica): simplest data-localisation story, low latency, but thinner managed-DB features; we would run Postgres + Patroni/pgBackRest ourselves.
   - **Default**: managed Postgres in `af-south-1` with a signed DPA and encryption (KMS keys under our control), field-level encryption of identifiers so the host never sees plaintext PII, and documented transfer basis in `legal-compliance-kenya.md`. Revisit if a client or regulator requires in-country residency; the app is host-agnostic.
-- CDN/WAF in front of web; webhook ingress paths rate-limited and IP-allowlisted for Safaricom ranges.
+- CDN/WAF in front of web; statement and claim upload paths rate-limited and size-capped (see `SECURITY.md` section 7).
 
 ## 16. Backup and disaster recovery
 
 - **RPO 15 min**: continuous WAL archiving + PITR (5-minute archive interval), nightly base backup, cross-region copy of backups (encrypted).
 - **RTO 4 h**: restore runbook; standby/replica promotion for infra failure; infra defined as code so web/worker redeploy from images.
-- Object storage: versioning + cross-region replication. Redis is rebuildable (jobs are re-derivable from DB; webhooks persisted before enqueue).
+- Object storage: versioning + cross-region replication. Redis is rebuildable (jobs are re-derivable from DB; uploaded statement files are persisted before enqueue).
 - Quarterly restore drill; `backup-verify` job restores into a scratch DB and runs `ledger-verify`.
-- Because raw webhooks are persisted first, payments received during an outage can be replayed; Safaricom also retries and Transaction Status Query backfills gaps.
+- Because statement files and claim evidence are persisted first, an import or claim lost to a worker outage can be re-parsed and re-matched from storage.
 
 ## 17. Scalability notes
 
 - Target Year 1: ~500 orgs, ~100k units, ~150k payments/month. A single Postgres primary with proper indexes handles this comfortably.
-- Hot paths: webhook insert (single row, unique index), statement reads (use denormalised balances), invoice runs (batched per org, chunks of 500 leases, one transaction per lease).
-- Partition `ledger_entries`, `audit_events`, `webhook_events` by month when each exceeds ~50M rows; partition key includes `organization_id` hash only if needed.
+- Hot paths: payment record insert (unique index on source and external ref), statement reads (use denormalised balances), invoice runs (batched per org, chunks of 500 leases, one transaction per lease).
+- Partition `ledger_entries`, `audit_events`, `payment_records` by month when each exceeds ~50M rows; partition key includes `organization_id` hash only if needed.
 - Read replica for reports/exports; heavy reports run as jobs writing to storage.
-- Invoice-run spikes on the 1st: per-org concurrency limits and queue priorities (webhooks > notify > invoice-run > reports).
+- Invoice-run spikes on the 1st: per-org concurrency limits and queue priorities (parse/match > notify > invoice-run > reports).
 - RLS cost: `organization_id` leading column in all composite indexes; policies use `current_setting` cached per statement.

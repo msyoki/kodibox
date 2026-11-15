@@ -34,7 +34,7 @@
 - Record retention: Tax Procedures Act requires 5 years **[CHECK]**.
 
 ## 4. Payments
-- **Safaricom Daraja:** STK Push (Lipa na M-Pesa Online), C2B (paybill/till with validation and confirmation URLs), B2C, Transaction Status, Account Balance, Reversal. Norms: each shortcode has its own credentials (consumer key/secret, passkey), so onboard a **per-landlord shortcode**; HTTPS callbacks; idempotent handling of duplicate/late callbacks; C2B URL registration and go-live approval from Safaricom; limits **[CHECK]**.
+- **Safaricom Daraja (reference only; Kodibox does not integrate, ADR 0007):** STK Push (Lipa na M-Pesa Online), C2B (paybill/till with validation and confirmation URLs), B2C, Transaction Status, Account Balance, Reversal. Norms: each shortcode has its own credentials (consumer key/secret, passkey), so onboard a **per-landlord shortcode**; HTTPS callbacks; idempotent handling of duplicate/late callbacks; C2B URL registration and go-live approval from Safaricom; limits **[CHECK]**.
 - **Banks:** Equity Jenga, KCB Buni, Co-op Open API, I&M etc. generally need commercial onboarding. Alternatives: statement import, notification parsing, or licensed aggregators (Pesapal, Flutterwave, IntaSend, DPO) **[CHECK terms]**.
 - **National Payment System Act 2011 and Regulations 2014 (CBK):** holding or transmitting customer funds needs CBK authorisation as a payment service provider. Collection on behalf of others normally means a PSP licence or partnering with a licensed PSP. **Digital credit** (rent advances/loans) requires a CBK Digital Credit Provider licence (CBK Amendment Act 2021).
 - AML: Proceeds of Crime and Anti-Money Laundering Act (POCAMLA); PSP partners handle KYC; keep transaction logs.
@@ -66,7 +66,7 @@
 - [ ] Hosting/cross-border safeguards documented
 - [ ] Consent capture/withdrawal and data-subject request flows
 - [ ] Retention and deletion jobs
-- [ ] Daraja per-landlord onboarding and go-live checklist; idempotent callbacks
+- [ ] Payment-evidence checklist: statement file and payer phone retention, DPA basis for processing tenant-submitted proofs, landlord instructions on statement exports (ADR 0007)
 - [ ] Legal opinion that the reconciliation-only model needs no CBK PSP licence; PSP partner if pooling
 - [ ] Verify s.6A 7.5% in Finance Act 2026; MRI report; eTIMS decision
 - [ ] SMS sender ID registered; opt-out; transactional vs promotional

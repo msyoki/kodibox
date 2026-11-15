@@ -6,15 +6,15 @@ How to use the project's Claude Code setup (`.claude/`) efficiently. CLAUDE.md i
 | Item | Purpose |
 |---|---|
 | `settings.json` | Allow-list for lint/test/typecheck/build/migrate and read-only git; denies `.env*` (except `.env.example`), secrets dirs, `rm -rf`, force push, `curl`/`wget`. Registers the guard hook |
-| `hooks/guard.mjs` | PreToolUse on Edit/Write/MultiEdit. Blocks (exit 2) content with likely secrets (Daraja key/secret/passkey, private keys, `sk_live`, AWS keys). Warns when a migration creates a table without `ENABLE ROW LEVEL SECURITY` |
+| `hooks/guard.mjs` | PreToolUse on Edit/Write/MultiEdit. Blocks (exit 2) content with likely secrets (private keys, `sk_live`, AWS keys, and any legacy Daraja key/secret/passkey pattern). Warns when a migration creates a table without `ENABLE ROW LEVEL SECURITY` |
 | `agents/` | codebase-scout, feature-builder, test-writer, security-reviewer, compliance-reviewer, docs-writer, db-migration-reviewer |
-| `skills/` | mpesa-daraja, ledger-money, kenya-compliance, secure-feature, drizzle-rls (each with a short SKILL.md and on-demand reference files) |
+| `skills/` | payment-reconciliation, ledger-money, kenya-compliance, secure-feature, drizzle-rls (each with a short SKILL.md and on-demand reference files) |
 | `commands/` | `/next-task`, `/review-sensitive`, `/new-adr` |
 
 ## Daily loop
 1. `/next-task` picks the next unchecked item in `docs/PROJECT_PLAN.md` and hands it to `feature-builder` (Sonnet), which loads the right skills, implements, tests, and reports a diff summary.
 2. Ask `test-writer` for extra coverage (cross-org, idempotency, property tests) if the builder's tests are thin.
-3. For auth, money, PII, webhooks, or migrations run `/review-sensitive` (security-reviewer on Opus, compliance-reviewer, and db-migration-reviewer when `packages/db` changed). Fix findings, re-run.
+3. For auth, money, PII, statement or claim imports, or migrations run `/review-sensitive` (security-reviewer on Opus, compliance-reviewer, and db-migration-reviewer when `packages/db` changed). Fix findings, re-run.
 4. Ask `docs-writer` to tick the plan, update the changelog, and write ADRs (`/new-adr "title and context"`) for stack or money-flow decisions.
 5. Commit with Conventional Commits (`feat(billing): ...`).
 
@@ -62,4 +62,4 @@ Each MCP server adds tool definitions to context, so enable only what the curren
 ## Keeping this setup healthy
 - When a rule in CLAUDE.md changes, update the matching skill and reviewer checklist in the same commit.
 - Review `settings.json` allow-list every milestone; add commands you approve repeatedly (`/fewer-permission-prompts` helps).
-- Verify Daraja endpoints, tax rates, and legal figures against current official sources; skills point to docs rather than duplicating figures.
+- Verify M-Pesa and bank statement layouts against current real exports (anonymised), tax rates, and legal figures against current official sources; skills point to docs rather than duplicating figures.

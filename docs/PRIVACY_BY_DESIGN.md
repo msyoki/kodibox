@@ -11,7 +11,7 @@ Status: v1 draft. **[LEGAL]** marks points needing confirmation from a Kenyan da
 | Marketing to tenants sent through the platform | Landlord org | Kodibox | Kodibox provides the tool only |
 
 - Where a property manager/agent acts for a landlord, the agent may be a joint controller or a processor of the landlord; the org setup captures which **[LEGAL]**.
-- A **Data Processing Agreement (DPA)** is mandatory under s.42 and the 2021 Regulations: accepted in-app at org signup (versioned, timestamped, signatory recorded) and listed with sub-processors (cloud host, KMS, Africa's Talking, Resend/SES, Sentry, Safaricom Daraja as data source). Must cover: instructions-only processing, confidentiality, security measures (refer to SECURITY.md), sub-processor approval and notice, assistance with data subject requests, breach notice within 24 h of confirmation, deletion/return at termination, audit rights.
+- A **Data Processing Agreement (DPA)** is mandatory under s.42 and the 2021 Regulations: accepted in-app at org signup (versioned, timestamped, signatory recorded) and listed with sub-processors (cloud host, KMS, Africa's Talking, Resend/SES, Sentry; statement files supplied by the landlord are personal data processed on the landlord's instructions, and no payment-rail sub-processor is used, per ADR 0007). Must cover: instructions-only processing, confidentiality, security measures (refer to SECURITY.md), sub-processor approval and notice, assistance with data subject requests, breach notice within 24 h of confirmation, deletion/return at termination, audit rights.
 - Sub-processor list is public; customers get 30 days notice of changes.
 
 ## 2. DPA 2019 principles (s.25) mapped to features

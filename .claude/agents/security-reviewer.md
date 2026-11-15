@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-description: Security review of a diff or feature touching auth, authorization, money/ledger, PII, webhooks, file storage, or migrations. Use PROACTIVELY before merging any such change. Reviews against docs/SECURITY.md and CLAUDE.md rules; read-only. Outputs severity-ranked findings.
+description: Security review of a diff or feature touching auth, authorization, money/ledger, PII, statement imports and payment claims, file storage, or migrations. Use PROACTIVELY before merging any such change. Reviews against docs/SECURITY.md and CLAUDE.md rules; read-only. Outputs severity-ranked findings.
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

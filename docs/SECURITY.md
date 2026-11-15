@@ -3,13 +3,13 @@
 Status: v1 draft. Items marked **[LEGAL]** need confirmation from a Kenyan lawyer before launch.
 Owner: security lead. Reviewed at every milestone and after every incident.
 
-Kodibox holds tenant PII (names, national IDs, KRA PINs, phone numbers), M-Pesa and bank payment data, and lease documents for many landlord organizations. A single cross-org leak or forged payment would end the business. Controls below are mandatory unless an ADR records an exception.
+Kodibox holds tenant PII (names, national IDs, KRA PINs, phone numbers), payment evidence (statement lines, M-Pesa messages, slip photos), and lease documents for many landlord organizations. Kodibox has no payment-rail integrations (ADR 0007), so payment evidence arrives only as uploaded files, pasted text or manual entries. A single cross-org leak or forged payment would end the business. Controls below are mandatory unless an ADR records an exception.
 
 ## 1. Security objectives
 
 1. **Confidentiality:** no user sees data outside their organization and role. PII is encrypted at the application layer and masked by default.
 2. **Integrity of money:** the ledger reflects only verified payments; entries are append-only; every change is attributable and tamper-evident.
-3. **Availability:** rent collection windows (1st to 10th of month) must survive worker, Redis or provider outages. Webhooks are acknowledged fast and replayable.
+3. **Availability:** rent collection windows (1st to 10th of month) must survive worker, Redis or provider outages. Uploaded statements and tenant claims are stored before parsing, so they can be re-processed after an outage.
 4. **Accountability:** every sensitive action is in `audit_events` with actor, IP, user agent, diff.
 5. **Privacy:** minimum collection, defined retention, data subject rights honoured (see `docs/PRIVACY_BY_DESIGN.md`).
 6. **Never hold client funds:** payments go to the landlord's own paybill/till/bank (CLAUDE.md rule 2). This removes the largest class of financial-theft risk.
@@ -17,7 +17,7 @@ Kodibox holds tenant PII (names, national IDs, KRA PINs, phone numbers), M-Pesa 
 ## 2. Assurance target
 
 - **OWASP ASVS 4.0 Level 2** for the whole product.
-- **ASVS Level 3** for: authentication and session management (V2, V3), payment and webhook handling (V4 access control on money paths, V5 validation, V8 data protection, V13 API), cryptographic key management (V6), and the audit log (V7).
+- **ASVS Level 3** for: authentication and session management (V2, V3), payment evidence handling (V4 access control on money paths, V5 validation and file handling, V8 data protection, V13 API), cryptographic key management (V6), and the audit log (V7).
 - Each PR touching these areas cites the ASVS requirement IDs it satisfies in the PR description.
 - A self-assessment spreadsheet (ASVS checklist, status per requirement) is kept in the security folder of the team drive and reviewed quarterly.
 
@@ -25,13 +25,13 @@ Kodibox holds tenant PII (names, national IDs, KRA PINs, phone numbers), M-Pesa 
 
 ```
 Browser / Mobile --TLS--> Next.js web (RSC, Server Actions) --> Postgres (RLS) <-- Worker (BullMQ, Redis)
-Safaricom Daraja / Banks --webhook--> web edge route (verify, enqueue) --> Worker (re-verify, credit)
-Worker --> Africa's Talking SMS, Resend/SES email, KRA eTIMS, Daraja APIs
+Landlord / tenant --upload (statement, SMS text, slip)--> web (authz, type and size checks, store) --> Worker (malware scan, parse, reconcile)
+Worker --> Africa's Talking SMS, Resend/SES email, KRA eTIMS
 Web/Worker --> S3-compatible object storage (private) ; KMS (data keys)
 Platform admin panel (separate route group, separate auth policy, VPN/IP restricted)
 ```
 
-Trust boundaries: internet to web; web to DB; webhooks (untrusted source claiming to be Safaricom/bank); worker to third-party APIs; tenant org A to org B; org staff to platform staff.
+Trust boundaries: internet to web; web to DB; uploaded files and pasted text (untrusted content, possibly fabricated); worker to third-party APIs; tenant org A to org B; org staff to platform staff.
 
 ## 4. STRIDE threat model per component
 
@@ -53,13 +53,13 @@ S = Spoofing, T = Tampering, R = Repudiation, I = Information disclosure, D = De
 - D: unbounded loops and large payloads. Mitigate: body size limits (1 MB default), rate limits per user, per org, per IP.
 - E: IDOR. Mitigate: `can(user, action, resource)` plus RLS as second line.
 
-### 4.3 Webhooks (Safaricom Daraja, banks)
-- S: attacker posts fake "payment received". Mitigate: section 7 (IP allowlist, secret path token, Transaction Status re-verification).
-- T: modified amount or account reference in transit or replay. Mitigate: TLS, amount and shortcode checks against re-verified data, idempotency on `TransID`.
-- R: dispute over whether a payment arrived. Mitigate: raw payload stored encrypted, immutable.
-- I: callbacks reveal payer MSISDN. Mitigate: encrypt raw payload, mask in logs.
-- D: flood of callbacks. Mitigate: edge rate limit, respond fast, enqueue only, dedupe before enqueue.
-- E: webhook handler running with platform-admin DB role. Mitigate: handler uses a narrow DB role that can insert `webhook_events` only; worker resolves org.
+### 4.3 Statement uploads and tenant claims (file and text input)
+- S: a landlord, staff member or tenant submits a fabricated statement or fake M-Pesa SMS to show rent paid. Mitigate: section 7 (permission-gated imports, claims pending verification, manager approval, audited).
+- T: doctored statement rows, or a re-upload that changes an amount. Mitigate: unique (org, payment source, external ref); conflicting amounts for an existing reference are rejected and alerted, never overwritten; file hash stored.
+- R: dispute over whether a payment was recorded or who approved it. Mitigate: raw file and raw line stored encrypted and immutable; audit events with actor, file hash and counts.
+- I: statements and SMS text reveal payer names and phone numbers. Mitigate: encrypt raw file and lines, hash payer phones for matching, mask in UI and logs, no raw text in job payloads.
+- D: oversized or zip-bomb files, huge XLSX sheets, claim floods. Mitigate: type, size and row limits, streaming parsers, parse time and memory caps, per-user claim rate limit.
+- E: parser running with platform-admin DB role or executing spreadsheet formulas. Mitigate: worker uses the org-scoped role; no formula or macro evaluation (section 7).
 
 ### 4.4 Worker (BullMQ, Redis)
 - S: rogue process enqueuing jobs. Mitigate: Redis AUTH + TLS + private network; job payloads validated by Zod on consume.
@@ -113,15 +113,15 @@ Attacker (a landlord or caretaker) changes an id in a URL or action payload to r
 - Automated cross-tenant test suite: for each action and query, run as org B against org A ids and expect not-found. Runs in CI with Testcontainers.
 - Not-found, not forbidden, is returned for foreign resources, so existence is not leaked.
 
-### 5.2 Fake M-Pesa callback / forged payment confirmation
-Attacker POSTs a crafted C2B confirmation to credit a rent balance.
-- Controls in section 7: IP allowlist, secret path token, Transaction Status API re-verification before crediting, shortcode and amount checks, idempotency.
-- Payments that fail re-verification land in a "unverified" queue and never touch the ledger.
-- Alert on any callback from a non-allowlisted IP or with a bad token.
+### 5.2 Forged payment evidence
+A tenant or staff member uploads a fake M-Pesa SMS, a doctored bank slip, or a statement with invented rows to credit a rent balance.
+- Controls in section 7: permission-gated imports, claims stay `pending_verification` and never touch the ledger until a statement line confirms them or a manager approves them, dedupe on external ref, and a maker-checker step for high-value approvals (threshold per org).
+- A claim with a transaction code that does not appear on any later statement is flagged after a configurable window, and surfaces in the import reminder.
+- Alert on bursts of claims from one tenant, on claims reusing another payer's code, and on approvals of unmatched claims.
 
 ### 5.3 Caretaker fraud: fake cash payments
 A caretaker records cash received that was never paid, or records cash and pockets it while marking something else.
-- Cash payments are a distinct method; caretaker role can create a cash receipt but it posts as `pending_owner_approval` until the owner or manager approves (configurable threshold per org).
+- Cash payments are a distinct method; caretaker role can create a cash receipt but it is held as `pending_verification` until the owner or manager approves (configurable threshold per org).
 - Tenant gets an SMS receipt for every cash entry (with a "dispute" link); disputes flag the entry.
 - Caretakers cannot edit or delete; reversal needs manager role plus reason and creates a reversing entry.
 - Daily cash-in report per caretaker; anomaly flags (many round-sum cash entries, entries just before month-end, high reversal rate).
@@ -154,7 +154,7 @@ Attacker probes login, reset, or tenant-portal registration to learn which numbe
 - Uniform responses and timing for "account exists / does not exist"; OTP sent "if registered".
 - Rate limits per IP and per target number; CAPTCHA after thresholds.
 - Tenant search inside an org is scoped by RLS and requires auth; no public lookup endpoints.
-- Paybill account references do not embed phone numbers or ID numbers; use short random unit codes.
+- Payment account references (paybill account, till reference) do not embed phone numbers or ID numbers; use short random unit codes.
 
 ### 5.8 Bulk export exfiltration
 A malicious or compromised insider exports every tenant's data.
@@ -201,8 +201,8 @@ Tick state is tracked in the ASVS spreadsheet. "Gate" indicates which pipeline s
 - [ ] CI test enumerates `information_schema` and fails if a table with `organization_id` lacks policies.
 
 ### 6.4 Input and output
-- [ ] Zod validation at every boundary (forms, actions, API routes, webhooks, env, job payloads, file metadata); `.strict()` objects; max lengths.
-- [ ] Output encoding: no `dangerouslySetInnerHTML` without sanitized (DOMPurify) review; CSV exports neutralize formula injection (prefix `'` for `= + - @`); PDF generation uses templates only.
+- [ ] Zod validation at every boundary (forms, actions, API routes, statement and claim uploads, env, job payloads, file metadata); `.strict()` objects; max lengths.
+- [ ] Output encoding: no `dangerouslySetInnerHTML` without sanitized (DOMPurify) review; CSV and XLSX exports neutralize formula injection (prefix `'` for cells starting with `= + - @`, tab or CR); PDF generation uses templates only.
 - [ ] Parameterized queries only.
 - [ ] Phone numbers normalized to E.164; amounts parsed to bigint minor units, never floats.
 
@@ -218,8 +218,8 @@ Tick state is tracked in the ASVS spreadsheet. "Gate" indicates which pipeline s
 - [ ] No user-supplied URLs fetched (e.g. logo URLs, callback URLs); if ever needed, requires ADR.
 - [ ] Cloud metadata service protected (IMDSv2 / hop limit 1).
 
-### 6.7 File uploads (IDs, leases, receipts)
-- [ ] Allowlist types: PDF, JPEG, PNG, HEIC (converted); magic-byte sniffing, never trust extension or `Content-Type`.
+### 6.7 File uploads (IDs, leases, receipts, statements)
+- [ ] Allowlist types: PDF, JPEG, PNG, HEIC (converted); statement files CSV and XLSX only (section 7); magic-byte sniffing, never trust extension or `Content-Type`.
 - [ ] Size limits: 10 MB per file for images, 20 MB for PDFs; count limits per entity.
 - [ ] Antivirus scan (ClamAV) in quarantine bucket before release; files unusable until clean.
 - [ ] Re-encode images (strip EXIF/GPS); reject PDFs with JavaScript/embedded files.
@@ -228,7 +228,7 @@ Tick state is tracked in the ASVS spreadsheet. "Gate" indicates which pipeline s
 
 ### 6.8 Cryptography and key management
 - [ ] TLS 1.2+ everywhere (1.3 preferred), modern ciphers, HSTS preload; internal service traffic over TLS; DB `sslmode=verify-full`.
-- [ ] Envelope encryption for PII (national ID, KRA PIN, phone, raw webhook payloads, lease docs): AES-256-GCM data keys generated per org (DEK), wrapped by a KMS key (KEK) in AWS KMS or equivalent; DEK cached in memory with short TTL; ciphertext stores key id and version.
+- [ ] Envelope encryption for PII (national ID, KRA PIN, phone, raw statement files and lines, pasted claim text, lease docs): AES-256-GCM data keys generated per org (DEK), wrapped by a KMS key (KEK) in AWS KMS or equivalent; DEK cached in memory with short TTL; ciphertext stores key id and version.
 - [ ] Searchable fields (phone, ID number) use a keyed blind index (HMAC-SHA256 with a separate key) so lookups work without decrypting.
 - [ ] Key rotation: KEK automatic annual rotation; DEK rotation yearly and on suspicion via a background re-encrypt job; rotation is tested in staging each quarter; compromised-key procedure documented in the incident runbook.
 - [ ] No custom cryptography; use `node:crypto` or audited libraries; random from CSPRNG.
@@ -236,8 +236,8 @@ Tick state is tracked in the ASVS spreadsheet. "Gate" indicates which pipeline s
 
 ### 6.9 Secrets management
 - [ ] Env vars injected from a secrets manager (AWS Secrets Manager/SSM or Doppler); validated at boot by `packages/config/env.ts`; process exits on missing or malformed.
-- [ ] Separate secrets per environment; Daraja consumer key/secret, passkey, SMS API key, DB creds rotated at least every 90 days and on staff departure.
-- [ ] Per-org integration credentials (e.g. a landlord's Daraja keys, if stored) are encrypted with the org DEK.
+- [ ] Separate secrets per environment; SMS API key, email API key, storage keys, DB creds rotated at least every 90 days and on staff departure.
+- [ ] No payment-rail credentials (Daraja, bank API keys) are stored, per ADR 0007. Payment instructions hold display details only; any bank account number is encrypted with the org DEK.
 - [ ] `.env*` git-ignored except `.env.example`.
 
 ### 6.10 Supply chain and pipeline scanning
@@ -256,30 +256,34 @@ Tick state is tracked in the ASVS spreadsheet. "Gate" indicates which pipeline s
 - [ ] Production data never copied to dev/staging; seed data is synthetic.
 - [ ] Infra as code reviewed; drift detection.
 
-## 7. Webhook security (Daraja and banks)
+## 7. Payment evidence security (statements, tenant claims, manual entries)
 
-Applies to M-Pesa C2B validation/confirmation, STK Push callbacks, B2C results (if ever), and bank callbacks.
+Applies to M-Pesa paybill/till statement imports, bank CSV/XLSX imports, tenant claims (pasted M-Pesa SMS text or slip photos), and manual cash, cheque or deposit entries. Kodibox has no payment-rail callbacks, so every control here applies to human-supplied files and text (ADR 0007).
 
-1. **Source IP allowlist** at the edge (WAF/middleware) using Safaricom's published Daraja callback IPs, kept in config and reviewed whenever Safaricom updates them. Bank IP lists per integration. Take the client IP from the trusted proxy header only.
-2. **Unguessable callback path token**: `/api/webhooks/mpesa/{orgOrShortcodeToken}/confirmation` where the token is 32+ random bytes, unique per registered shortcode/URL, stored hashed, rotatable. Wrong token returns the same 404 as unknown routes. (Daraja has no HMAC signature, so this plus IP allowlist plus re-verification is the trust model.)
-3. **No sensitive words in URLs** registered with Daraja (e.g. avoid "mpesa", "safaricom" strings if Daraja rejects them); use neutral path names.
-4. **Respond fast**: validate with Zod, store the raw payload encrypted in `webhook_events`, return the ResultCode 0 acknowledgement, process in the worker. Never do slow work inline.
-5. **Idempotency on `TransID`**: unique index `(provider, trans_id)`; duplicate callbacks are acknowledged and ignored. Ledger posting uses the `TransID` as idempotency key too.
-6. **Re-verify before crediting**: the worker calls the Transaction Status API (or the bank's query endpoint) for the `TransID` and compares amount, MSISDN hash, shortcode and status. Only a match is credited. Mismatch or API failure moves the event to retry/unverified, never to the ledger.
-7. **Business checks**: `BusinessShortCode` must equal a shortcode registered to a known org; amount must be a positive integer within sane bounds; `TransTime` within an acceptable window; `BillRefNumber` mapped to a unit via server lookup (unmatched goes to the suspense/"unallocated" queue for manual allocation).
-8. **Validation URL**: if C2B validation is enabled, return accept/reject based only on server-side data; never leak tenant data in the response.
-9. **Rate and size limits**: 64 KB max body, per-IP and global limits sized for peak bursts.
-10. **Monitoring**: alert on rejected-IP attempts, token failures, re-verification mismatches, duplicate-storm patterns, and gaps (no callbacks while STK pushes are active).
-11. **Replay tooling**: stored raw payloads allow replay in staging with redaction; reconciliation job pulls Daraja statements/transaction history daily to catch missed callbacks.
+1. **Permission-gated and audited**: uploading statements and approving claims require `payments:import` (owner, manager, accountant by default). Caretakers can submit cash entries only under maker-checker. Each upload, parse, preview, commit, match, approval and rejection writes `audit_events` with actor, role, IP, user agent, file SHA-256 and row counts.
+2. **File type allowlist**: CSV and XLSX for statements; JPEG, PNG, HEIC and PDF for slip photos (section 6.7). Magic-byte sniffing. Legacy `.xls`, macro-enabled `.xlsm`, `.zip`, executables and archives are rejected.
+3. **Size and shape limits** (proposed; confirm in pilot): statement file max 5 MB; max 10,000 rows per import; max 1 KB per row; max 2,000 characters per pasted SMS text; slip photo under 10 MB (section 6.7). Oversized files are rejected before storage.
+4. **Malware-safe parsing**: files are stored in the quarantine bucket, scanned (ClamAV) and only then parsed. Parsing runs in the worker, never in the web request. CSV is read as a stream with a strict delimiter and quoting rule. XLSX is read with macros, external links, embedded objects and formula evaluation disabled, with a cap on sheets, rows and decompressed size. Parse runs under a time and memory limit.
+5. **No formula execution**: every cell is treated as text data. A value that starts with `=`, `+`, `-`, `@`, tab or CR is never evaluated. Exports of statements, reconciliation reports or unmatched queues neutralise such values with a leading `'` (section 6.4).
+6. **Encrypted raw storage**: the original file is stored in the private bucket under a random key, encrypted with the org DEK (section 6.8). Raw lines in `payment_records` and pasted claim text are stored as `[ENC]` ciphertext. The file hash is kept in plaintext for whole-file dedupe.
+7. **Payer identifiers**: payer phone numbers are normalised to E.164 and stored as a keyed HMAC (blind index) for matching. Payer names are shown masked in the unmatched queue. The matching key is separate from the database.
+8. **Masking**: UI and logs show masked phones (`+2547****5678`), names only as ids, and amounts and account references in full. Viewing a raw line or raw file is a `pii:reveal` action, audited and volume-capped (section 5.8).
+9. **Retention** (proposed, [LEGAL]): original statement files and slip photos are deleted 12 months after the import is committed, unless a legal hold applies. Raw lines follow the same period. Normalised payment records follow the Financial records class (section 10). The import summary (file hash, counts, dates, actor) is kept with the financial record. Deletion is audited.
+10. **Dedupe as an integrity control**: unique (organization_id, payment_source_id, external_ref). Re-uploading the same statement is a no-op. A reused reference with a different amount or date is rejected, flagged to the owner, and never overwritten.
+11. **Claim abuse limits**: a claim cannot change the ledger until it is matched to a statement line or approved by a manager. Claims are rate-limited per tenant (proposed: 10 per day). A transaction code already used by another claim or record is rejected with a generic message that does not reveal the other tenant.
+12. **Maker-checker**: manual cash entries by a caretaker stay `pending_verification` until a manager or owner approves with step-up auth. The approver cannot be the entry's creator. Approval thresholds are set per org.
+13. **Error reporting**: row-level parse errors show row number and reason category only. Error reports never echo raw cell values, which may contain names or phone numbers.
+14. **Monitoring**: alert on spikes in parse failures, rejected references, claim bursts, and approvals of claims that remain unmatched.
+15. **Fixtures**: tests and demos use synthetic statements and SMS samples only. No real statement or message is committed to the repository.
 
 ## 8. Logging and redaction
 
 - Structured JSON logs via OpenTelemetry; correlation ids; Sentry with `beforeSend` scrubbing.
-- **Never log**: passwords, OTPs, session ids/tokens, API keys, full national ID, KRA PIN, full phone numbers, raw M-Pesa/bank payloads, document contents, Authorization or Cookie headers, DB connection strings.
+- **Never log**: passwords, OTPs, session ids/tokens, API keys, full national ID, KRA PIN, full phone numbers, raw statement lines, pasted M-Pesa messages, slip contents, document contents, Authorization or Cookie headers, DB connection strings.
 - **Masking rules**: phone `+2547****5678` (last 4), national ID `****1234` (last 4), KRA PIN `A*******Z`, names logged only as ids, amounts allowed, account refs allowed. Emails: `j***@example.com`.
 - Central `redact()` helper with a deny-list of keys (`password`, `token`, `secret`, `authorization`, `cookie`, `id_number`, `kra_pin`, `msisdn`, `phone`, `payload`); unit tested; logger wrapper applies it automatically; CI tests assert PII fixtures never appear in captured logs.
 - Request bodies are not logged by default.
-- Security events logged distinctly: login failure, lockout, 2FA change, step-up, permission denied, webhook rejection, export, PII reveal, admin access.
+- Security events logged distinctly: login failure, lockout, 2FA change, step-up, permission denied, statement or claim rejection, export, PII reveal, admin access.
 - Retention: application logs 1 year **[LEGAL]**; security/audit logs 1 year hot plus archive per section 12; access restricted to security and on-call roles.
 
 ## 9. Audit log tamper-evidence
@@ -298,8 +302,8 @@ Retention periods below are proposals; every row is **[LEGAL]** until confirmed.
 | Class | Examples | Protection | Retention (proposed) |
 |---|---|---|---|
 | Restricted | National ID number and scans, KRA PIN, bank account numbers, DEKs, secrets | App-layer envelope encryption, masked, reveal audited, access by named roles | ID number/scan: delete 90 days after lease end unless legal hold or tax need **[LEGAL]**; KRA PIN: kept while needed for tax records, then with the financial record |
-| Confidential | Phone, email, names, lease documents, payment records (M-Pesa raw payloads), statements | Encryption at rest, RLS, role-gated | Lease docs: 7 years after lease end (limitation period for contract claims) **[LEGAL]** |
-| Financial records | Ledger entries, invoices, receipts, payments, eTIMS data | Append-only, hash-chained, backups | 7 years from end of the financial year (Tax Procedures Act 2015 s.23 record-keeping) **[LEGAL]** |
+| Confidential | Phone, email, names, lease documents, raw statement files and lines, pasted claim text, slip photos | Encryption at rest, RLS, role-gated | Lease docs: 7 years after lease end (limitation period for contract claims) **[LEGAL]**; raw statement files, lines and slip photos: 12 months after import (proposed, section 7) **[LEGAL]** |
+| Financial records | Ledger entries, invoices, receipts, payment records, allocations, eTIMS data | Append-only, hash-chained, backups | 7 years from end of the financial year (Tax Procedures Act 2015 s.23 record-keeping) **[LEGAL]** |
 | Internal | Audit events, security logs, application logs | Restricted access, redacted | Audit events 7 years (they support financial records) **[LEGAL]**; app/security logs 1 year |
 | Account data (Kodibox as controller) | Org users, billing, login metadata | Encrypted at rest, access-limited | Life of account plus 12 months; billing 7 years **[LEGAL]** |
 | Marketing/consent | Consent records, opt-outs | Kept as proof | Life of consent plus 3 years **[LEGAL]** |
@@ -315,7 +319,7 @@ Retention periods below are proposals; every row is **[LEGAL]** until confirmed.
 - Object storage: versioning, replication to a second region, Object Lock on lease/statement buckets.
 - All backups encrypted (KMS), access restricted, separate account/credentials from production writers.
 - **Restore drills**: quarterly full restore into an isolated environment, verifying RPO <= 15 min and RTO <= 4 h; record results; verify ledger hash chains and balances after restore. Failed drill is a sev-2 finding.
-- Redis is treated as rebuildable; queued work is reconstructible from DB state and webhook_events.
+- Redis is treated as rebuildable; queued work is reconstructible from DB state and stored statement files and claim evidence.
 
 ## 12. Incident response runbook
 
@@ -332,8 +336,8 @@ Retention periods below are proposals; every row is **[LEGAL]** until confirmed.
    - Consider Safaricom, banks, and police (DCI) reporting where fraud is involved, and cyber incident reporting obligations under the Computer Misuse and Cybercrimes Act **[LEGAL]**.
 5. **Eradicate and recover**: patch root cause, restore from clean backups if needed, verify ledger integrity (chain verification and balance recompute), staged return to service.
 6. **Review**: blameless post-incident review within 5 business days; action items tracked; update threat model and tests. Keep the incident register (even for non-notifiable events) for ODPC inspection.
-7. **Exercises**: tabletop exercise twice a year (webhook forgery, cross-org leak, insider).
-8. **Contacts file** (kept outside the platform): ODPC, cloud provider, Safaricom Daraja support, Africa's Talking, legal counsel, cyber insurer, PR.
+7. **Exercises**: tabletop exercise twice a year (forged payment evidence, cross-org leak, insider).
+8. **Contacts file** (kept outside the platform): ODPC, cloud provider, Africa's Talking, legal counsel, cyber insurer, PR.
 
 ## 13. Vulnerability disclosure policy (summary)
 
@@ -348,15 +352,15 @@ Published at `/.well-known/security.txt` and in the repo root `SECURITY.md`.
 
 - **Branching**: trunk with protected `main`; PRs require 1 approval, passing CI (lint, typecheck, tests, Semgrep, CodeQL, gitleaks, audit, Trivy).
 - **PR template** (`.github/pull_request_template.md`) includes security and privacy checklist.
-- **CODEOWNERS** requires the `security-reviewers` team for: `packages/core/authz/**`, `packages/core/ledger/**`, `packages/db/migrations/**`, `packages/db/rls/**`, `packages/integrations/mpesa/**`, `packages/integrations/banks/**`, `apps/web/src/app/api/webhooks/**`, `apps/web/src/middleware.ts`, auth config, `packages/config/**`, crypto/KMS helpers, upload handling, admin panel, CI workflows, `Dockerfile*`, `docs/SECURITY.md`. Agent assistance: the `security-reviewer` agent reviews diffs on these paths before human review; it does not replace the human owner.
+- **CODEOWNERS** requires the `security-reviewers` team for: `packages/core/authz/**`, `packages/core/ledger/**`, `packages/core/reconciliation/**`, `packages/db/migrations/**`, `packages/db/rls/**`, `packages/integrations/payment-sources/**`, statement and claim upload handlers, `apps/web/src/middleware.ts`, auth config, `packages/config/**`, crypto/KMS helpers, upload handling, admin panel, CI workflows, `Dockerfile*`, `docs/SECURITY.md`. Agent assistance: the `security-reviewer` agent reviews diffs on these paths before human review; it does not replace the human owner.
 - **Threat modelling**: any new feature touching money, PII or a new integration gets a short STRIDE note in the PR or ADR.
-- **Testing**: security regression tests for each fixed vulnerability; cross-tenant tests; authz matrix tests; fuzz webhook parsers.
+- **Testing**: security regression tests for each fixed vulnerability; cross-tenant tests; authz matrix tests; fuzz statement (CSV and XLSX) and SMS-text parsers.
 - **Training**: onboarding on this document; yearly refresh.
 - **Environment hygiene**: preview deployments use synthetic data only and require auth.
 
 ## 15. Pre-launch and ongoing assurance
 
-- **Independent penetration test is required before production launch** (and before any mobile release and yearly after): scope web, APIs, webhooks, tenancy isolation, admin panel, cloud config, mobile. All critical/high findings fixed and retested before go-live; report summary kept for ODPC/customer due-diligence.
+- **Independent penetration test is required before production launch** (and before any mobile release and yearly after): scope web, APIs, statement and claim uploads and parsers, tenancy isolation, admin panel, cloud config, mobile. All critical/high findings fixed and retested before go-live; report summary kept for ODPC/customer due-diligence.
 - Pre-launch gate checklist: ASVS L2/L3 self-assessment complete, all CI scanners green, restore drill passed, incident runbook rehearsed, DPA template and privacy notice approved, ODPC registration done, DPIA signed off, KMS key rotation tested.
 - Quarterly: access review, dependency/Renovate backlog, ZAP authenticated scan, restore drill.
 - Bug bounty considered after 6 months of stable operation.

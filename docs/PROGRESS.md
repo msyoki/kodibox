@@ -60,11 +60,11 @@ Goal: see and test the whole product now. Screens live in `apps/web` and read fr
 | L-02 | ODPC registration + DPO | ⏳ |
 | L-03 | ToS, privacy notice, DPA, SMS consent wording | ⏳ |
 | L-04 | DPIA | ⏳ |
-| L-05 | Daraja + Africa's Talking accounts, sender ID | ⏳ |
+| L-05 | Africa's Talking account and sender ID | ⏳ |
 | L-06 | Verify `[CHECK]` legal items (MRI rate, eTIMS, retention) | ⏳ |
 
 ## Phase 1: MVP (backend + wiring the prototype UI to real data)
-M1-01 properties/units ⏳ · M1-02 tenants ⏳ · M1-03 leases ⏳ · M1-04 ledger ⏳ · M1-05 invoice run ⏳ · M1-06 payment sources ⏳ · M1-07 C2B webhook ⏳ · M1-08 unmatched queue ⏳ · M1-09 STK push ⏳ · M1-10 cash maker-checker ⏳ · M1-11 receipts/statements ⏳ · M1-12 notifications ⏳ · M1-13 penalties ⏳ · M1-14 dashboard ⏳ · M1-15 reports ⏳ · M1-16 onboarding ⏳ · M1-17 subscriptions ⏳ · M1-18 ticket intake ⏳
+M1-01 properties/units ⏳ · M1-02 tenants ⏳ · M1-03 leases ⏳ · M1-04 ledger ⏳ · M1-05 invoice run ⏳ · M1-06 payment instructions ⏳ · M1-07 statement import ⏳ · M1-08 reconciliation and unmatched queue ⏳ · M1-09 tenant payment claims ⏳ · M1-10 cash maker-checker ⏳ · M1-11 receipts/statements ⏳ · M1-12 notifications ⏳ · M1-13 penalties ⏳ · M1-14 dashboard ⏳ · M1-15 reports ⏳ · M1-16 onboarding ⏳ · M1-17 subscriptions ⏳ · M1-18 ticket intake ⏳
 
 ## Open decisions
 - File storage image to replace MinIO (needed by Sprint 3)

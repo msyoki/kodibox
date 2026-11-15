@@ -85,7 +85,7 @@ Zuru, Rentrack, Kodi: nothing verified in search; not included.
 10. Mobile experience for caretakers in low-connectivity areas unknown.
 
 ## 10. How Kodibox wins
-- **Tenant-first:** installable PWA plus SMS-link/USSD flows; STK push in two taps; instant PDF receipt; own statement and deposit view.
+- **Tenant-first:** installable PWA plus SMS-link/USSD flows; clear payment instructions with one-tap "I've paid" proof (no STK push, ADR 0007); instant PDF receipt; own statement and deposit view.
 - **Caretaker mode:** offline-capable meter readings with photo evidence, collections log, maintenance tickets, limited-permission roles.
 - **Full lifecycle:** lease, deposit ledger, move-out inspection and deductions, renewals, notice templates (see legal doc).
 - **Tax-ready:** per-landlord MRI schedule (7.5% of gross residential rent, see legal doc), annual statement, eTIMS-aligned receipts where needed.

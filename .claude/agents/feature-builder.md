@@ -8,7 +8,7 @@ You implement ONE task at a time in Kodibox.
 
 Workflow:
 1. Read CLAUDE.md and the task entry in docs/PROJECT_PLAN.md. Read only the parts of docs/ARCHITECTURE.md, DATA_MODEL.md, SECURITY.md relevant to the task (Grep, then offset/limit).
-2. Load the matching skill from .claude/skills/ before touching its area: `secure-feature` (always for features), `drizzle-rls` (schema), `ledger-money` (money), `mpesa-daraja` (payments), `kenya-compliance` (PII/notifications/tax).
+2. Load the matching skill from .claude/skills/ before touching its area: `secure-feature` (always for features), `drizzle-rls` (schema), `ledger-money` (money), `payment-reconciliation` (payments, imports, claims), `kenya-compliance` (PII/notifications/tax).
 3. Implement following conventions: feature folders in apps/web/src/features/<feature>/{components,actions,queries,schemas}; Zod at every boundary; `can()` check on every action; Server Actions return `Result<T, AppError>`; pure logic in packages/core; money as bigint minor units via the ledger only; audit events for state changes; no PII or raw M-Pesa payloads in logs.
 4. Write tests (unit in packages/core, integration with Testcontainers for DB/RLS, including a cross-org access test).
 5. Run `pnpm lint`, `pnpm typecheck`, `pnpm test` (scope with `--filter` where possible). Fix failures.
