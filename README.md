@@ -101,10 +101,10 @@ cd kodibox
 cp .env.example .env            # local placeholder values; never commit .env
 docker compose up -d postgres redis mailpit
 pnpm install
-pnpm dev                        # web on http://localhost:3000, plus the worker
+pnpm dev                        # web on http://localhost:3100, plus the worker
 ```
 
-> **Windows:** if port 5432 is reserved, set `POSTGRES_PORT=5433` in `.env` and the database URLs.
+> **Windows:** if port 5432 is taken or reserved (for example by a native Postgres), use `POSTGRES_PORT=5433` in `.env` and in every database URL (`.env.example` already does). The web dev server defaults to port 3100 in `.env.example` (`APP_URL`, `BETTER_AUTH_URL`); run `pnpm --filter @kodibox/web dev -p 3100`.
 
 | Command | What it does |
 |---|---|
@@ -117,15 +117,44 @@ pnpm dev                        # web on http://localhost:3000, plus the worker
 
 Mailpit (the local email inbox) is at http://localhost:8025. SMS runs against the Africa's Talking **sandbox** in development. There is no Safaricom sandbox to set up, because Kodibox does not call M-Pesa (ADR 0007).
 
-### Run the web prototype
+### Run the web app with real sign-in (E-04)
 
-The web prototype runs on demo data with no database.
+Sign-in uses Better Auth against Postgres. The web app reads the root `.env`.
 
 ```bash
-pnpm --filter @kodibox/web dev      # http://localhost:3000 (/ redirects to /login)
+cp .env.example .env
+docker compose up -d postgres redis
+pnpm install
+pnpm db:bootstrap      # once: creates roles kodibox_migrator, kodibox_app, kodibox_auth
+pnpm db:migrate
+pnpm db:seed           # demo org + 4 demo users (needs SEED_DEMO_PASSWORD, ALLOW_DB_SEED=1)
+pnpm --filter @kodibox/web dev -p 3100
 ```
 
-Sign in with anything, enter any 6 digits for 2FA, and land on `/dashboard`. Payment screens are under `/payments`, and payment instructions are under `/settings/payment-instructions`.
+Needed env (all in `.env.example`): `AUTH_SECRET`, `AUTH_DATABASE_URL` (role `kodibox_auth`, the only role that can read credentials), `BETTER_AUTH_URL`/`APP_URL`, `REDIS_URL` (rate limits; falls back to in-process memory if Redis is down), `SEED_DEMO_PASSWORD`.
+
+Demo users (all `@example.test`, password = `SEED_DEMO_PASSWORD`):
+
+| User | Role | How to sign in |
+|---|---|---|
+| `owner@example.test` | owner | password, then forced TOTP enrolment (scan the QR, save recovery codes) |
+| `manager@example.test` | manager | same as owner |
+| `caretaker@example.test` (+254700000002) | caretaker | phone code at `/login` ("Sign in with a phone code") or `/m/login` |
+| `tenant@example.test` (+254700000003) | tenant | same as caretaker |
+
+There is no SMS provider yet. In development the OTP is printed, with a masked number, to the web server console (`[dev otp] to +2547****0003 code 123456`); email verification and reset links print the same way. Outside development nothing is delivered or logged. Staff roles can never sign in with an SMS code.
+
+Pages still render demo data after sign-in; real org and role resolution arrives with E-05.
+
+### Run the web prototype
+
+Pages render demo data. Sign-in itself is real (see above).
+
+```bash
+pnpm --filter @kodibox/web dev      # http://localhost:3100 (/ redirects to /login)
+```
+
+The data on every page is demo data. Payment screens are under `/payments`, and payment instructions are under `/settings/payment-instructions`.
 
 ### Run the mobile app with Expo Go over USB
 

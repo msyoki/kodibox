@@ -1,9 +1,11 @@
 import { Card, CardHeader } from '@/components/ui';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { requireSession } from '@/server/session';
 
 export const metadata = { title: 'Appearance | Kodibox' };
 
-export default function AppearancePage() {
+export default async function AppearancePage() {
+  await requireSession();
   return (
     <Card aria-labelledby="ap" className="flex max-w-xl flex-col gap-3">
       <CardHeader id="ap" title="Appearance" />

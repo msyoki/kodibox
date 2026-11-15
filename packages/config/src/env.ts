@@ -16,10 +16,20 @@ export const serverEnvSchema = z
     AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
     // Placeholder until E-0x envelope encryption lands: base64 32-byte key-encryption key.
     ENCRYPTION_KEK: z.string().min(1),
-    DARAJA_CONSUMER_KEY: optionalString,
-    DARAJA_CONSUMER_SECRET: optionalString,
-    DARAJA_PASSKEY: optionalString,
-    DARAJA_SHORTCODE: optionalString,
+    // Public base URL of the auth endpoints (Better Auth). Defaults to APP_URL.
+    BETTER_AUTH_URL: z.string().url().optional(),
+    // Extra trusted origins (comma-separated), e.g. a staging alias. APP_URL is always trusted.
+    AUTH_TRUSTED_ORIGINS: optionalString,
+    // Auth server connection: role kodibox_auth (credential tables). Required in production.
+    AUTH_DATABASE_URL: z.string().url().optional(),
+    // Opt-in: HaveIBeenPwned k-anonymity check at sign-up/password change (outbound call). Default on in production.
+    // Number of trusted reverse proxies in front of the app (right-most-untrusted X-Forwarded-For hop). 0 = trust no forwarded header. Required in production.
+    TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).optional(),
+    // Opt-in: allow public /sign-up/email (off until the onboarding flow exists).
+    AUTH_PUBLIC_SIGNUP: z.enum(['0', '1']).optional(),
+    // Staging-only override: run auth with plaintext phone/email at rest (E-06 encryption is a production deploy blocker).
+    AUTH_ALLOW_PLAINTEXT_PII: z.enum(['0', '1']).optional(),
+    AUTH_BREACHED_PASSWORD_CHECK: z.enum(['0', '1']).optional(),
     AT_USERNAME: optionalString,
     AT_API_KEY: optionalString,
     AT_SENDER_ID: optionalString,
@@ -37,6 +47,79 @@ export const serverEnvSchema = z
         });
       }
     }
+    for (const key of ['AUTH_SECRET', 'ENCRYPTION_KEK'] as const) {
+      const v = env[key];
+      if (/change-?me|placeholder|example/i.test(v)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: `${key} looks like a placeholder; generate a real secret`,
+        });
+      } else if (!hasEnoughEntropy(v)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: `${key} must be a random secret of at least 32 bytes (e.g. openssl rand -base64 48)`,
+        });
+      }
+    }
+    for (const key of ['APP_URL', 'BETTER_AUTH_URL'] as const) {
+      const v = env[key];
+      if (v !== undefined && !v.startsWith('https://')) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: `${key} must be https in production`,
+        });
+      }
+    }
+    for (const o of (env.AUTH_TRUSTED_ORIGINS ?? '')
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean)) {
+      let ok = false;
+      try {
+        const u = new URL(o);
+        ok = u.protocol === 'https:' && !o.includes('*') && u.origin === o.replace(/[/]$/, '');
+      } catch {
+        ok = false;
+      }
+      if (!ok) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['AUTH_TRUSTED_ORIGINS'],
+          message: 'AUTH_TRUSTED_ORIGINS must be exact https origins (no wildcards, no paths)',
+        });
+      }
+    }
+    if (env.TRUSTED_PROXY_HOPS === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['TRUSTED_PROXY_HOPS'],
+        message: 'TRUSTED_PROXY_HOPS must be set in production (number of trusted proxies)',
+      });
+    }
+    if (!env.AUTH_DATABASE_URL) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['AUTH_DATABASE_URL'],
+        message: 'AUTH_DATABASE_URL is required in production (role kodibox_auth)',
+      });
+    } else {
+      let authUser = '';
+      try {
+        authUser = decodeURIComponent(new URL(env.AUTH_DATABASE_URL).username);
+      } catch {
+        // malformed URL is reported by the field validator
+      }
+      if (authUser !== 'kodibox_auth') {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['AUTH_DATABASE_URL'],
+          message: 'AUTH_DATABASE_URL must connect as role kodibox_auth in production',
+        });
+      }
+    }
     let user = '';
     try {
       user = decodeURIComponent(new URL(env.DATABASE_URL).username);
@@ -51,6 +134,11 @@ export const serverEnvSchema = z
       });
     }
   });
+
+/** Heuristic: at least 32 characters and 16 distinct characters (random base64/hex of 32+ bytes passes; repeated words fail). */
+function hasEnoughEntropy(v: string): boolean {
+  return v.length >= 32 && new Set(v).size >= 16;
+}
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 

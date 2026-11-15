@@ -1,7 +1,9 @@
 import { CaretakerInspection } from '@/features/mobile-caretaker/inspection';
+import { requireSession } from '@/server/session';
 
 export const metadata = { title: 'Inspection | Kodibox' };
 
-export default function Page() {
+export default async function Page() {
+  await requireSession();
   return <CaretakerInspection />;
 }

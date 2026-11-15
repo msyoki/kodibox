@@ -53,6 +53,7 @@ Engineering tasks:
 - [x] E-02 CI (GitHub Actions): lint, typecheck, test, build, gitleaks, Semgrep, `pnpm audit`, Trivy; Renovate.
 - [x] E-03 `packages/db`: Drizzle, migrations, `withOrg()` + RLS baseline, Testcontainers test harness.
 - [ ] E-04 Auth: Better Auth (email/phone + password, OTP, TOTP 2FA mandatory for owner/manager/accountant), sessions, rate limits.
+  - Follow-ups before launch (tracked, see ADR 0008): schedule `pnpm --filter @kodibox/auth purge:expired` daily in apps/worker; pseudonymisation function + `dsr_requests` hook; link the audit-failure ALERT to the breach runbook; progressive lockout + notification; password recovery flow (email link + TOTP/recovery code); session rotation on step-up; queue-backed OTP/email delivery; **E-06 (PII encryption) is a production deploy blocker for auth**; set controller identity constants for /privacy.
 - [ ] E-05 Organizations, memberships, roles, `can()` authz module + tests (including cross-org denial tests).
 - [ ] E-06 Audit log (hash-chained `audit_events`), PII envelope encryption helper, log redaction.
 - [ ] E-07 App shell: layout, navigation, design system (shadcn/ui), Africa/Nairobi formatting, KES money formatting. _Prototype: UI kit delivered in P-01 (own kit, not shadcn)._

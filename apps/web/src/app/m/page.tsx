@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/shell/logo';
+import { requireSession } from '@/server/session';
 
 const PERSONAS = [
   {
@@ -22,7 +23,8 @@ const PERSONAS = [
   },
 ];
 
-export default function MobileIndexPage() {
+export default async function MobileIndexPage() {
+  await requireSession();
   return (
     <main className="flex flex-1 flex-col gap-5 p-5">
       <div className="flex items-center gap-2.5 pt-4">

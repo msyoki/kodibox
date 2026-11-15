@@ -131,3 +131,35 @@ DPIAs are stored in `docs/dpia/` (one per feature, versioned) and linked from th
 5. Credit referencing and arrears-sharing rules (CRB regulations) before any such feature ships.
 6. Registration thresholds and exemptions for small landlords and for Kodibox.
 7. Handling of occupants who are minors and non-lessee occupants.
+
+## 11. Sign-in and account data (E-04): data map, lawful basis, sub-processors
+
+| Data | Purpose | Lawful basis | Retention (proposed, [LEGAL]) | Where |
+|---|---|---|---|---|
+| Email, name, password hash | Create and secure the account | Contract; legitimate interest (account security) | Life of account; then pseudonymised | users, accounts |
+| Phone number (E.164) | OTP sign-in, tenant contact | Contract; legitimate interest | Life of account; plaintext until E-06 | users |
+| OTP code (SMS), email link tokens | Authenticate | Contract; legitimate interest | Deleted on use or expiry (minutes to 1 h) | verifications |
+| TOTP secret, recovery codes | Second factor (mandatory for owner/manager/accountant) | Legitimate interest (security) | Life of account | two_factors (encrypted) |
+| IP, user agent, sign-in times | Device list, takeover detection | Legitimate interest (security) | Sessions: until expiry; audit log: 1 year hot | sessions, audit_events |
+
+OTP SMS uses a fixed template (`Kodibox code 123456. Valid 5 min. Do not share.`) with message class `otp`; it never carries promotional content (marketing needs opt-in and STOP).
+
+Sub-processors for sign-in (named when contracted): SMS provider (Africa's Talking planned, category: SMS aggregator), email provider (Resend/SES planned), HaveIBeenPwned (Pwned Passwords range API, k-anonymity: only the first 5 characters of a SHA-1 hash leave the server; no personal data), hosting/DB/Redis. A notice at the point of collection links /privacy on every auth screen (version constant `PRIVACY_NOTICE_VERSION`).
+
+### Open [LEGAL] items from E-04
+1. Confirm retention periods for sessions, OTP/verification rows, audit log and account tombstones.
+2. Is an OTP SMS a transactional/service message outside marketing consent rules under the Kenya Information and Communications Act and the DPA? Confirm.
+3. Cross-border transfers: SMS routing, email provider, HaveIBeenPwned, hosting region. Safeguards and notices per the DPA transfer provisions.
+4. ODPC registration as controller/processor before launch; registered contact for the privacy notice.
+5. Whether this processing triggers a DPIA (mandatory 2FA, device and IP logging, phone-number identifiers).
+6. Lawful basis wording for IP/device logging (legitimate interest vs legal obligation) and the notice text at /privacy.
+
+### 11.1 Internal-only legal checklist for the public /privacy page (not shown to users)
+The public page uses neutral wording; these items must be confirmed by counsel before launch:
+- **Controller identity:** set CONTROLLER_NAME, CONTROLLER_ADDRESS, CONTACT_EMAIL, ODPC_REG_NO in `packages/core/src/auth/privacy.ts`. The company is not registered yet; the page throws in production until all four are real values (`assertControllerIdentityConfigured`, tested).
+- **[LEGAL] Data subject request timelines:** the page says "within the period the Act sets". Confirm the exact periods (access, correction, erasure, portability, objection) and our internal SLA, then decide whether to state them publicly.
+- **[LEGAL] Retention periods** for sessions, verification rows, audit log (1 year hot proposed) and account tombstones; the page states them neutrally.
+- **[LEGAL] Lawful basis wording:** "performance of contract" for account/OTP and "legitimate interest" for security logging, 2FA secret and breached-password check; confirm and document the legitimate-interest assessment.
+- **[LEGAL]** No automated decision-making or profiling is claimed on the page; re-check if risk scoring is ever added.
+- **[LEGAL]** Notice for tenants: the landlord/manager (controller) must publish their own notice; provide them a template.
+- Bump `PRIVACY_NOTICE_VERSION` on any text change.

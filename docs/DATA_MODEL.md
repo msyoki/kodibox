@@ -66,6 +66,10 @@ erDiagram
 ### organizations (global; RLS on `id = current_org`)
 `name text`, `type text CHECK in (landlord, agency)`, `kra_pin` [ENC][PII-business], `slug text unique`, `plan text`, `settings jsonb` (grace days, allocation policy, penalty defaults, billing day), `timezone default 'Africa/Nairobi'`, `status (active|suspended|closed)`, `data_region text`, `dpo_contact text`. Index: unique(slug). Registered with ODPC flag `odpc_registration_no text`.
 
+> **E-04 status:** auth tables are `sessions` (token stored as sha256), `accounts`, `verifications`, `two_factors` (plural names; global; only role `kodibox_auth`, ADR 0008). `users` carries `email_verified`, `phone_number` (E.164, plaintext until E-06), `phone_number_verified`, `two_factor_enabled`. `phone_hash`, `locale`, `status`, `deleted_at` arrive with E-05/E-06.
+>
+> **Erasure (DSAR) = pseudonymisation, not row deletion:** set `email` to a tombstone address, null `phone_number` and `image`, set `deleted_at`/status; delete the user's `accounts`, `two_factors`, `sessions` and `verifications`; keep `users.id`, membership history and `audit_events` (retained under the 7-year financial/audit class, PII already masked in audit payloads). Run through the DSAR workflow with an audit event. **[LEGAL]** confirm the retention class.
+
 ### users (global; no org_id; RLS: self-row or via membership join; platform_admin audited)
 `email citext unique null`, `phone_e164` [ENC][PII] + `phone_hash unique`, `password_hash` (Better Auth), `name` [PII], `locale (en|sw)`, `totp_enabled bool`, `last_login_at`, `status`, `deleted_at`. Better Auth tables (`sessions`, `accounts`, `verifications`) live alongside; sessions store hashed tokens. CHECK (email is not null or phone_hash is not null).
 

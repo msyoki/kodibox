@@ -7,7 +7,10 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./internal": "./src/internal.ts"
+    "./internal": "./src/internal.ts",
+    "./auth": "./src/auth.ts",
+    "./env-urls": "./src/env.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "build": "tsc --noEmit -p tsconfig.json",
@@ -17,7 +20,7 @@
     "db:generate": "drizzle-kit generate",
     "db:bootstrap": "tsx src/scripts/bootstrap.ts",
     "db:migrate": "tsx src/scripts/migrate.ts",
-    "db:seed": "tsx src/scripts/seed.ts"
+    "db:seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",

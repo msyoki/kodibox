@@ -1,7 +1,9 @@
 import { ManagerTenants } from '@/features/mobile-manager/tenants';
+import { requireSession } from '@/server/session';
 
 export const metadata = { title: 'Tenants | Kodibox' };
 
-export default function Page() {
+export default async function Page() {
+  await requireSession();
   return <ManagerTenants />;
 }

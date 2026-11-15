@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Field, Input, Switch, useToast } from '@/components/ui';
+import { authClient } from '@/features/auth/client';
 
 const KE_PHONE = /^(?:\+?254|0)[17]\d{8}$/;
 
@@ -22,14 +24,25 @@ export default function AppLoginPage() {
   const [fingerprint, setFingerprint] = useState(true);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
-  function sendCode() {
-    if (!KE_PHONE.test(phone.replace(/\s/g, ''))) {
+  async function sendCode() {
+    const number = phone.replace(/\s/g, '');
+    if (!KE_PHONE.test(number)) {
       setPhoneError('Enter a Kenyan mobile number such as 0712 345 678.');
       return;
     }
     setPhoneError(undefined);
+    // Same answer whether or not the number is registered (no account enumeration).
+    const { error } = await authClient.phoneNumber.sendOtp({ phoneNumber: number });
+    if (error) {
+      setPhoneError(
+        error.status === 429
+          ? 'Too many requests. Try again later.'
+          : 'We could not send a code. Check the number and try again.',
+      );
+      return;
+    }
     setStep('otp');
-    toast('Code sent by SMS (demo: any 6 digits work)', 'info');
+    toast('If this number is registered, a code has been sent by SMS', 'info');
   }
 
   function setDigit(i: number, v: string) {
@@ -39,13 +52,26 @@ export default function AppLoginPage() {
     if (d && i < 5) refs.current[i + 1]?.focus();
   }
 
-  function verify() {
+  async function verify() {
     if (digits.some((d) => !d)) {
       setOtpError('Enter all 6 digits of the code.');
       return;
     }
+    const { error } = await authClient.phoneNumber.verify({
+      phoneNumber: phone.replace(/\s/g, ''),
+      code: digits.join(''),
+    });
+    if (error) {
+      setOtpError(
+        error.status === 429
+          ? 'Too many attempts. Try again later.'
+          : 'That code is not valid or has expired.',
+      );
+      return;
+    }
     toast(fingerprint ? 'Signed in. Fingerprint enabled.' : 'Signed in', 'ok');
-    router.push('/m/tenant');
+    router.push('/login/continue');
+    router.refresh();
   }
 
   return (
@@ -69,7 +95,7 @@ export default function AppLoginPage() {
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            sendCode();
+            void sendCode();
           }}
         >
           <Field label="Phone number" htmlFor="phone" error={phoneError}>
@@ -94,20 +120,19 @@ export default function AppLoginPage() {
           <Button type="submit" size="lg">
             Send code
           </Button>
-          <button
-            type="button"
-            onClick={() => toast('Privacy notice opens in the full app (demo)', 'info')}
-            className="min-h-11 text-sm font-bold text-link underline"
+          <Link
+            href="/privacy"
+            className="inline-flex min-h-11 items-center text-sm font-bold text-link underline"
           >
             Read our privacy notice
-          </button>
+          </Link>
         </form>
       ) : (
         <form
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            verify();
+            void verify();
           }}
         >
           <div className="flex items-center justify-between gap-2 text-sm">
@@ -154,7 +179,7 @@ export default function AppLoginPage() {
             Didn’t get it?{' '}
             <button
               type="button"
-              onClick={() => toast('New code sent (demo)', 'info')}
+              onClick={() => void sendCode()}
               className="min-h-11 font-bold text-link underline"
             >
               Resend code
@@ -171,13 +196,12 @@ export default function AppLoginPage() {
           <Button type="submit" size="lg">
             Verify and sign in
           </Button>
-          <button
-            type="button"
-            onClick={() => toast('Privacy notice opens in the full app (demo)', 'info')}
-            className="min-h-11 text-sm font-bold text-link underline"
+          <Link
+            href="/privacy"
+            className="inline-flex min-h-11 items-center text-sm font-bold text-link underline"
           >
             Read our privacy notice
-          </button>
+          </Link>
         </form>
       )}
     </div>

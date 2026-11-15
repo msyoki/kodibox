@@ -13,12 +13,21 @@
     "test:e2e": "echo \"e2e not implemented until E-05\""
   },
   "dependencies": {
+    "@kodibox/auth": "workspace:*",
     "@kodibox/config": "workspace:*",
     "@kodibox/core": "workspace:*",
+    "@kodibox/db": "workspace:*",
     "@kodibox/demo": "workspace:*",
+    "@kodibox/integrations": "workspace:*",
     "@kodibox/ui": "workspace:*",
+    "@next/env": "^16.4.6",
+    "@node-rs/argon2": "^2.2.2",
+    "better-auth": "1.7.25",
     "clsx": "^2.1.1",
+    "ioredis": "^6.0.0",
     "next": "^15.5.28",
+    "postgres": "^4.0.0",
+    "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwind-merge": "^3.7.0"
@@ -26,6 +35,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.5.28",
     "@tailwindcss/postcss": "^4.3.3",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "postcss": "^8.5.32",

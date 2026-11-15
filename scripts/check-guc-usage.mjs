@@ -8,7 +8,15 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const BANNED = /app\.current_org_id|app\.current_user_id|set_config/;
-const SKIP_DIR_NAMES = new Set(['node_modules', '.next', '.turbo', 'dist', 'coverage', '.git']);
+const SKIP_DIR_NAMES = new Set([
+  'node_modules',
+  '.next',
+  '.next-smoke',
+  '.turbo',
+  'dist',
+  'coverage',
+  '.git',
+]);
 // Exact repo-relative paths only (a dir merely named "migrations" elsewhere is still scanned).
 const SKIP_PATHS = new Set([
   'packages/db/migrations',

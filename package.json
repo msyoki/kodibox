@@ -17,7 +17,7 @@
     "format:check": "prettier --check .",
     "db:migrate": "pnpm --filter @kodibox/db db:migrate",
     "db:generate": "pnpm --filter @kodibox/db db:generate",
-    "db:seed": "pnpm --filter @kodibox/db db:seed",
+    "db:seed": "pnpm --filter @kodibox/db db:seed && pnpm --filter @kodibox/auth seed:demo",
     "db:bootstrap": "pnpm --filter @kodibox/db db:bootstrap",
     "prepare": "simple-git-hooks"
   },

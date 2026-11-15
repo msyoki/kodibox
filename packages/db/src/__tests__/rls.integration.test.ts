@@ -104,7 +104,7 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
   it('migrations applied and are re-runnable', async () => {
     await expect(runMigrations(t.migratorUrl)).resolves.toBeUndefined();
     const rows = await t.migrator.sql`select count(*)::int as n from drizzle.__drizzle_migrations`;
-    expect(rows[0]?.n).toBe(2);
+    expect(rows[0]?.n).toBe(3);
   });
 
   it('app role is not a superuser, not BYPASSRLS, and owns nothing', async () => {
@@ -138,6 +138,22 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
     }
   });
 
+  it('EVERY public table has ENABLE + FORCE RLS (auth credential tables included)', async () => {
+    const rows = await t.admin.sql<
+      { relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }[]
+    >`
+      select c.relname, c.relrowsecurity, c.relforcerowsecurity
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relkind = 'r' and c.relname <> '__drizzle_migrations'`;
+    expect(rows.map((r) => r.relname)).toEqual(
+      expect.arrayContaining(['accounts', 'sessions', 'verifications', 'two_factors']),
+    );
+    for (const r of rows) {
+      expect(r.relrowsecurity, r.relname).toBe(true);
+      expect(r.relforcerowsecurity, r.relname).toBe(true);
+    }
+  });
+
   it('org A cannot see org B rows inside withOrg(A)', async () => {
     await t.app.withOrg(ORG_A, async (tx) => {
       expect((await tx.select().from(organizations)).map((o) => o.id)).toEqual([ORG_A]);
@@ -145,7 +161,7 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
         new Set([ORG_A]),
       );
       expect((await tx.select().from(auditEvents)).map((e) => e.organizationId)).toEqual([ORG_A]);
-      expect((await tx.select().from(users)).map((u) => u.id).sort()).toEqual(
+      expect((await tx.select({ id: users.id }).from(users)).map((u) => u.id).sort()).toEqual(
         [USER_A, USER_C, USER_M].sort(),
       );
     });
@@ -252,7 +268,7 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
       ),
     ).rejects.toSatisfy(pgMatches(/permission denied/));
     await t.app.withOrg(ORG_A, async (tx) => {
-      const ids = (await tx.select().from(users)).map((u) => u.id);
+      const ids = (await tx.select({ id: users.id }).from(users)).map((u) => u.id);
       expect(ids).not.toContain(USER_B);
     });
   });
@@ -271,7 +287,11 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
     const own = await t.app.withOrg(
       ORG_A,
       (tx) =>
-        tx.update(users).set({ displayName: 'Renamed' }).where(eq(users.id, USER_A)).returning(),
+        tx
+          .update(users)
+          .set({ displayName: 'Renamed' })
+          .where(eq(users.id, USER_A))
+          .returning({ id: users.id }),
       { userId: USER_A },
     );
     expect(own).toHaveLength(1);
@@ -279,19 +299,27 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
     const other = await t.app.withOrg(
       ORG_A,
       (tx) =>
-        tx.update(users).set({ displayName: 'Hacked' }).where(eq(users.id, USER_M)).returning(),
+        tx
+          .update(users)
+          .set({ displayName: 'Hacked' })
+          .where(eq(users.id, USER_M))
+          .returning({ id: users.id }),
       { userId: USER_A },
     );
     expect(other).toHaveLength(0);
     const noCtx = await t.app.withOrg(ORG_A, (tx) =>
-      tx.update(users).set({ displayName: 'Hacked' }).returning(),
+      tx.update(users).set({ displayName: 'Hacked' }).returning({ id: users.id }),
     );
     expect(noCtx).toHaveLength(0);
     // org B user from org A context, even acting as that user
     const foreign = await t.app.withOrg(
       ORG_A,
       (tx) =>
-        tx.update(users).set({ displayName: 'Hacked' }).where(eq(users.id, USER_B)).returning(),
+        tx
+          .update(users)
+          .set({ displayName: 'Hacked' })
+          .where(eq(users.id, USER_B))
+          .returning({ id: users.id }),
       { userId: USER_B },
     );
     expect(foreign).toHaveLength(0);
@@ -646,5 +674,26 @@ describe.skipIf(!hasDocker)('migrations + RLS (Testcontainers postgres:16-alpine
       const [row] = await t.admin.sql`select status, role from memberships where id = ${h}`;
       expect(row).toEqual({ status: 'active', role: 'tenant' });
     });
+  });
+});
+
+describe.skipIf(!dockerAvailable())('users column privileges', () => {
+  let t: TestDb;
+  beforeAll(async () => {
+    t = await startTestDb();
+  }, 180_000);
+  afterAll(async () => {
+    await t?.stop();
+  });
+  it('the app role cannot select phone_number, email_verified, two_factor_enabled or image', async () => {
+    for (const col of ['phone_number', 'email_verified', 'two_factor_enabled', 'image']) {
+      await expect(t.app.sql.unsafe(`select ${col} from users`), col).rejects.toThrow(
+        /permission denied/,
+      );
+    }
+    await expect(t.app.sql.unsafe('select * from users')).rejects.toThrow(/permission denied/);
+    await expect(
+      t.app.sql.unsafe('select id, email, display_name from users'),
+    ).resolves.toBeDefined();
   });
 });

@@ -176,6 +176,14 @@ Kodibox staff reading or altering customer data.
 
 Tick state is tracked in the ASVS spreadsheet. "Gate" indicates which pipeline stage enforces it.
 
+### 6.0 E-04 implementation notes
+- Auth server uses a dedicated DB role (`kodibox_auth`, ADR 0008); credential tables are unreachable by the app role. Session tokens are stored as sha256. Backup codes are encrypted (not hashed): documented exception.
+- Client IP: `TRUSTED_PROXY_HOPS` trusted proxies; the IP is the Nth entry from the right of X-Forwarded-For (never the left-most); IPv6 is rate-limited per /64. Production must set it.
+- Plaintext PII at rest until E-06: production auth refuses to start unless AUTH_ALLOW_PLAINTEXT_PII=1 (staging only). **E-06 is a deploy blocker.**
+- Erasure is pseudonymisation (see DATA_MODEL.md). Retention job: `pnpm --filter @kodibox/auth purge:expired` (daily) deletes expired sessions (IP + user agent) and verifications (phone/email identifiers, OTPs).
+- Rate-limit store down: OTP-send and reset scopes fail closed (429); others degrade to per-instance limits; an `ALERT` line is logged. Audit write failure: sign-in and 2FA-disable fail closed; others log `ALERT auth audit write failed`.
+- Follow-up (tracked): progressive lockout 15 min / 1 h / 24 h with owner notification; step-up/privilege-change session rotation; 24 h cooling period.
+
 ### 6.1 Authentication (Better Auth)
 - [ ] Passwords hashed with argon2id (m=64 MiB, t=3, p=1 minimum; tune to ~250 ms), unique salt, optional server-side pepper from KMS.
 - [ ] Password policy: min 12 chars, breached-password check (HIBP k-anonymity), no composition rules, no forced rotation.

@@ -7,6 +7,7 @@ Drizzle ORM + PostgreSQL 16 + Row-Level Security. See `docs/adr/0005-postgres-rl
 | Variable                                         | Role                        | Used by                                   |
 | ------------------------------------------------ | --------------------------- | ----------------------------------------- |
 | `DATABASE_URL`                                   | `kodibox_app`               | Runtime (web, worker), `db:seed`          |
+| `AUTH_DATABASE_URL`                              | `kodibox_auth`              | Auth server only (credential tables; ADR 0008). Import from `@kodibox/db/auth` |
 | `MIGRATION_DATABASE_URL`                         | `kodibox_migrator`          | `db:migrate` only (CI/deploy). Never set on runtime services |
 | `DATABASE_ADMIN_URL`                             | privileged (CREATE ROLE)    | `db:bootstrap` only, once per environment |
 

@@ -18,3 +18,10 @@ export function migrationDatabaseUrl(
 export function adminDatabaseUrl(source: Record<string, string | undefined> = process.env): string {
   return url.parse(source.DATABASE_ADMIN_URL);
 }
+
+/** Auth server only: role kodibox_auth (credential tables). Never the app-role URL. */
+export function authDatabaseUrl(source: Record<string, string | undefined> = process.env): string {
+  if (!source.AUTH_DATABASE_URL)
+    throw new Error('AUTH_DATABASE_URL is not set (role kodibox_auth)');
+  return url.parse(source.AUTH_DATABASE_URL);
+}

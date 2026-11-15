@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Logo } from '@/components/shell/logo';
 import { ToastProvider } from '@/components/ui';
 import { DemoStoreProvider } from '@/demo/store';
+import { requireSession } from '@/server/session';
 
 const TABS = [
   { label: 'Overview', href: '#overview' },
@@ -13,7 +14,8 @@ const TABS = [
 ];
 
 /** Read-only landlord portal: simple top nav, no app sidebar. */
-export default function PortalLayout({ children }: { children: ReactNode }) {
+export default async function PortalLayout({ children }: { children: ReactNode }) {
+  await requireSession();
   return (
     <DemoStoreProvider>
       <ToastProvider>

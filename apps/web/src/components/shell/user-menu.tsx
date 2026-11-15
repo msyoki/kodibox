@@ -1,11 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Avatar } from '@/components/ui';
+import { authClient } from '@/features/auth/client';
 
 export function UserMenu() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  async function signOut() {
+    await authClient.signOut(); // revokes the server-side session
+    router.replace('/login');
+  }
   return (
     <div className="relative">
       <button
@@ -34,12 +41,13 @@ export function UserMenu() {
             </Link>
           </li>
           <li>
-            <Link
-              href="/login"
-              className="flex min-h-11 items-center rounded-control px-3 font-semibold text-danger no-underline hover:bg-divider"
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="flex min-h-11 w-full cursor-pointer items-center rounded-control border-0 bg-transparent px-3 text-left font-semibold text-danger hover:bg-divider"
             >
               Sign out
-            </Link>
+            </button>
           </li>
         </ul>
       ) : null}

@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { assertStrongPasswords } from '../scripts/bootstrap';
 import { seed } from '../scripts/seed';
 
-const strong = { migrator: 'k3Jx9-Lm2Qv8-Zt5Rw1-Yp7Nb4', app: 'a9Wd2-Hs6Ge3-Uf8Cx1-Vq5Tz0' };
+const strong = {
+  migrator: 'k3Jx9-Lm2Qv8-Zt5Rw1-Yp7Nb4',
+  app: 'a9Wd2-Hs6Ge3-Uf8Cx1-Vq5Tz0',
+  auth: 'q4Rt7-Yu2Io9-Pa5Sd8-Fg1Hj6',
+};
 
 describe('bootstrap password guard', () => {
   it('accepts strong passwords anywhere', () => {
@@ -16,6 +20,13 @@ describe('bootstrap password guard', () => {
     expect(() => assertStrongPasswords({ ...strong, migrator: 'short-pw' }, 'staging')).toThrow(
       /refusing/,
     );
+  });
+
+  it('requires an auth role password outside development/test', () => {
+    const { auth: _a, ...noAuth } = strong;
+    void _a;
+    expect(() => assertStrongPasswords(noAuth, 'production')).toThrow(/KODIBOX_AUTH_PASSWORD/);
+    expect(() => assertStrongPasswords(noAuth, 'development')).not.toThrow();
   });
 
   it('allows weak passwords in development and test', () => {

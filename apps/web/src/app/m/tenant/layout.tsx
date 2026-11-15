@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { TabBar } from '@/components/mobile/tab-bar';
 import { TenantLocalProvider } from '@/components/tenant-app/local-state';
+import { requireSession } from '@/server/session';
 
 const TABS = [
   { label: 'Home', href: '/m/tenant' },
@@ -9,7 +10,8 @@ const TABS = [
   { label: 'Profile', href: '/m/tenant/profile' },
 ];
 
-export default function TenantLayout({ children }: { children: ReactNode }) {
+export default async function TenantLayout({ children }: { children: ReactNode }) {
+  await requireSession();
   return (
     <TenantLocalProvider>
       <main className="flex flex-1 flex-col">{children}</main>
