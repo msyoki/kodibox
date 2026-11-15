@@ -6,7 +6,7 @@ const PERSONAS = [
     href: '/m/tenant',
     name: 'Tenant',
     who: 'Peter Otieno, B-12 Riverside Court',
-    blurb: 'Balance, pay by STK push, statements, repair requests.',
+    blurb: 'Balance, how to pay, proof of payment, statements, repair requests.',
   },
   {
     href: '/m/caretaker',
@@ -37,10 +37,10 @@ export default function MobileIndexPage() {
           <li key={p.href}>
             <Link
               href={p.href}
-              className="flex min-h-14 flex-col gap-1 rounded-card border border-border bg-surface p-4 text-text no-underline hover:border-brand focus-visible:outline-2 focus-visible:outline-brand"
+              className="flex min-h-14 flex-col gap-1 rounded-card border border-border bg-surface p-4 text-text no-underline hover:border-brand focus-visible:outline-2 focus-visible:outline-link"
             >
               <strong className="text-lg">{p.name}</strong>
-              <span className="text-sm font-semibold text-brand">{p.who}</span>
+              <span className="text-sm font-semibold text-link">{p.who}</span>
               <span className="text-sm text-muted">{p.blurb}</span>
             </Link>
           </li>

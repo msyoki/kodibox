@@ -14,7 +14,7 @@ const fill = {
   warning: 'bg-warning',
   danger: 'bg-danger',
   info: 'bg-info',
-  muted: 'bg-[#c9d9d5]',
+  muted: 'bg-bar-track',
 } as const;
 
 export function ProgressBar({

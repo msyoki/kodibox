@@ -8,7 +8,7 @@ import type {
 import { cn } from '@/lib/cn';
 
 const control =
-  'min-h-11 w-full rounded-control border border-border-strong bg-surface px-3 text-[15px] text-text placeholder:text-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand disabled:bg-soft';
+  'min-h-11 w-full rounded-control border border-border-strong bg-surface px-3 text-[15px] text-text placeholder:text-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-link disabled:bg-soft';
 
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
   return <label className={cn('text-sm font-semibold', className)} {...props} />;
@@ -76,7 +76,7 @@ export function Switch({ label, className, ...props }: SwitchProps) {
       <input type="checkbox" role="switch" className="peer sr-only" {...props} />
       <span
         aria-hidden="true"
-        className="relative h-6 w-11 flex-none rounded-full bg-border-strong transition-colors peer-checked:bg-brand peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"
+        className="relative h-6 w-11 flex-none rounded-full bg-border-strong transition-colors peer-checked:bg-brand peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-link after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"
       />
       {label}
     </label>

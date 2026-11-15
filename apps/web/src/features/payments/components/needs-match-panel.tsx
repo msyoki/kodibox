@@ -17,40 +17,51 @@ import {
 } from '@/components/ui';
 import { getInvoice, listInvoices, type DemoData, type UnmatchedPayment } from '@/demo';
 import { maskPayerName, previewAllocation, suggestionConfidence } from '@/demo/billing';
+import { UNMATCHED_REASON_LABEL, reasonOf } from '@/demo/recon';
 import { CHANNEL_LABEL, formatWhen } from '@/demo/format';
 import { cn } from '@/lib/cn';
 
 interface Props {
   data: DemoData;
   unmatched: UnmatchedPayment[];
-  onMatch: (unmatchedId: string, tenantId: string, invoiceId: string) => void;
+  onMatch: (unmatchedId: string, tenantId: string, invoiceId?: string) => void;
+  onSplit: (unmatchedId: string, parts: { tenantId: string; amount: number }[]) => void;
   onNotRent: (id: string) => void;
 }
 
 const MANUAL = 'manual';
 
-export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) {
+export function NeedsMatchPanel({ data, unmatched, onMatch, onSplit, onNotRent }: Props) {
   const { toast } = useToast();
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [choice, setChoice] = useState<Record<string, string>>({});
   const [manualInvoice, setManualInvoice] = useState('');
+  const [search, setSearch] = useState('');
   const [remember, setRemember] = useState(true);
   const [splitOpen, setSplitOpen] = useState(false);
   const [splitInvoice, setSplitInvoice] = useState('');
   const [splitFirst, setSplitFirst] = useState('');
 
   const selected = unmatched.find((u) => u.id === selectedId) ?? unmatched[0];
-  const openInvoices = useMemo(
+  const allOpenInvoices = useMemo(
     () =>
       listInvoices({ status: 'open' }, data).sort((a, b) => a.unitCode.localeCompare(b.unitCode)),
     [data],
   );
+  const openInvoices = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q
+      ? allOpenInvoices.filter((i) =>
+          `${i.unitCode} ${i.tenantName} ${i.propertyName}`.toLowerCase().includes(q),
+        )
+      : allOpenInvoices;
+  }, [allOpenInvoices, search]);
 
   if (!selected) {
     return (
       <EmptyState
-        title="Every payment is matched"
-        description="New M-Pesa payments with a wrong or missing account number will appear here."
+        title="Nothing to review"
+        description="Imported lines that could not be matched with confidence will appear here."
       />
     );
   }
@@ -58,6 +69,7 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
   const picked = choice[selected.id] ?? selected.suggestions[0]?.invoiceId ?? MANUAL;
   const invoiceId = picked === MANUAL ? manualInvoice : picked;
   const invoice = invoiceId ? getInvoice(invoiceId, data) : undefined;
+  const reason = reasonOf(selected);
   const alloc = invoice ? previewAllocation(invoice, selected.amount) : undefined;
 
   function confirm() {
@@ -65,8 +77,8 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
     onMatch(selected.id, invoice.tenantId, invoice.id);
     toast(
       remember
-        ? `Matched to ${invoice.unitCode}. Receipt sent. Alias saved for next time.`
-        : `Matched to ${invoice.unitCode}. Receipt sent.`,
+        ? `Assigned to ${invoice.unitCode}. Receipt sent. Alias saved for next time.`
+        : `Assigned to ${invoice.unitCode}. Receipt sent.`,
       'ok',
     );
     setSelectedId(undefined);
@@ -77,10 +89,12 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
     const first = openInvoices.find((i) => i.id === splitInvoice);
     const second = invoice;
     if (!first || !second) return;
-    // Prototype: DemoStore has no split action, so the payment is recorded against the first unit.
-    onMatch(selected.id, first.tenantId, first.id);
+    onSplit(selected.id, [
+      { tenantId: first.tenantId, amount: firstCents },
+      { tenantId: second.tenantId, amount: selected.amount - firstCents },
+    ]);
     toast(
-      `Split across ${first.unitCode} and ${second.unitCode} (demo: recorded to ${first.unitCode}).`,
+      `Split across ${first.unitCode} and ${second.unitCode}. Both are in the audit log.`,
       'ok',
     );
     setSplitOpen(false);
@@ -98,8 +112,9 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(260px,340px)_1fr]">
       <section aria-label="Unmatched payments" className="flex flex-col gap-2.5">
-        <p className="m-0 text-sm text-muted">
-          These payments reached your paybill but we could not tell which unit they belong to.
+        <p className="m-0 mb-1 text-[13px] text-muted">
+          These lines came from your imported statements, but we could not tell with confidence
+          which unit they belong to.
         </p>
         {unmatched.map((u) => {
           const sel = u.id === selected.id;
@@ -110,8 +125,8 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
               aria-pressed={sel}
               onClick={() => setSelectedId(u.id)}
               className={cn(
-                'flex min-h-11 flex-col gap-1.5 rounded-card p-3.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
-                sel ? 'border-2 border-brand bg-surface' : 'border border-border bg-bg',
+                'flex min-h-11 flex-col gap-1.5 rounded-xl px-4 py-3.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
+                sel ? 'border-2 border-brand bg-surface' : 'border border-border bg-soft',
               )}
             >
               <span className="flex justify-between gap-2">
@@ -122,6 +137,9 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
                 <span className="font-mono">{u.reference}</span>
                 <span>{formatWhen(u.receivedAt)}</span>
               </span>
+              <Badge tone={reasonOf(u) === 'ambiguous' ? 'warn' : 'neutral'} className="self-start">
+                {UNMATCHED_REASON_LABEL[reasonOf(u)].split(':')[0]}
+              </Badge>
               <span className="text-xs text-muted">
                 Account entered:{' '}
                 <strong className="text-text">
@@ -133,7 +151,7 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
         })}
       </section>
 
-      <Card aria-labelledby="matchh" className="flex flex-col gap-5">
+      <Card aria-labelledby="matchh" className="flex flex-col gap-5 p-6">
         <div>
           <h2 id="matchh" className="m-0 text-xl font-extrabold">
             Match <Money minor={selected.amount} /> from {maskPayerName(selected.payerName)}
@@ -144,15 +162,30 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
               <span className="font-mono">{selected.reference}</span>
             </span>
             <span>· {formatWhen(selected.receivedAt)}</span>
-            <span>
-              · phone <MaskedText kind="phone" value={selected.payerPhone} />
-            </span>
-            <Badge tone="ok">Verified with Safaricom</Badge>
+            {selected.payerPhoneMasked ? (
+              <span>· phone {selected.payerPhoneMasked}</span>
+            ) : selected.payerPhone ? (
+              <span>
+                · phone <MaskedText kind="phone" value={selected.payerPhone} />
+              </span>
+            ) : null}
+            <Badge tone="info">From statement import</Badge>
+          </p>
+          <p className="mt-2 mb-0 text-sm">
+            <strong>Why it is here:</strong> {UNMATCHED_REASON_LABEL[reason]}
+            {selected.confidence ? ` (best score ${Math.round(selected.confidence * 100)}%)` : ''}.
           </p>
         </div>
 
         <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0">
-          <legend className="mb-2 p-0 text-sm font-bold">Suggested matches</legend>
+          <legend className="mb-2 p-0 text-sm font-bold tracking-wide text-muted uppercase">
+            Suggested matches
+          </legend>
+          {selected.suggestions.length === 0 ? (
+            <p className="m-0 text-sm text-muted">
+              No suggestions. Search for the tenant below, or set this line aside as not rent.
+            </p>
+          ) : null}
           {selected.suggestions.map((s) => {
             const inv = getInvoice(s.invoiceId, data);
             const conf = suggestionConfidence(s);
@@ -161,7 +194,7 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
               <label
                 key={s.invoiceId}
                 className={cn(
-                  'flex min-h-11 cursor-pointer items-start gap-3 rounded-card p-3.5',
+                  'flex min-h-11 cursor-pointer items-start gap-3 rounded-xl px-4 py-3.5',
                   picked === s.invoiceId
                     ? 'border-2 border-brand bg-brand-tint'
                     : 'border border-border bg-surface',
@@ -179,9 +212,19 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
                     <strong>
                       {inv.unitCode} · {inv.propertyName} · {inv.tenantName}
                     </strong>
-                    <Badge tone={conf.strong ? 'ok' : 'neutral'}>{conf.label}</Badge>
+                    <Badge tone={conf.strong ? 'ok' : 'neutral'}>
+                      {s.confidence !== undefined
+                        ? `${Math.round(s.confidence * 100)}% confidence`
+                        : conf.label}
+                    </Badge>
                   </span>
-                  <span className="text-sm text-muted">{s.reason}</span>
+                  <span className="flex flex-wrap gap-1.5">
+                    {s.reason.split(' + ').map((chip) => (
+                      <Badge key={chip} tone="neutral">
+                        {chip}
+                      </Badge>
+                    ))}
+                  </span>
                   <span className="text-sm">
                     Balance due <Money minor={inv.balance} className="font-bold" />
                   </span>
@@ -191,7 +234,7 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
           })}
           <label
             className={cn(
-              'flex min-h-11 cursor-pointer items-start gap-3 rounded-card p-3.5',
+              'flex min-h-11 cursor-pointer items-start gap-3 rounded-xl px-4 py-3.5',
               picked === MANUAL
                 ? 'border-2 border-brand bg-brand-tint'
                 : 'border border-border bg-surface',
@@ -207,6 +250,13 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
             <span className="flex flex-1 flex-col gap-1">
               <strong>Search another unit or tenant</strong>
               <span className="text-sm text-muted">Pick any unit with an open invoice.</span>
+              <Input
+                aria-label="Search unit or tenant"
+                type="search"
+                placeholder="Search unit or tenant"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
               <Select
                 aria-label="Unit with open invoice"
                 value={manualInvoice}
@@ -228,7 +278,7 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
         </fieldset>
 
         {invoice && alloc ? (
-          <div className="rounded-card border border-border bg-bg p-4">
+          <div className="rounded-xl border border-divider bg-soft p-4">
             <h3 className="m-0 mb-2 text-sm font-bold">
               How <Money minor={selected.amount} /> will be applied to {invoice.unitCode}
             </h3>
@@ -277,10 +327,10 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
 
         <div className="flex flex-wrap gap-2.5">
           <Button size="lg" disabled={!invoice} onClick={confirm}>
-            Confirm match &amp; send receipt
+            {picked === MANUAL ? 'Assign to tenant' : 'Confirm suggestion'}
           </Button>
           <Button size="lg" variant="secondary" onClick={() => setSplitOpen(true)}>
-            Split across units
+            Split across tenants
           </Button>
           <Button
             size="lg"
@@ -296,15 +346,15 @@ export function NeedsMatchPanel({ data, unmatched, onMatch, onNotRent }: Props) 
         </div>
         <p className="m-0 text-xs text-muted">
           Every match is saved in the audit log with your name and the time. Matches can be reversed
-          but never deleted. Kodibox never holds this money; it is already in your paybill.
+          but never deleted. Kodibox never holds this money; it is already in your own account.
         </p>
       </Card>
 
       <Dialog
         open={splitOpen}
         onClose={() => setSplitOpen(false)}
-        title="Split across units"
-        description="Divide this payment between two units. The amounts must add up to the payment."
+        title="Split across tenants"
+        description="Divide this line between two tenants. The amounts must add up to the payment."
         footer={
           <>
             <Button variant="ghost" onClick={() => setSplitOpen(false)}>

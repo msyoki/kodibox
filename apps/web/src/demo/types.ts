@@ -118,7 +118,10 @@ export interface Invoice {
   oldestUnpaidDays: number;
 }
 
+/** `mpesa_stk` is a legacy value the shared seed may still emit; the UI treats it as M-Pesa paybill. */
 export type PaymentChannel = 'mpesa_paybill' | 'mpesa_stk' | 'bank' | 'cash';
+/** Where the evidence for a payment came from. */
+export type PaymentOrigin = 'statement' | 'claim' | 'cash';
 export type PaymentStatus = 'matched' | 'awaiting_approval' | 'rejected';
 
 export interface Payment {
@@ -136,13 +139,25 @@ export interface Payment {
   /** Set for cash recorded by a caretaker (maker); approval is the checker step. */
   recordedBy?: string;
   approvedBy?: string;
+  /** Statement import, verified/approved tenant claim, or cash. Absent on seed rows (derived from channel). */
+  origin?: PaymentOrigin;
 }
 
 export interface UnmatchedSuggestion {
   tenantId: string;
   invoiceId: string;
   reason: string;
+  /** 0..1 from the reconciliation engine. */
+  confidence?: number;
 }
+
+export type UnmatchedReason =
+  | 'ambiguous'
+  | 'below_threshold'
+  | 'no_signal'
+  | 'conflict'
+  | 'possible_duplicate'
+  | 'unverified_claim';
 
 export interface UnmatchedPayment {
   id: string;
@@ -156,6 +171,66 @@ export interface UnmatchedPayment {
   channel: Extract<PaymentChannel, 'mpesa_paybill' | 'bank'>;
   receivedAt: IsoDateTime;
   suggestions: UnmatchedSuggestion[];
+  reason?: UnmatchedReason;
+  confidence?: number;
+  /** Already masked (statement imports only ever keep a hash plus this masked form). */
+  payerPhoneMasked?: string;
+}
+
+export type ClaimStatus = 'pending' | 'verified' | 'approved' | 'rejected';
+
+/** Tenant-submitted proof of payment, held until a statement line confirms it or a manager approves. */
+export interface PaymentClaim {
+  id: string;
+  tenantId?: string;
+  tenantName: string;
+  unitCode: string;
+  kind: 'sms' | 'slip';
+  /** Pasted M-Pesa confirmation SMS (sms claims). */
+  sms?: string;
+  /** Parsed fields; absent for slips until a manager reads them. */
+  code?: string;
+  amount?: MinorUnits;
+  paidAt?: IsoDateTime;
+  slipName?: string;
+  status: ClaimStatus;
+  /** The pasted SMS names a payee that is not one of the org's payment instructions. */
+  payeeMismatch?: boolean;
+  submittedAt: IsoDateTime;
+  reviewedBy?: string;
+  /** Maker-checker note on approval, or the reason on rejection. */
+  note?: string;
+}
+
+export interface PaymentInstruction {
+  id: string;
+  /** 'org' is the default; otherwise a property id overriding it. */
+  scope: string;
+  mpesaKind: 'paybill' | 'till' | 'none';
+  /** Paybill or till number (demo placeholder). */
+  mpesaNumber: string;
+  /** Name M-Pesa shows on confirmation messages (used to spot proofs paid to someone else). */
+  payeeName: string;
+  /** The account reference tenants type is always their unit code. */
+  accountRule: 'unit_code';
+  bankName: string;
+  bankAccount: string;
+  bankBranch: string;
+}
+
+export type ImportReminder = 'off' | 'daily' | 'weekly';
+
+export interface StatementImportRecord {
+  id: string;
+  at: IsoDateTime;
+  sourceLabel: string;
+  fileName: string;
+  fresh: number;
+  duplicates: number;
+  autoMatched: number;
+  needsReview: number;
+  rowErrors: number;
+  claimsVerified: number;
 }
 
 export type TicketStatus = 'new' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
@@ -291,6 +366,14 @@ export interface DemoData {
   invoices: Invoice[];
   payments: Payment[];
   unmatched: UnmatchedPayment[];
+  /** Lines set aside as not rent (deposits, refunds, charges). Reversible. */
+  notRent: UnmatchedPayment[];
+  claims: PaymentClaim[];
+  paymentInstructions: PaymentInstruction[];
+  importReminder: ImportReminder;
+  statementImports: StatementImportRecord[];
+  /** Overpayments kept as tenant credit, by tenant id (minor units). */
+  tenantCredits: Record<string, number>;
   tickets: Ticket[];
   ticketMessages: TicketMessage[];
   expenses: Expense[];

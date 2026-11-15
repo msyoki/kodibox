@@ -3,7 +3,7 @@ import type { PaymentChannel } from './types';
 
 export const CHANNEL_LABEL: Record<PaymentChannel, string> = {
   mpesa_paybill: 'M-Pesa paybill',
-  mpesa_stk: 'M-Pesa STK',
+  mpesa_stk: 'M-Pesa paybill',
   bank: 'Bank',
   cash: 'Cash',
 };

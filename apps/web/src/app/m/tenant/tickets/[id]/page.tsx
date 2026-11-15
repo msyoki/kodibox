@@ -196,15 +196,15 @@ export default function TenantTicketPage() {
                       setFeedback(ticket.id, { rating: n });
                       toast(`Rated ${n} of 5`, 'ok');
                     }}
-                    className="flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-brand"
+                    className="flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-link"
                   >
                     <svg
                       width="30"
                       height="30"
                       viewBox="0 0 24 24"
                       aria-hidden="true"
-                      fill={n <= fb.rating ? '#F0B54A' : 'none'}
-                      stroke={n <= fb.rating ? '#8A4B08' : '#5A635F'}
+                      fill={n <= fb.rating ? 'var(--color-amber)' : 'none'}
+                      stroke={n <= fb.rating ? 'var(--color-warn)' : 'var(--color-muted)'}
                       strokeWidth="1.8"
                       strokeLinejoin="round"
                     >

@@ -111,7 +111,7 @@ export function PropertiesView({ properties }: { properties: PropertyCard[] }) {
       {shown.length === 0 ? (
         <EmptyState title="No properties match" description="Try a different search or filter." />
       ) : (
-        <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 p-0">
           {shown.map((p) => {
             const occPct = p.unitCount ? Math.round((p.occupied / p.unitCount) * 100) : 0;
             return (
@@ -126,8 +126,16 @@ export function PropertiesView({ properties }: { properties: PropertyCard[] }) {
                       {p.kind === 'commercial' ? 'Commercial' : 'Residential'}
                     </Badge>
                   </div>
-                  <p className="m-0 text-sm">
-                    <strong>{p.unitCount} units</strong> · {p.occupied} of {p.unitCount} occupied
+                  <p className="m-0 flex justify-between gap-2 text-[13px]">
+                    <span>
+                      <span className="font-mono font-medium">{p.unitCount}</span> units
+                    </span>
+                    <span className="font-bold">
+                      {occPct}% occupied
+                      <span className="sr-only">
+                        , {p.occupied} of {p.unitCount} units
+                      </span>
+                    </span>
                   </p>
                   <ProgressBar
                     value={occPct}
@@ -141,7 +149,7 @@ export function PropertiesView({ properties }: { properties: PropertyCard[] }) {
                     ) : (
                       <Link
                         href={`/properties/${p.id}`}
-                        className="inline-flex min-h-11 items-center text-sm font-bold text-brand"
+                        className="inline-flex min-h-11 items-center text-sm font-bold text-link"
                       >
                         View units
                         <span className="sr-only"> for {p.name}</span> &rarr;

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Badge, Button, Card, useToast } from '@/components/ui';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Mark, ScreenHeader, Section } from '@/components/mobile-ui/screen';
 
 const TASKS = [
@@ -61,7 +62,12 @@ export function CaretakerHome() {
       <ScreenHeader
         eyebrow="Baraka Flats · Mvule Apartments"
         title="Today, Mon 2 Nov"
-        right={<Mark tone="brand">OO</Mark>}
+        right={
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Mark tone="brand">OO</Mark>
+          </div>
+        }
       />
       <div className="px-4 pt-3">
         {queue.length > 0 ? (

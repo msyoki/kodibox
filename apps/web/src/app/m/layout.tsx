@@ -10,7 +10,7 @@ export default function MobileLayout({ children }: { children: ReactNode }) {
   return (
     <DemoStoreProvider>
       <ToastProvider>
-        <div className="min-h-screen bg-[#e9e7df]">
+        <div className="min-h-screen bg-backdrop">
           <div className="relative mx-auto flex min-h-screen w-full max-w-[420px] flex-col bg-bg shadow-xl">
             {children}
           </div>

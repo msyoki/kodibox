@@ -63,7 +63,7 @@ export function CaretakerInspection() {
                 <button
                   type="button"
                   onClick={() => update(i, { photos: r.photos + 1 })}
-                  className="min-h-11 rounded-control px-2 text-xs font-semibold text-brand hover:bg-brand-tint"
+                  className="min-h-11 rounded-control px-2 text-xs font-semibold text-link hover:bg-brand-tint"
                 >
                   {r.photos} photos · add
                 </button>

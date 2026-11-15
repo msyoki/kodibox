@@ -177,7 +177,7 @@ export function InvoiceDetail({ id }: { id: string }) {
           <p className="mt-2 mb-0 text-xs text-muted">
             Paid so far <Money minor={invoice.paid} />. Payments go straight to your paybill or
             bank; Kodibox only reconciles them. Unmatched payments are handled in{' '}
-            <Link href="/payments" className="font-semibold text-brand">
+            <Link href="/payments" className="font-semibold text-link">
               Payments
             </Link>
             .

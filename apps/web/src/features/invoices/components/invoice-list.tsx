@@ -62,7 +62,7 @@ export function InvoiceList() {
                   aria-pressed={sel}
                   onClick={() => setFilter(f)}
                   className={cn(
-                    'min-h-11 rounded-full border px-3.5 text-[13px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                    'min-h-11 rounded-full border px-3.5 text-[13px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
                     sel
                       ? 'border-brand bg-brand text-white'
                       : 'border-border-strong bg-surface text-text',

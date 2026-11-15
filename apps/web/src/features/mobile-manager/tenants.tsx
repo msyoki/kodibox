@@ -10,7 +10,7 @@ import { useDemoStore } from '@/demo/store';
 import { cn } from '@/lib/cn';
 
 export function ManagerTenants() {
-  const { data } = useDemoStore();
+  const { data, actions } = useDemoStore();
   const { toast } = useToast();
   const [q, setQ] = useState('');
   const [selectedId, setSelectedId] = useState(DEMO_TENANT_ID);
@@ -123,19 +123,28 @@ export function ManagerTenants() {
               </div>
               <Button
                 disabled={detail.tenant.balance <= 0}
-                onClick={() =>
+                onClick={() => {
+                  if (detail.tenant.smsOptOut) {
+                    toast(`${detail.tenant.name} opted out of SMS. Use a call instead.`, 'warn');
+                    return;
+                  }
+                  actions.logAudit(
+                    'reminder.sent',
+                    detail.tenant.id,
+                    `Payment reminder SMS sent to ${detail.tenant.name}`,
+                  );
                   toast(
-                    `STK request sent to ${detail.tenant.name}. Money goes straight to your paybill.`,
+                    `Reminder sent to ${detail.tenant.name} with pay instructions and account reference.`,
                     'ok',
-                  )
-                }
+                  );
+                }}
               >
                 {detail.tenant.balance > 0 ? (
                   <>
-                    Send STK request for <Money minor={detail.tenant.balance} />
+                    Send payment reminder for <Money minor={detail.tenant.balance} />
                   </>
                 ) : (
-                  'No balance to request'
+                  'No balance to remind'
                 )}
               </Button>
               <Link href="/tenants" className={buttonClasses('ghost', 'md', 'w-full')}>

@@ -16,6 +16,7 @@
   --color-brand-tint: #f1f7f5;
   --color-brand-line: #2b6a61;
   --color-on-brand: #d7e7e3;
+  --color-link: #0e4d45;
   --color-amber: #f0b54a;
   --color-warning: #d9822b;
   --color-danger: #9b2c1a;
@@ -27,6 +28,14 @@
   --color-info: #1d4f91;
   --color-info-soft: #e3ecf9;
 
+  /* Web-only extras (not in the shared palette). Dark values are set below. */
+  --color-on-fill: #ffffff; /* text on solid ok/danger/brand fills */
+  --color-on-amber: #14201e; /* dark text on amber fills (both themes) */
+  --color-body: #3f4743; /* secondary body text, between text and muted */
+  --color-backdrop: #e9e7df; /* page behind the phone-width column */
+  --color-input-line: #b9cfca;
+  --color-bar-track: #c9d9d5;
+
   --radius-control: 10px;
   --radius-card: 14px;
   --radius-panel: 16px;
@@ -35,12 +44,56 @@
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
+/* Dark palette: values come from packages/ui/src/tokens.ts (darkColors); a test keeps them in sync. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #0e1111;
+  --color-surface: #161a1a;
+  --color-border: #262c2c;
+  --color-border-strong: #323a39;
+  --color-divider: #1d2222;
+  --color-soft: #121616;
+  --color-text: #ecefee;
+  --color-muted: #9ba3a1;
+  --color-brand: #14806f;
+  --color-brand-dark: #0c1817;
+  --color-brand-soft: #123a34;
+  --color-brand-tint: #131f1e;
+  --color-brand-line: #1f4b45;
+  --color-on-brand: #c9e6df;
+  --color-link: #5fd3bc;
+  --color-amber: #f0b54a;
+  --color-warning: #e8a05a;
+  --color-danger: #f08f7a;
+  --color-danger-soft: #3a1d17;
+  --color-ok: #6fcf98;
+  --color-ok-soft: #14301f;
+  --color-warn: #f2b86f;
+  --color-warn-soft: #33250f;
+  --color-info: #93b8ee;
+  --color-info-soft: #172539;
+
+  --color-on-fill: #0e1111;
+  --color-body: #c4cbc9;
+  --color-backdrop: #090b0b;
+  --color-input-line: #3a4442;
+  --color-bar-track: #24403c;
 }
 
-a {
-  color: var(--color-brand);
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+/* Base element styles live in the base layer so Tailwind utilities (text-white etc.)
+   can override them. Unlayered rules beat every layer in Tailwind v4. */
+@layer base {
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+  }
+
+  a {
+    color: var(--color-link);
+  }
 }

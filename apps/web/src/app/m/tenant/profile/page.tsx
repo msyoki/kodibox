@@ -13,6 +13,7 @@ import {
   Textarea,
   useToast,
 } from '@/components/ui';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Eyebrow } from '@/components/tenant-app/bits';
 import { cn } from '@/lib/cn';
 import { DEMO_TENANT_ID } from '@/demo';
@@ -44,9 +45,9 @@ export default function TenantProfilePage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
-    <div className="flex flex-col gap-5 p-4">
+    <div className="flex flex-col gap-4 p-4">
       <header className="flex items-center gap-3">
-        <Avatar name="Peter Otieno" size="lg" />
+        <Avatar name="Peter Otieno" size="lg" className="size-14 bg-brand text-xl text-white" />
         <div>
           <h1 className="m-0 text-xl font-extrabold">Peter Otieno</h1>
           <Eyebrow>{PROPERTY_LABEL}</Eyebrow>
@@ -57,7 +58,7 @@ export default function TenantProfilePage() {
       </header>
 
       <section aria-labelledby="nf">
-        <h2 id="nf" className="mb-2 mt-0 text-base font-extrabold">
+        <h2 id="nf" className="mb-2 mt-0 text-sm font-extrabold">
           Notifications
         </h2>
         <div className="rounded-card border border-border bg-surface px-4">
@@ -95,8 +96,15 @@ export default function TenantProfilePage() {
         </p>
       </section>
 
+      <section aria-labelledby="ap">
+        <h2 id="ap" className="mb-2 mt-0 text-sm font-extrabold">
+          Appearance
+        </h2>
+        <ThemeToggle variant="segmented" />
+      </section>
+
       <section aria-labelledby="lg">
-        <h2 id="lg" className="mb-2 mt-0 text-base font-extrabold">
+        <h2 id="lg" className="mb-2 mt-0 text-sm font-extrabold">
           Language
         </h2>
         <div role="group" aria-labelledby="lg" className="grid grid-cols-2 gap-2">
@@ -115,9 +123,9 @@ export default function TenantProfilePage() {
                 toast(`Language set to ${label}`, 'info');
               }}
               className={cn(
-                'min-h-11 rounded-control border text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                'min-h-11 rounded-control border text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
                 lang === key
-                  ? 'border-brand bg-brand-soft text-brand'
+                  ? 'border-brand bg-brand-soft text-link'
                   : 'border-border-strong bg-surface text-muted',
               )}
             >
@@ -128,7 +136,7 @@ export default function TenantProfilePage() {
       </section>
 
       <section aria-labelledby="sc">
-        <h2 id="sc" className="mb-2 mt-0 text-base font-extrabold">
+        <h2 id="sc" className="mb-2 mt-0 text-sm font-extrabold">
           Security
         </h2>
         <div className="rounded-card border border-border bg-surface px-4">
@@ -152,7 +160,7 @@ export default function TenantProfilePage() {
       </section>
 
       <section aria-labelledby="pv">
-        <h2 id="pv" className="mb-2 mt-0 text-base font-extrabold">
+        <h2 id="pv" className="mb-2 mt-0 text-sm font-extrabold">
           Privacy
         </h2>
         <div className="rounded-card border border-border bg-surface px-4">
@@ -197,7 +205,7 @@ export default function TenantProfilePage() {
 
       <Link
         href="/m/login"
-        className="flex min-h-12 items-center justify-center rounded-control border border-border-strong bg-surface text-[15px] font-bold text-text no-underline hover:bg-divider focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        className="flex min-h-12 items-center justify-center rounded-control border border-border-strong bg-surface text-[15px] font-bold text-text no-underline hover:bg-divider focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
       >
         Sign out
       </Link>

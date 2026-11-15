@@ -44,7 +44,7 @@ const REPORTS = [
   { title: 'Occupancy', desc: 'Vacant, occupied and notice-to-vacate units with days vacant.' },
   {
     title: 'Payment channel mix',
-    desc: 'Share of M-Pesa paybill, STK push, bank transfer and cash, by month.',
+    desc: 'Share of M-Pesa paybill or till, bank transfer and cash, by month.',
   },
 ];
 
@@ -70,7 +70,7 @@ export function ReportsView() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <Badge tone="info">Featured</Badge>
-            <h2 id="mri" className="m-0 mt-2 text-[17px] font-bold">
+            <h2 id="mri" className="m-0 mt-2 text-xl font-extrabold">
               Monthly Rental Income (MRI) tax · October 2026
             </h2>
             <p className="m-0 text-sm text-muted">
@@ -79,39 +79,42 @@ export function ReportsView() {
           </div>
           <div className="text-right">
             <div className="text-xs text-muted">Filing due</div>
-            <div className="text-xl font-extrabold">20 Nov 2026</div>
-            <div className="text-xs text-muted">18 days left</div>
+            <div className="text-lg font-extrabold">20 Nov 2026</div>
+            <div className="text-[13px] font-semibold text-warn">18 days left</div>
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field
-            label="Tax rate (%) as configured"
-            htmlFor="mri-rate"
-            help="Rate as configured — verify with KRA"
-          >
-            <Input
-              id="mri-rate"
-              inputMode="decimal"
-              value={rateText}
-              onChange={(e) => setRateText(e.target.value.replace(/[^0-9.]/g, ''))}
-            />
-          </Field>
-          <div>
-            <div className="text-sm font-semibold text-muted">Gross residential rent received</div>
-            <div className="text-xl">
-              <Money minor={totalGross} />
-            </div>
-            <div className="text-xs text-muted">
-              {rows.length} landlords · {rows.length} residential properties
-            </div>
+        <div className="flex flex-wrap items-stretch gap-3">
+          <div className="flex min-w-[200px] flex-[1_1_200px] flex-col gap-1 rounded-control border border-divider bg-soft px-3.5 py-3 text-[13px] text-muted">
+            <Field
+              label="Tax rate (%) as configured"
+              htmlFor="mri-rate"
+              help="Rate as configured — verify with KRA"
+            >
+              <Input
+                id="mri-rate"
+                inputMode="decimal"
+                className="w-24 font-mono"
+                value={rateText}
+                onChange={(e) => setRateText(e.target.value.replace(/[^0-9.]/g, ''))}
+              />
+            </Field>
           </div>
-          <div>
-            <div className="text-sm font-semibold text-muted">Tax payable (total)</div>
-            <div className="text-xl">
+          <div className="flex min-w-[200px] flex-[1_1_200px] flex-col gap-1 rounded-control border border-divider bg-soft px-3.5 py-3 text-[13px] text-muted">
+            Gross residential rent received
+            <strong className="font-mono text-[22px] font-medium text-text">
+              <Money minor={totalGross} />
+            </strong>
+            <span>
+              {rows.length} landlords · {rows.length} residential properties
+            </span>
+          </div>
+          <div className="flex min-w-[200px] flex-[1_1_200px] flex-col gap-1 rounded-control border border-bar-track bg-brand-soft px-3.5 py-3 text-[13px] text-link">
+            Tax payable (total)
+            <strong className="font-mono text-[22px] font-medium">
               <Money minor={totalTax} />
-            </div>
-            <div className="text-xs text-muted">Payable by each landlord to KRA</div>
+            </strong>
+            <span>Payable by each landlord to KRA</span>
           </div>
         </div>
 
@@ -144,18 +147,21 @@ export function ReportsView() {
           </TBody>
         </Table>
 
-        <div className="rounded-control bg-soft p-3 text-sm">
-          <strong>Commercial units excluded.</strong>{' '}
-          {excluded.map((e) => (
-            <span key={e.propertyNames}>
-              {e.propertyNames} is commercial (<Money minor={e.gross} /> received) and is not part
-              of MRI. Handle it under the landlord&apos;s other tax treatment.{' '}
-            </span>
-          ))}
-        </div>
-        <div className="rounded-control bg-warn-soft p-3 text-sm text-warn">
-          eTIMS-ready receipts: 131 of 134 payments. 3 October payments have no receipt yet (cash,
-          awaiting approval). Approve them first so they are included.
+        <div className="flex flex-wrap items-stretch gap-3">
+          <div className="min-w-[240px] flex-[1_1_280px] rounded-control bg-warn-soft px-3.5 py-3 text-[13px] leading-normal text-warn">
+            <strong className="block">Commercial units excluded</strong>
+            {excluded.map((e) => (
+              <span key={e.propertyNames}>
+                {e.propertyNames} is commercial (<Money minor={e.gross} /> received) and is not part
+                of MRI. Handle it under the landlord&apos;s other tax treatment.{' '}
+              </span>
+            ))}
+          </div>
+          <div className="min-w-[240px] flex-[1_1_280px] rounded-control bg-ok-soft px-3.5 py-3 text-[13px] leading-normal text-ok">
+            <strong className="block">eTIMS-ready receipts: 131 of 134 payments</strong>3 October
+            payments have no receipt yet (cash, awaiting approval). Approve them first so they are
+            included.
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2.5">

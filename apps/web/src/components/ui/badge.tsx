@@ -8,7 +8,7 @@ const toneClass: Record<Tone, string> = {
   warn: 'bg-warn-soft text-warn',
   danger: 'bg-danger-soft text-danger',
   info: 'bg-info-soft text-info',
-  neutral: 'bg-divider text-[#3f4743]',
+  neutral: 'bg-divider text-body',
 };
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

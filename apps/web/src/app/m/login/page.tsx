@@ -97,7 +97,7 @@ export default function AppLoginPage() {
           <button
             type="button"
             onClick={() => toast('Privacy notice opens in the full app (demo)', 'info')}
-            className="min-h-11 text-sm font-bold text-brand underline"
+            className="min-h-11 text-sm font-bold text-link underline"
           >
             Read our privacy notice
           </button>
@@ -140,7 +140,7 @@ export default function AppLoginPage() {
                   onKeyDown={(e) => {
                     if (e.key === 'Backspace' && !digits[i] && i > 0) refs.current[i - 1]?.focus();
                   }}
-                  className="min-h-12 w-full min-w-0 rounded-control border border-border-strong bg-surface text-center font-mono text-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand"
+                  className="min-h-12 w-full min-w-0 rounded-control border border-border-strong bg-surface text-center font-mono text-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-link"
                 />
               ))}
             </div>
@@ -155,7 +155,7 @@ export default function AppLoginPage() {
             <button
               type="button"
               onClick={() => toast('New code sent (demo)', 'info')}
-              className="min-h-11 font-bold text-brand underline"
+              className="min-h-11 font-bold text-link underline"
             >
               Resend code
             </button>
@@ -174,7 +174,7 @@ export default function AppLoginPage() {
           <button
             type="button"
             onClick={() => toast('Privacy notice opens in the full app (demo)', 'info')}
-            className="min-h-11 text-sm font-bold text-brand underline"
+            className="min-h-11 text-sm font-bold text-link underline"
           >
             Read our privacy notice
           </button>

@@ -14,7 +14,7 @@ export function UserMenu() {
         aria-haspopup="true"
         aria-label="Account menu"
         onClick={() => setOpen((o) => !o)}
-        className="flex min-h-11 items-center gap-2 rounded-control px-2 hover:bg-divider focus-visible:outline-2 focus-visible:outline-brand"
+        className="flex min-h-11 items-center gap-2 rounded-control px-2 hover:bg-divider focus-visible:outline-2 focus-visible:outline-link"
       >
         <Avatar name="Wanjiru Mwangi" />
         <span className="hidden text-left text-sm leading-tight sm:block">

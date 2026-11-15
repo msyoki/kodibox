@@ -47,18 +47,13 @@ export function Tabs({ tabs, defaultTab, className }: TabsProps) {
               onClick={() => setActive(t.id)}
               onKeyDown={(e) => onKeyDown(e, i)}
               className={cn(
-                'min-h-11 border-b-2 px-4 text-sm font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-brand',
+                'min-h-11 border-b-[3px] px-3.5 text-sm whitespace-nowrap focus-visible:outline-2 focus-visible:outline-link',
                 selected
-                  ? 'border-brand text-brand'
-                  : 'border-transparent text-muted hover:text-text',
+                  ? 'border-brand font-extrabold text-text'
+                  : 'border-transparent font-semibold text-muted hover:text-text',
               )}
             >
-              {t.label}
-              {t.badge !== undefined ? (
-                <span className="ml-2 rounded-full bg-amber px-2 py-0.5 text-xs font-bold text-text">
-                  {t.badge}
-                </span>
-              ) : null}
+              {t.badge !== undefined ? `${t.label} · ${t.badge}` : t.label}
             </button>
           );
         })}

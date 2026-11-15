@@ -75,9 +75,9 @@ function Chips({
             aria-pressed={value === o}
             onClick={() => onChange(o)}
             className={cn(
-              'min-h-11 rounded-control border px-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+              'min-h-11 rounded-control border px-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
               value === o
-                ? 'border-brand bg-brand-soft text-brand'
+                ? 'border-brand bg-brand-soft text-link'
                 : 'border-border-strong bg-surface text-muted',
             )}
           >
@@ -125,7 +125,7 @@ function NewTicketForm({ onDone }: { onDone: () => void }) {
           type="button"
           aria-label="Back"
           onClick={() => (kind ? setKind(null) : onDone())}
-          className="flex size-11 items-center justify-center rounded-control hover:bg-divider focus-visible:outline-2 focus-visible:outline-brand"
+          className="flex size-11 items-center justify-center rounded-control hover:bg-divider focus-visible:outline-2 focus-visible:outline-link"
         >
           <svg
             width="20"
@@ -156,7 +156,7 @@ function NewTicketForm({ onDone }: { onDone: () => void }) {
                   key={k.id}
                   type="button"
                   onClick={() => setKind(k.id)}
-                  className="flex min-h-24 flex-col items-start gap-1 rounded-card border border-border bg-surface p-3 text-left hover:bg-brand-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  className="flex min-h-24 flex-col items-start gap-1 rounded-card border border-border bg-surface p-3 text-left hover:bg-brand-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
                 >
                   <strong className="text-[15px]">{k.label}</strong>
                   <span className="text-xs text-muted">{k.hint}</span>
@@ -215,7 +215,7 @@ function NewTicketForm({ onDone }: { onDone: () => void }) {
                     type="button"
                     aria-label="Add photo"
                     onClick={() => setPhotos((p) => p + 1)}
-                    className="flex size-16 items-center justify-center rounded-control border border-dashed border-brand text-2xl text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    className="flex size-16 items-center justify-center rounded-control border border-dashed border-brand text-2xl text-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
                   >
                     +
                   </button>
@@ -268,7 +268,7 @@ export default function TenantTicketsPage() {
           <Link
             key={t.id}
             href={`/m/tenant/tickets/${t.id}`}
-            className="flex flex-col gap-1 rounded-card border border-border bg-surface p-3 text-text no-underline hover:bg-brand-tint focus-visible:outline-2 focus-visible:outline-brand"
+            className="flex flex-col gap-1 rounded-card border border-border bg-surface p-3 text-text no-underline hover:bg-brand-tint focus-visible:outline-2 focus-visible:outline-link"
           >
             <span className="flex items-start justify-between gap-2">
               <strong className="text-sm">{t.title}</strong>

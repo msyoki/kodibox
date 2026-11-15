@@ -126,7 +126,13 @@ export function ManagerApprovals() {
                       <span className="text-sm">
                         <strong className="block font-mono">{u.reference}</strong>
                         <span className="text-xs text-muted">
-                          <MaskedText kind="phone" value={u.payerPhone} /> · account &quot;
+                          {u.payerPhoneMasked ??
+                            (u.payerPhone ? (
+                              <MaskedText kind="phone" value={u.payerPhone} />
+                            ) : (
+                              'No phone'
+                            ))}{' '}
+                          · account &quot;
                           {u.accountEntered}&quot;
                         </span>
                       </span>

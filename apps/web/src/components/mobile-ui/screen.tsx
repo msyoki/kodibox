@@ -74,10 +74,10 @@ export function PhotoButton({
       aria-pressed={added}
       className={cn(
         'flex min-h-12 w-full items-center justify-center gap-2 rounded-control border border-dashed px-3 text-sm font-bold',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
         added
           ? 'border-ok bg-ok-soft text-ok'
-          : 'border-brand bg-surface text-brand hover:bg-brand-tint',
+          : 'border-brand bg-surface text-link hover:bg-brand-tint',
       )}
     >
       <span aria-hidden="true">{added ? '✓' : '▣'}</span>
@@ -95,7 +95,7 @@ export function Mark({
   tone?: 'brand' | 'ok' | 'warn' | 'danger' | 'info';
 }) {
   const t = {
-    brand: 'bg-brand-soft text-brand',
+    brand: 'bg-brand-soft text-link',
     ok: 'bg-ok-soft text-ok',
     warn: 'bg-warn-soft text-warn',
     danger: 'bg-danger-soft text-danger',

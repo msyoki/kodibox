@@ -5,6 +5,7 @@
  * Every function takes an optional `src` as its LAST argument. Server pages omit it (static seed).
  * Client pages that must react to DemoStore mutations pass `useDemoStore().data`.
  */
+import { daysAgoLabel, getReconStatus } from './recon';
 import { DEMO_TODAY, seedData } from './seed';
 import type {
   AuditEvent,
@@ -364,6 +365,7 @@ export const listMeterReadings = (propertyId?: string, src: DemoData = seedData)
 export interface BadgeCounts {
   openTickets: number;
   unmatched: number;
+  claimsPending: number;
   cashPending: number;
   /** unmatched + cash awaiting approval: the Payments nav badge */
   payments: number;
@@ -372,11 +374,13 @@ export interface BadgeCounts {
 export function getBadgeCounts(src: DemoData = seedData): BadgeCounts {
   const unmatched = src.unmatched.length;
   const cashPending = src.payments.filter((p) => p.status === 'awaiting_approval').length;
+  const claimsPending = src.claims.filter((c) => c.status === 'pending').length;
   return {
     openTickets: src.tickets.filter(isOpenTicket).length,
     unmatched,
+    claimsPending,
     cashPending,
-    payments: unmatched,
+    payments: unmatched + claimsPending,
   };
 }
 
@@ -445,6 +449,7 @@ export function getDashboard(src: DemoData = seedData): Dashboard {
 
   const badges = getBadgeCounts(src);
   const unmatchedTotal = src.unmatched.reduce((s, u) => s + u.amount, 0);
+  const recon = getReconStatus(src);
   const metered = src.meterReadings.filter((m) => m.propertyId === 'prop_mvule');
   const readingsDone = metered.filter((m) => m.status !== 'pending').length;
   const endingLeases = src.leases.filter((l) => l.status === 'ending_soon');
@@ -452,9 +457,23 @@ export function getDashboard(src: DemoData = seedData): Dashboard {
   const kes = (minor: number) => `KES ${Math.round(minor / 100).toLocaleString('en-KE')}`;
   const attention: AttentionItem[] = [
     {
+      id: 'att_import',
+      title: `Last statement imported ${daysAgoLabel(recon.lastImportDaysAgo)}`,
+      sub: 'Import your latest M-Pesa or bank statement to match new payments',
+      href: '/payments',
+      tone: (recon.lastImportDaysAgo ?? 99) > 7 ? 'warning' : 'info',
+    },
+    {
       id: 'att_unmatched',
-      title: `${badges.unmatched} unmatched M-Pesa payments`,
-      sub: `${kes(unmatchedTotal)} · wrong or missing account numbers`,
+      title: `${badges.unmatched} unmatched lines`,
+      sub: `${kes(unmatchedTotal)} · need a tenant assigned`,
+      href: '/payments',
+      tone: 'warning',
+    },
+    {
+      id: 'att_claims',
+      title: `${badges.claimsPending} claims pending verification`,
+      sub: 'Tenants say they paid; waiting for a statement line or your approval',
       href: '/payments',
       tone: 'warning',
     },

@@ -178,7 +178,7 @@ export function PropertyDetail({
                   </TD>
                   <TD>
                     {u.tenantId ? (
-                      <Link href={`/tenants/${u.tenantId}`} className="font-semibold text-brand">
+                      <Link href={`/tenants/${u.tenantId}`} className="font-semibold text-link">
                         {u.tenantName}
                       </Link>
                     ) : (
@@ -195,7 +195,7 @@ export function PropertyDetail({
                     {u.tenantId ? (
                       <Link
                         href={`/tenants/${u.tenantId}`}
-                        className="inline-flex min-h-11 items-center font-semibold text-brand"
+                        className="inline-flex min-h-11 items-center font-semibold text-link"
                       >
                         Open lease
                       </Link>

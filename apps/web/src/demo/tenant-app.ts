@@ -1,60 +1,66 @@
 /**
- * Static persona data and pure helpers for the tenant mobile views (P-06).
- * Persona: Peter Otieno, B-12 Riverside Court, balance KES 16,700. Amounts are integer KES cents.
+ * Tenant mobile views (P-06). The persona data and pure helpers live in `@kodibox/demo` (bigint
+ * KES cents, shared with the mobile app); this file adapts them to the number cents the web
+ * prototype uses. Ticket views still run over the web store's data below.
  */
-import { kes } from '@/lib/money';
-import { DEMO_TODAY } from './seed';
+import {
+  BALANCE as BALANCE_MINOR,
+  DUE_LABEL,
+  DUE_LINES as DUE_LINES_MINOR,
+  HOME_LINES as HOME_LINES_MINOR,
+  LANDLORD_NAME,
+  MIN_NOTICE_DAYS,
+  PAYBILL_PLACEHOLDER,
+  PROPERTY_LABEL,
+  RECENT_RECEIPTS as RECEIPTS_MINOR,
+  RENT_ONLY as RENT_ONLY_MINOR,
+  STATEMENT_MONTHS,
+  TENANT_ACCOUNT,
+  TENANT_DOCS,
+  TENANT_FIRST_NAME,
+  TENANT_NOTICES,
+  allocatePayment as allocateMinor,
+  earliestVacateDate,
+  getLedger as getLedgerMinor,
+  type StatementMonth,
+} from '@kodibox/demo';
+import { toNumbers } from './adapt';
 import { getTicket, listTickets, type TicketRow } from './index';
 import type { DemoData, TicketMessage, TicketStatus } from './types';
 
-export const PAYBILL_PLACEHOLDER = '[PAYBILL]';
-export const TENANT_ACCOUNT = 'B-12';
-export const TENANT_FIRST_NAME = 'Peter';
-export const LANDLORD_NAME = 'Mwangi Properties';
-export const PROPERTY_LABEL = 'B-12 · Riverside Court';
-export const DUE_LABEL = '5 November';
-export const MIN_NOTICE_DAYS = 30;
+export {
+  DUE_LABEL,
+  LANDLORD_NAME,
+  MIN_NOTICE_DAYS,
+  PAYBILL_PLACEHOLDER,
+  PROPERTY_LABEL,
+  STATEMENT_MONTHS,
+  TENANT_ACCOUNT,
+  TENANT_DOCS,
+  TENANT_FIRST_NAME,
+  TENANT_NOTICES,
+  earliestVacateDate,
+};
+export type { StatementMonth };
+export type { TenantNotice } from '@kodibox/demo';
 
 export interface DueLine {
   label: string;
   amount: number;
 }
 
-/** Charges making up the balance, in allocation order (oldest first). */
-export const DUE_LINES: DueLine[] = [
-  { label: 'Water · October', amount: kes(1200) },
-  { label: 'Late fee · October', amount: kes(200) },
-  { label: 'November rent', amount: kes(14000) },
-  { label: 'Service charge', amount: kes(1300) },
-];
-
-/** Display order used on the home screen. */
-export const HOME_LINES: DueLine[] = [
-  { label: 'November rent', amount: kes(14000) },
-  { label: 'Service charge', amount: kes(1300) },
-  { label: 'Water · October (13 units)', amount: kes(1200) },
-  { label: 'Late fee · October', amount: kes(200) },
-];
-
-export const BALANCE = DUE_LINES.reduce((s, l) => s + l.amount, 0);
-export const RENT_ONLY = kes(14000);
+export const DUE_LINES: DueLine[] = toNumbers([...DUE_LINES_MINOR]);
+export const HOME_LINES: DueLine[] = toNumbers([...HOME_LINES_MINOR]);
+export const BALANCE = Number(BALANCE_MINOR);
+export const RENT_ONLY = Number(RENT_ONLY_MINOR);
 
 export interface Allocation {
   lines: DueLine[];
   newBalance: number;
 }
 
-/** Oldest charges are settled first; whatever is left stays as the balance. */
 export function allocatePayment(amount: number): Allocation {
-  let left = amount;
-  const lines: DueLine[] = [];
-  for (const l of DUE_LINES) {
-    if (left <= 0) break;
-    const part = Math.min(left, l.amount);
-    lines.push({ label: part < l.amount ? `${l.label} (part)` : l.label, amount: part });
-    left -= part;
-  }
-  return { lines, newBalance: Math.max(0, BALANCE - amount) };
+  return toNumbers(allocateMinor(BigInt(amount)));
 }
 
 export interface ReceiptItem {
@@ -64,11 +70,12 @@ export interface ReceiptItem {
   amount: number;
 }
 
-export const RECENT_RECEIPTS: ReceiptItem[] = [
-  { title: 'October rent', ref: 'TJ9K2LQ7XA', when: '3 Oct', amount: kes(15300) },
-  { title: 'September rent', ref: 'TI4B8MN2VD', when: '4 Sep', amount: kes(15300) },
-  { title: 'August rent', ref: 'TH1Q5WE9RS', when: '2 Aug', amount: kes(16100) },
-];
+export const RECENT_RECEIPTS: ReceiptItem[] = RECEIPTS_MINOR.map((r) => ({
+  title: r.title,
+  ref: r.ref,
+  when: r.when,
+  amount: Number(r.amount),
+}));
 
 export interface LedgerEntry {
   title: string;
@@ -81,77 +88,9 @@ export interface LedgerRow extends LedgerEntry {
   balance: number;
 }
 
-export const STATEMENT_MONTHS = [
-  { key: 'nov', label: 'Nov 2026' },
-  { key: 'oct', label: 'Oct 2026' },
-  { key: 'sep', label: 'Sep 2026' },
-] as const;
-export type StatementMonth = (typeof STATEMENT_MONTHS)[number]['key'];
-
-const LEDGER: Record<StatementMonth, LedgerEntry[]> = {
-  nov: [
-    { title: 'November rent', sub: 'Invoice · 1 Nov', delta: kes(14000) },
-    { title: 'Service charge', sub: 'Invoice · 1 Nov', delta: kes(1300) },
-    { title: 'Water · October (13 units)', sub: 'Invoice · 1 Nov', delta: kes(1200) },
-    { title: 'Late fee · October', sub: 'Invoice · 5 Nov', delta: kes(200) },
-  ],
-  oct: [
-    { title: 'October rent', sub: 'Invoice · 1 Oct', delta: kes(14000) },
-    { title: 'Service charge', sub: 'Invoice · 1 Oct', delta: kes(1300) },
-    { title: 'Payment · M-Pesa', sub: 'TJ9K2LQ7XA · 3 Oct', delta: -kes(15300) },
-  ],
-  sep: [
-    { title: 'September rent', sub: 'Invoice · 1 Sep', delta: kes(14000) },
-    { title: 'Service charge', sub: 'Invoice · 1 Sep', delta: kes(1300) },
-    { title: 'Payment · M-Pesa', sub: 'TI4B8MN2VD · 4 Sep', delta: -kes(15300) },
-  ],
-};
-
 /** Running balance, newest entry first. Every month opens at zero in this persona. */
 export function getLedger(month: StatementMonth): LedgerRow[] {
-  let running = 0;
-  const rows = LEDGER[month].map((e) => {
-    running += e.delta;
-    return { ...e, balance: running };
-  });
-  return rows.reverse();
-}
-
-export interface TenantNotice {
-  id: string;
-  title: string;
-  tag: 'Info' | 'Action';
-  body: string;
-  meta: string;
-}
-
-export const TENANT_NOTICES: TenantNotice[] = [
-  {
-    id: 'n1',
-    title: 'Water interruption',
-    tag: 'Info',
-    body: 'Nairobi Water will cut supply on Thursday 5 Nov, 9:00 to 15:00 for pipe repairs. Please store water ahead.',
-    meta: `Sent 2 Nov · ${LANDLORD_NAME}`,
-  },
-  {
-    id: 'n2',
-    title: 'Rent review notice',
-    tag: 'Action',
-    body: 'Rent for B-12 changes from KES 14,000 to KES 14,700 per month. Effective 1 February 2027, with 90 days notice as per your lease.',
-    meta: `Sent 30 Oct · ${LANDLORD_NAME}`,
-  },
-];
-
-export const TENANT_DOCS = [
-  { id: 'lease', title: 'Lease agreement', sub: 'PDF · signed 1 Mar 2025' },
-  { id: 'inspection', title: 'Move-in inspection report', sub: 'PDF · 14 photos · 1 Mar 2025' },
-];
-
-/** Earliest allowed move-out date: today plus the lease notice period, as YYYY-MM-DD. */
-export function earliestVacateDate(): string {
-  const d = new Date(`${DEMO_TODAY}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + MIN_NOTICE_DAYS);
-  return d.toISOString().slice(0, 10);
+  return toNumbers(getLedgerMinor(month));
 }
 
 // ---- tickets ----------------------------------------------------------------------------

@@ -107,7 +107,7 @@ export function TenantsList({
                   <TD>
                     <Link
                       href={`/tenants/${t.id}`}
-                      className="inline-flex min-h-11 items-center font-semibold text-brand"
+                      className="inline-flex min-h-11 items-center font-semibold text-link"
                     >
                       {t.name}
                     </Link>

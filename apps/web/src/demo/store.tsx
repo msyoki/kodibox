@@ -13,7 +13,28 @@
  */
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { getBadgeCounts, seedData, type BadgeCounts } from './index';
-import type { AuditEvent, DemoData, Invoice, Payment, TicketMessage, TicketStatus } from './types';
+import {
+  addAudit,
+  applyImport,
+  applyToInvoice,
+  approveClaim as approveClaimFn,
+  assignUnmatched,
+  ignoreUnmatched,
+  rejectClaim as rejectClaimFn,
+  restoreNotRent as restoreNotRentFn,
+  savePaymentInstruction,
+  splitUnmatched,
+  submitClaim as submitClaimFn,
+  type ClaimInput,
+  type ImportPreview,
+} from './recon';
+import type {
+  DemoData,
+  ImportReminder,
+  PaymentInstruction,
+  TicketMessage,
+  TicketStatus,
+} from './types';
 
 export interface NewTicketMessage {
   author: string;
@@ -23,8 +44,21 @@ export interface NewTicketMessage {
 }
 
 export interface DemoActions {
-  /** Match an unmatched M-Pesa payment to a tenant invoice (creates a matched Payment, updates the invoice). */
-  matchPayment: (unmatchedId: string, tenantId: string, invoiceId: string) => void;
+  /** Assign an unmatched line to a tenant (oldest invoice first, preferring `invoiceId`; overpayment becomes credit). */
+  matchPayment: (unmatchedId: string, tenantId: string, invoiceId?: string) => void;
+  splitPayment: (unmatchedId: string, parts: { tenantId: string; amount: number }[]) => void;
+  /** Set a line aside as not rent (reversible). */
+  ignorePayment: (unmatchedId: string) => void;
+  restoreNotRent: (id: string) => void;
+  /** Commit a previewed statement import. */
+  commitImport: (preview: ImportPreview) => void;
+  submitClaim: (input: ClaimInput) => void;
+  approveClaim: (claimId: string, note: string, assignTenantId?: string) => void;
+  rejectClaim: (claimId: string, reason: string) => void;
+  savePaymentInstruction: (i: PaymentInstruction) => void;
+  setImportReminder: (r: ImportReminder) => void;
+  /** Generic audited event for actions with no other state change (e.g. SMS reminders). */
+  logAudit: (action: string, entity: string, summary: string) => void;
   /** Maker-checker: approve a caretaker-recorded cash payment. */
   approveCash: (paymentId: string, approver?: string) => void;
   rejectCash: (paymentId: string, approver?: string) => void;
@@ -45,75 +79,59 @@ const DemoStoreContext = createContext<DemoStoreValue | null>(null);
 
 const NOW = () => '2026-11-02T10:00:00+03:00';
 const ACTOR = 'Wanjiru Mwangi';
-
-function withAudit(
-  d: DemoData,
-  action: string,
-  entity: string,
-  summary: string,
-  actor = ACTOR,
-): DemoData {
-  const event: AuditEvent = {
-    id: `ae_live_${d.auditEvents.length + 1}`,
-    at: NOW(),
-    actor,
-    action,
-    entity,
-    summary,
-  };
-  return { ...d, auditEvents: [event, ...d.auditEvents] };
-}
-
-function applyToInvoice(invoices: Invoice[], invoiceId: string, amount: number): Invoice[] {
-  return invoices.map((i) => {
-    if (i.id !== invoiceId) return i;
-    const paid = Math.min(i.total, i.paid + amount);
-    const balance = i.total - paid;
-    return {
-      ...i,
-      paid,
-      balance,
-      status: balance === 0 ? 'paid' : 'partial',
-      oldestUnpaidDays: balance === 0 ? 0 : i.oldestUnpaidDays,
-    };
-  });
-}
+const withAudit = addAudit;
 
 export function DemoStoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<DemoData>(() => structuredClone(seedData));
 
-  const matchPayment = useCallback((unmatchedId: string, tenantId: string, invoiceId: string) => {
-    setData((d) => {
-      const um = d.unmatched.find((u) => u.id === unmatchedId);
-      const tenant = d.tenants.find((t) => t.id === tenantId);
-      const invoice = d.invoices.find((i) => i.id === invoiceId);
-      if (!um || !tenant || !invoice) return d;
-      const payment: Payment = {
-        id: `pay_live_${um.id}`,
-        tenantId,
-        unitId: tenant.unitId,
-        propertyId: tenant.propertyId,
-        invoiceId,
-        amount: um.amount,
-        channel: um.channel,
-        reference: um.reference,
-        receivedAt: um.receivedAt,
-        status: 'matched',
-      };
-      const next: DemoData = {
-        ...d,
-        unmatched: d.unmatched.filter((u) => u.id !== unmatchedId),
-        payments: [payment, ...d.payments],
-        invoices: applyToInvoice(d.invoices, invoiceId, um.amount),
-      };
-      return withAudit(
-        next,
-        'payment.matched',
-        um.reference,
-        `Matched ${um.reference} to ${tenant.name}`,
-      );
-    });
+  const matchPayment = useCallback((unmatchedId: string, tenantId: string, invoiceId?: string) => {
+    setData((d) => assignUnmatched(d, unmatchedId, tenantId, invoiceId));
   }, []);
+  const splitPayment = useCallback(
+    (unmatchedId: string, parts: { tenantId: string; amount: number }[]) =>
+      setData((d) => splitUnmatched(d, unmatchedId, parts)),
+    [],
+  );
+  const ignorePayment = useCallback((id: string) => setData((d) => ignoreUnmatched(d, id)), []);
+  const restoreNotRent = useCallback((id: string) => setData((d) => restoreNotRentFn(d, id)), []);
+  const commitImport = useCallback(
+    (preview: ImportPreview) => setData((d) => applyImport(d, preview)),
+    [],
+  );
+  const submitClaim = useCallback(
+    (input: ClaimInput) => setData((d) => submitClaimFn(d, input)),
+    [],
+  );
+  const approveClaim = useCallback(
+    (id: string, note: string, assign?: string) =>
+      setData((d) => approveClaimFn(d, id, note, assign)),
+    [],
+  );
+  const rejectClaim = useCallback(
+    (id: string, reason: string) => setData((d) => rejectClaimFn(d, id, reason)),
+    [],
+  );
+  const savePaymentInstructionAction = useCallback(
+    (i: PaymentInstruction) => setData((d) => savePaymentInstruction(d, i)),
+    [],
+  );
+  const setImportReminder = useCallback(
+    (r: ImportReminder) =>
+      setData((d) =>
+        withAudit(
+          { ...d, importReminder: r },
+          'settings.import_reminder_changed',
+          'import_reminder',
+          `Statement import reminder set to ${r}`,
+        ),
+      ),
+    [],
+  );
+  const logAudit = useCallback(
+    (action: string, entity: string, summary: string) =>
+      setData((d) => withAudit(d, action, entity, summary)),
+    [],
+  );
 
   const approveCash = useCallback((paymentId: string, approver = ACTOR) => {
     setData((d) => {
@@ -218,6 +236,16 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
       badges: getBadgeCounts(data),
       actions: {
         matchPayment,
+        splitPayment,
+        ignorePayment,
+        restoreNotRent,
+        commitImport,
+        submitClaim,
+        approveClaim,
+        rejectClaim,
+        savePaymentInstruction: savePaymentInstructionAction,
+        setImportReminder,
+        logAudit,
         approveCash,
         rejectCash,
         updateTicketStatus,
@@ -229,6 +257,16 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
     [
       data,
       matchPayment,
+      splitPayment,
+      ignorePayment,
+      restoreNotRent,
+      commitImport,
+      submitClaim,
+      approveClaim,
+      rejectClaim,
+      savePaymentInstructionAction,
+      setImportReminder,
+      logAudit,
       approveCash,
       rejectCash,
       updateTicketStatus,

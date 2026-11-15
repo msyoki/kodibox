@@ -8,7 +8,7 @@ import { Button, Checkbox, Field, Input } from '@/components/ui';
 const VALUES = [
   {
     title: 'Never holds your money',
-    text: 'Rent goes straight to your own M-Pesa paybill or bank account. Kodibox only reconciles it.',
+    text: 'Rent goes straight to your own M-Pesa paybill or bank account. Kodibox only reconciles the statements you import.',
   },
   {
     title: 'Automatic M-Pesa reconciliation',
@@ -16,7 +16,7 @@ const VALUES = [
   },
   {
     title: 'A tenant app that tenants use',
-    text: 'Pay by STK push, see statements and send repair requests from their phone.',
+    text: 'See how to pay, send proof of payment, view statements and request repairs from their phone.',
   },
 ];
 
@@ -96,7 +96,7 @@ export function LoginForm() {
             </div>
           ))}
         </div>
-        <p className="m-0 text-[13px] text-[#bfd8d2]">
+        <p className="m-0 text-[13px] text-on-brand">
           Data Protection Act 2019 compliant. Every money change is audited and reversible.
         </p>
       </aside>
@@ -110,7 +110,7 @@ export function LoginForm() {
               aria-labelledby="s1"
             >
               <div>
-                <span className="text-xs font-bold tracking-wider text-brand uppercase">
+                <span className="text-xs font-bold tracking-wider text-link uppercase">
                   Step 1 of 2
                 </span>
                 <h2 id="s1" className="m-0 mt-1 text-2xl font-extrabold tracking-tight">
@@ -154,7 +154,7 @@ export function LoginForm() {
           ) : (
             <form onSubmit={onVerify} className="flex flex-col gap-[18px]" aria-labelledby="s2h">
               <div>
-                <span className="text-xs font-bold tracking-wider text-brand uppercase">
+                <span className="text-xs font-bold tracking-wider text-link uppercase">
                   Step 2 of 2 &middot; Two-factor
                 </span>
                 <h2 id="s2h" className="m-0 mt-1 text-2xl font-extrabold tracking-tight">
@@ -180,7 +180,7 @@ export function LoginForm() {
                     onChange={(e) => setDigit(i, e.target.value)}
                     onKeyDown={(e) => onKeyDown(i, e)}
                     onPaste={onPaste}
-                    className="box-border min-h-14 w-full min-w-0 flex-1 rounded-control border border-[#b9cfca] bg-surface text-center font-mono text-[22px] font-medium focus-visible:outline-2 focus-visible:outline-brand"
+                    className="box-border min-h-14 w-full min-w-0 flex-1 rounded-control border border-input-line bg-surface text-center font-mono text-[22px] font-medium focus-visible:outline-2 focus-visible:outline-link"
                   />
                 ))}
               </fieldset>
@@ -200,7 +200,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="min-h-11 w-fit cursor-pointer border-0 bg-transparent p-0 text-left font-semibold text-brand underline"
+                  className="min-h-11 w-fit cursor-pointer border-0 bg-transparent p-0 text-left font-semibold text-link underline"
                 >
                   Back to step 1
                 </button>

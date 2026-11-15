@@ -34,16 +34,25 @@ export function BillingView() {
     <div className="flex flex-col gap-4">
       <Card aria-labelledby="plan">
         <CardHeader title="Current plan" id="plan" />
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="text-xl font-extrabold">{current.name}</div>
-            <div className="text-sm text-muted">
-              <Money minor={current.priceMonthly} /> per month · up to {current.unitLimit} units ·
-              150 units in use
-            </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <div className="flex flex-wrap items-baseline gap-2.5">
+            <span className="text-[26px] font-extrabold">{current.name}</span>
+            <span className="font-mono text-[15px] text-muted">
+              <Money minor={current.priceMonthly} /> per month
+            </span>
           </div>
           <Badge tone="ok">Active</Badge>
         </div>
+        <dl className="m-0 mt-3.5 grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-3.5">
+          <div>
+            <dt className="text-[13px] text-muted">Units in use</dt>
+            <dd className="m-0 mt-1 font-mono text-xl">150</dd>
+          </div>
+          <div>
+            <dt className="text-[13px] text-muted">Unit limit</dt>
+            <dd className="m-0 mt-1 font-mono text-xl">{current.unitLimit}</dd>
+          </div>
+        </dl>
         <p className="mt-3 mb-0 text-xs text-muted">
           This is the only money Kodibox receives: a subscription fee for the software. Tenant rent
           goes to your paybill or bank account, never through Kodibox.
@@ -58,22 +67,25 @@ export function BillingView() {
             return (
               <div
                 key={p.id}
-                className={`flex flex-col gap-2 rounded-card border p-4 ${isCurrent ? 'border-brand bg-brand-tint' : 'border-border'}`}
+                className={`flex flex-col gap-2.5 rounded-card bg-surface p-5 ${isCurrent ? 'border-2 border-brand' : 'border border-border'}`}
               >
-                <div className="font-bold">{p.name}</div>
-                <div>
-                  <Money minor={p.priceMonthly} />
-                  <span className="text-sm text-muted"> / month</span>
+                <div className="flex items-center justify-between gap-2">
+                  <strong className="text-[17px] font-extrabold">{p.name}</strong>
+                  {isCurrent ? <Badge tone="info">Current</Badge> : null}
                 </div>
-                <ul className="m-0 flex-1 list-disc pl-5 text-sm">
+                <div>
+                  <Money minor={p.priceMonthly} className="text-xl font-medium" />
+                  <span className="text-[13px] text-muted"> / month</span>
+                </div>
+                <ul className="m-0 flex-1 list-disc pl-[18px] text-sm leading-relaxed">
                   {p.features.map((f) => (
                     <li key={f}>{f}</li>
                   ))}
                 </ul>
                 {isCurrent ? (
-                  <Badge tone="ok" className="self-start">
+                  <span className="inline-flex min-h-11 items-center justify-center rounded-control bg-brand-soft text-sm font-bold text-link">
                     Your plan
-                  </Badge>
+                  </span>
                 ) : (
                   <Button
                     variant="secondary"

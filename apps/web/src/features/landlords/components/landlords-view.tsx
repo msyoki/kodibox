@@ -82,7 +82,7 @@ export function LandlordsView() {
                       type="button"
                       aria-pressed={active}
                       onClick={() => setSelectedId(s.landlord.id)}
-                      className="min-h-11 text-left font-semibold text-brand underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-brand"
+                      className="min-h-11 text-left font-semibold text-link underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-link"
                     >
                       {s.landlord.name}
                     </button>
@@ -119,28 +119,47 @@ export function LandlordsView() {
               </Button>
             }
           />
-          <dl className="m-0 grid max-w-md grid-cols-[1fr_auto] gap-x-6 gap-y-2 text-sm">
-            <dt>Rent collected</dt>
-            <dd className="m-0 text-right">
-              <Money minor={rem.gross} />
-            </dd>
-            <dt>Less commission ({sel.landlord.commissionPct}%)</dt>
-            <dd className="m-0 text-right">
-              <Money minor={-rem.commission} />
-            </dd>
-            <dt>Less approved expenses</dt>
-            <dd className="m-0 text-right">
-              <Money minor={-rem.expenses} />
-            </dd>
-            <dt className="border-t border-border pt-2 font-bold">To remit</dt>
-            <dd className="m-0 border-t border-border pt-2 text-right text-lg font-bold">
-              <Money minor={net} />
-            </dd>
+          <dl className="m-0 overflow-hidden rounded-control border border-divider text-[15px]">
+            <div className="flex justify-between gap-3 bg-soft px-4 py-3">
+              <dt>Rent and charges collected</dt>
+              <dd className="m-0">
+                <Money minor={rem.gross} />
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3 border-t border-divider px-4 py-3">
+              <dt>
+                Less commission{' '}
+                <span className="text-[13px] text-muted">({sel.landlord.commissionPct}%)</span>
+              </dt>
+              <dd className="m-0">
+                <Money minor={-rem.commission} />
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3 border-t border-divider px-4 py-3">
+              <dt>Less approved expenses</dt>
+              <dd className="m-0">
+                <Money minor={-rem.expenses} />
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3 border-t-2 border-brand bg-brand-soft px-4 py-3.5 font-extrabold">
+              <dt>Amount to remit to landlord</dt>
+              <dd className="m-0 text-lg">
+                <Money minor={net} />
+              </dd>
+            </div>
           </dl>
-          <p className="m-0 text-xs text-muted">
-            Collections − commission − expenses = remittance. Tenants paid straight to the property
-            paybill or account; this statement only records what you pass on.
+          <p className="m-0 font-mono text-[13px] text-muted">
+            Collections − commission − expenses = remittance
           </p>
+          <div
+            role="note"
+            className="rounded-control bg-info-soft px-3.5 py-3 text-[13px] leading-normal text-info"
+          >
+            <strong className="block">Kodibox does not move money</strong>
+            Tenants paid straight to the property paybill or account. Pay the landlord from your own
+            bank or M-Pesa, then record the bank reference here. The remittance is logged and can be
+            reversed with a reason; it is never deleted.
+          </div>
           <div className="flex flex-wrap items-center gap-2.5">
             {rem.status === 'due' ? (
               <Button onClick={() => setPayOpen(true)}>Mark remitted</Button>

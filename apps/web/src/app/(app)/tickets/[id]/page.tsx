@@ -12,7 +12,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
         title="Ticket"
         eyebrow="Complaints, repairs and billing queries from tenants"
         actions={
-          <Link href="/tickets" className="font-semibold text-brand underline">
+          <Link href="/tickets" className="font-semibold text-link underline">
             Back to tickets
           </Link>
         }

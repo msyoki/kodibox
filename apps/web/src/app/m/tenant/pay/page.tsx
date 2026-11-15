@@ -1,185 +1,301 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
-import { Button, Field, Input, MaskedText, Money, useToast } from '@/components/ui';
+import { Badge, Button, Field, Input, Money, Textarea, useToast } from '@/components/ui';
 import { BackHeader } from '@/components/tenant-app/bits';
-import { useTenantLocal } from '@/components/tenant-app/local-state';
 import { DEMO_TENANT_ID } from '@/demo';
+import { MAX_SMS_CHARS } from '@/features/payments/reconcile-adapter';
+import { getInstruction, payeeNamesOf, previewSms, tenantPaidDelta } from '@/demo/recon';
 import { useDemoStore } from '@/demo/store';
-import {
-  BALANCE,
-  LANDLORD_NAME,
-  PAYBILL_PLACEHOLDER,
-  RENT_ONLY,
-  TENANT_ACCOUNT,
-} from '@/demo/tenant-app';
+import { BALANCE, LANDLORD_NAME, TENANT_ACCOUNT } from '@/demo/tenant-app';
+import { formatWhen } from '@/demo/format';
 import { kes } from '@/lib/money';
 
-const KE_PHONE = /^(?:\+?254|0)[17]\d{8}$/;
+type Mode = 'how' | 'sms' | 'slip' | 'sent';
+
+function CopyRow({ label, value }: { label: string; value: string }) {
+  const { toast } = useToast();
+  return (
+    <div className="flex items-center justify-between gap-3 border-t border-divider py-2.5 first:border-t-0">
+      <span className="flex min-w-0 flex-col">
+        <span className="text-xs text-muted">{label}</span>
+        <strong className="truncate font-mono text-[15px]">{value}</strong>
+      </span>
+      <Button
+        variant="secondary"
+        size="sm"
+        aria-label={`Copy ${label}`}
+        onClick={() => {
+          void navigator.clipboard?.writeText(value).catch(() => undefined);
+          toast(`${label} copied`, 'ok');
+        }}
+      >
+        Copy
+      </Button>
+    </div>
+  );
+}
 
 export default function TenantPayPage() {
-  const { data } = useDemoStore();
-  const { paid, recordPayment } = useTenantLocal();
-  const { toast } = useToast();
-  const owed = Math.max(0, BALANCE - paid);
+  const { data, actions } = useDemoStore();
   const tenant = data.tenants.find((t) => t.id === DEMO_TENANT_ID);
+  const instr = getInstruction(data, tenant?.propertyId);
+  const owed = Math.max(0, BALANCE - tenantPaidDelta(data, DEMO_TENANT_ID));
+  const myClaims = data.claims.filter((c) => c.tenantId === DEMO_TENANT_ID);
 
-  const [amountText, setAmountText] = useState(String(owed / 100));
-  const [otherPhone, setOtherPhone] = useState(false);
-  const [phoneText, setPhoneText] = useState('');
-  const [errors, setErrors] = useState<{ amount?: string; phone?: string }>({});
-  const [sentAmount, setSentAmount] = useState<number | null>(null);
+  const [mode, setMode] = useState<Mode>('how');
+  const [sms, setSms] = useState('');
+  const [touched, setTouched] = useState(false);
+  const [slipName, setSlipName] = useState('');
+  const [slipAmount, setSlipAmount] = useState('');
+  const [slipCode, setSlipCode] = useState('');
+  const [slipError, setSlipError] = useState('');
 
-  const rentOnly = Math.min(RENT_ONLY, owed);
+  const parsed = sms.trim() ? previewSms(sms, payeeNamesOf(data)) : null;
+  const tooLong = sms.length > MAX_SMS_CHARS;
 
-  function send() {
-    const shillings = Number(amountText.replace(/[^0-9]/g, ''));
-    const minor = kes(shillings);
-    const next: typeof errors = {};
-    if (!shillings || shillings < 10) next.amount = 'Enter at least KES 10.';
-    else if (minor > owed) next.amount = 'That is more than you owe. Enter the balance or less.';
-    if (otherPhone && !KE_PHONE.test(phoneText.replace(/\s/g, '')))
-      next.phone = 'Enter a Kenyan number such as 0712 345 678.';
-    setErrors(next);
-    if (next.amount || next.phone) return;
-    setSentAmount(minor);
-    toast('M-Pesa prompt sent', 'info');
-  }
-
-  if (sentAmount !== null) {
+  if (mode === 'sent') {
     return (
       <div className="flex flex-1 flex-col">
-        <BackHeader href="/m/tenant" label="Back to home" title="Pay rent" />
+        <BackHeader href="/m/tenant" label="Back to home" title="How to pay" />
         <div role="status" className="flex flex-col items-center gap-4 p-6 text-center">
-          <div
-            aria-hidden="true"
-            className="flex size-16 items-center justify-center rounded-full bg-brand-soft text-2xl"
-          >
-            ☎
-          </div>
-          <h2 className="m-0 text-xl font-extrabold">Check your phone</h2>
+          <h2 className="m-0 text-xl font-extrabold">Thanks, we have your proof</h2>
+          <Badge tone="warn">Pending verification</Badge>
           <p className="m-0 text-sm text-muted">
-            Enter your M-Pesa PIN on{' '}
-            {otherPhone ? (
-              'the number you entered'
-            ) : tenant ? (
-              <MaskedText kind="phone" value={tenant.phone} />
-            ) : (
-              'your phone'
-            )}{' '}
-            to pay{' '}
-            <strong className="text-text">
-              <Money minor={sentAmount} />
-            </strong>{' '}
-            to {LANDLORD_NAME}.
+            Your landlord confirms it against their statement. Your balance updates once it is
+            verified. You do not need to send it again.
           </p>
-          <ol className="m-0 flex w-full list-none flex-col gap-2 rounded-card border border-border bg-surface p-4 text-left text-sm">
-            <li>✓ Prompt sent</li>
-            <li className="text-muted">… Waiting for your PIN</li>
-            <li className="text-muted">○ Receipt by SMS</li>
-          </ol>
-          <div className="flex w-full flex-col gap-2">
-            <Link
-              href="/m/tenant/receipt"
-              onClick={() => recordPayment(sentAmount)}
-              className="inline-flex min-h-12 items-center justify-center rounded-control bg-brand px-5 text-[15px] font-bold text-white no-underline hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
-              Paid? View receipt
-            </Link>
-            <Button variant="ghost" onClick={() => setSentAmount(null)}>
-              Didn’t get it? Send again
-            </Button>
-          </div>
-          <p className="m-0 text-xs text-muted">Demo: no real prompt is sent.</p>
+          <Button onClick={() => setMode('how')}>Back to how to pay</Button>
         </div>
       </div>
     );
   }
 
-  if (owed === 0) {
+  if (mode === 'sms' || mode === 'slip') {
     return (
       <div className="flex flex-1 flex-col">
-        <BackHeader href="/m/tenant" label="Back to home" title="Pay rent" />
-        <p className="p-6 text-center text-sm text-muted">You have nothing to pay right now.</p>
+        <BackHeader href="/m/tenant/pay" label="Back to how to pay" title="I have paid" />
+        <div className="flex flex-col gap-4 p-4">
+          <div role="group" aria-label="Proof type" className="grid grid-cols-2 gap-2">
+            {(
+              [
+                ['sms', 'Paste M-Pesa SMS'],
+                ['slip', 'Upload slip'],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={mode === id}
+                onClick={() => setMode(id)}
+                className={
+                  mode === id
+                    ? 'min-h-11 rounded-control border border-brand bg-brand-soft text-sm font-bold text-link focus-visible:outline-2 focus-visible:outline-link'
+                    : 'min-h-11 rounded-control border border-border-strong bg-surface text-sm font-bold text-muted focus-visible:outline-2 focus-visible:outline-link'
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {mode === 'sms' ? (
+            <>
+              <Field
+                label="M-Pesa confirmation message"
+                htmlFor="sms"
+                error={
+                  tooLong
+                    ? 'That message is too long to be an M-Pesa SMS.'
+                    : touched && !sms.trim()
+                      ? 'Paste the message you received from M-Pesa.'
+                      : parsed && !parsed.ok
+                        ? parsed.message
+                        : undefined
+                }
+              >
+                <Textarea
+                  id="sms"
+                  value={sms}
+                  placeholder="QFT4AB12CD Confirmed. Ksh16,700.00 sent to ..."
+                  onChange={(e) => setSms(e.target.value)}
+                  onBlur={() => setTouched(true)}
+                />
+              </Field>
+              {parsed?.ok && !tooLong ? (
+                <dl
+                  aria-label="What we read"
+                  className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-card border border-border bg-surface p-3 text-sm"
+                >
+                  <dt className="text-muted">Code</dt>
+                  <dd className="m-0 font-mono font-semibold">{parsed.code}</dd>
+                  <dt className="text-muted">Amount</dt>
+                  <dd className="m-0 font-semibold">
+                    <Money minor={parsed.amount} />
+                  </dd>
+                  <dt className="text-muted">Date</dt>
+                  <dd className="m-0 font-semibold">{formatWhen(parsed.paidAt)}</dd>
+                  {parsed.accountRef ? (
+                    <>
+                      <dt className="text-muted">Account</dt>
+                      <dd className="m-0 font-mono font-semibold">{parsed.accountRef}</dd>
+                    </>
+                  ) : null}
+                </dl>
+              ) : null}
+              {parsed?.ok && parsed.payeeMismatch ? (
+                <p
+                  role="alert"
+                  className="m-0 rounded-card border border-warn bg-warn-soft p-3 text-sm"
+                >
+                  This message says you paid {parsed.payee ?? 'a different name'}, which is not your
+                  landlord&apos;s payee name. Check the details before sending. Your landlord will
+                  review it.
+                </p>
+              ) : null}
+              <Button
+                size="lg"
+                disabled={!parsed?.ok || tooLong}
+                onClick={() => {
+                  actions.submitClaim({ kind: 'sms', tenantId: DEMO_TENANT_ID, sms });
+                  setSms('');
+                  setMode('sent');
+                }}
+              >
+                Send proof of payment
+              </Button>
+            </>
+          ) : (
+            <>
+              <Field label="Photo or PDF of the slip" htmlFor="slip">
+                <Input
+                  id="slip"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setSlipName(e.target.files?.[0]?.name ?? '')}
+                />
+              </Field>
+              <Field label="Amount paid (KES)" htmlFor="slip-amt" error={slipError}>
+                <Input
+                  id="slip-amt"
+                  inputMode="numeric"
+                  value={slipAmount}
+                  onChange={(e) => setSlipAmount(e.target.value)}
+                />
+              </Field>
+              <Field label="Reference or code (optional)" htmlFor="slip-code">
+                <Input
+                  id="slip-code"
+                  value={slipCode}
+                  onChange={(e) => setSlipCode(e.target.value)}
+                />
+              </Field>
+              <Button
+                size="lg"
+                onClick={() => {
+                  const shillings = Number(slipAmount.replace(/[^0-9]/g, ''));
+                  if (!slipName) return setSlipError('Choose the slip to upload.');
+                  if (!shillings) return setSlipError('Enter the amount on the slip.');
+                  setSlipError('');
+                  actions.submitClaim({
+                    kind: 'slip',
+                    tenantId: DEMO_TENANT_ID,
+                    slipName,
+                    amount: kes(shillings),
+                    ...(slipCode ? { code: slipCode } : {}),
+                  });
+                  setMode('sent');
+                }}
+              >
+                Send proof of payment
+              </Button>
+              <p className="m-0 text-xs text-muted">Demo: the file is not uploaded anywhere.</p>
+            </>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex flex-1 flex-col">
-      <BackHeader href="/m/tenant" label="Back to home" title="Pay rent" />
+      <BackHeader href="/m/tenant" label="Back to home" title="How to pay" />
       <div className="flex flex-col gap-4 p-4">
-        <div className="flex flex-col rounded-card border border-border bg-surface p-3 text-sm">
-          <span className="text-muted">Paying to</span>
-          <strong>{LANDLORD_NAME}</strong>
-          <span className="font-mono text-xs text-muted">
-            Paybill {PAYBILL_PLACEHOLDER} · Account {TENANT_ACCOUNT}
-          </span>
-        </div>
-
-        <Field label="Amount (KES)" htmlFor="amt" error={errors.amount}>
-          <Input
-            id="amt"
-            inputMode="numeric"
-            value={amountText}
-            onChange={(e) => setAmountText(e.target.value)}
-            aria-invalid={errors.amount ? true : undefined}
-          />
-        </Field>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="sm" onClick={() => setAmountText(String(owed / 100))}>
-            Full balance <Money minor={owed} prefix={false} />
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setAmountText(String(rentOnly / 100))}
-          >
-            Rent only <Money minor={rentOnly} prefix={false} />
-          </Button>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold">M-Pesa phone number</span>
-          {otherPhone ? (
-            <Field label="Other M-Pesa number" htmlFor="ph" error={errors.phone}>
-              <Input
-                id="ph"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="07XX XXX XXX"
-                value={phoneText}
-                onChange={(e) => setPhoneText(e.target.value)}
-                aria-invalid={errors.phone ? true : undefined}
-              />
-            </Field>
-          ) : (
-            <div className="flex min-h-11 items-center rounded-control border border-border-strong bg-soft px-3 text-[15px]">
-              {tenant ? <MaskedText kind="phone" value={tenant.phone} /> : null}
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => {
-              setOtherPhone((v) => !v);
-              setErrors((e) => ({ ...e, phone: undefined }));
-            }}
-            className="flex min-h-11 items-center self-start text-sm font-bold text-brand underline"
-          >
-            {otherPhone ? 'Use my number on file' : 'Use a different number'}
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Button size="lg" onClick={send}>
-            Send M-Pesa prompt
-          </Button>
-          <p className="m-0 text-center text-xs text-muted">
-            Your money goes directly to your landlord’s paybill. Kodibox never holds it.
+        {owed === 0 ? (
+          <p className="m-0 rounded-card border border-border bg-surface p-3 text-sm text-muted">
+            You have nothing to pay right now. Instructions are below for next time.
           </p>
-        </div>
+        ) : (
+          <div className="rounded-2xl border border-border bg-surface p-[18px]">
+            <p className="m-0 text-[13px] text-muted">Amount due</p>
+            <p className="m-0 font-mono text-3xl font-medium tracking-tight">
+              <Money minor={owed} />
+            </p>
+          </div>
+        )}
+
+        <section
+          aria-label="Payment details"
+          className="rounded-2xl border border-border bg-surface px-[18px]"
+        >
+          <p className="mt-3 mb-1 text-[13px] text-muted">Pay to {LANDLORD_NAME}</p>
+          {instr.mpesaKind === 'paybill' ? (
+            <>
+              <CopyRow label="M-Pesa Paybill" value={instr.mpesaNumber} />
+              <CopyRow label="Account number (your unit)" value={TENANT_ACCOUNT} />
+            </>
+          ) : null}
+          {instr.mpesaKind === 'till' ? (
+            <CopyRow label="M-Pesa Till" value={instr.mpesaNumber} />
+          ) : null}
+          {instr.bankName && instr.bankAccount ? (
+            <>
+              <CopyRow label={`${instr.bankName} account`} value={instr.bankAccount} />
+              {instr.bankBranch ? (
+                <p className="m-0 pb-2 text-xs text-muted">Branch: {instr.bankBranch}</p>
+              ) : null}
+              <CopyRow label="Bank reference (your unit)" value={TENANT_ACCOUNT} />
+            </>
+          ) : null}
+        </section>
+        <p className="m-0 text-xs text-muted">
+          Always type your exact account number so your payment is matched. Your money goes directly
+          to your landlord. Kodibox never holds it.
+        </p>
+
+        <Button size="lg" onClick={() => setMode('sms')}>
+          I&apos;ve paid
+        </Button>
+
+        {myClaims.length > 0 ? (
+          <section aria-label="Your proofs of payment" className="flex flex-col gap-2">
+            <h2 className="m-0 text-sm font-extrabold">Your proofs of payment</h2>
+            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+              {myClaims.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between gap-2 rounded-card border border-border bg-surface p-3 text-sm"
+                >
+                  <span className="font-mono text-xs">{c.code ?? 'Slip'}</span>
+                  {c.amount !== undefined ? <Money minor={c.amount} prefix={false} /> : null}
+                  <Badge
+                    tone={
+                      c.status === 'pending' ? 'warn' : c.status === 'rejected' ? 'danger' : 'ok'
+                    }
+                  >
+                    {c.status === 'pending'
+                      ? 'Pending verification'
+                      : c.status === 'verified'
+                        ? 'Verified'
+                        : c.status === 'approved'
+                          ? 'Approved'
+                          : 'Not accepted'}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
     </div>
   );

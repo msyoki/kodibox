@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <!-- Kodibox mark (same as components/shell/logo.tsx, light tone) on a brand tile. -->
+  <rect width="32" height="32" rx="7" fill="#0e4d45"/>
+  <g transform="translate(2 2)">
+    <rect x="3" y="9" width="22" height="16" rx="3" stroke="#f0b54a" stroke-width="2.4"/>
+    <path d="M3 12L14 4l11 8" stroke="#f0b54a" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="11" y="16" width="6" height="9" rx="1" fill="#f0b54a"/>
+  </g>
+</svg>

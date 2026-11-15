@@ -74,7 +74,9 @@ export function previewAllocation(
 
 /** "John Kamau" becomes "JOHN K•••" (payer names on M-Pesa are already limited to initials in the UI). */
 export function maskPayerName(name: string): string {
-  const [first = '', second] = name.trim().split(/\s+/);
+  // Payer names sometimes arrive as phone numbers: never show a digit run of 7 or more.
+  const safe = name.replace(/\+?\d[\d\s-]{5,}\d/g, '').replace(/\d{7,}/g, '');
+  const [first = '', second] = safe.trim().split(/\s+/);
   if (!first) return '•••';
   return `${first.toUpperCase()} ${second ? second[0]?.toUpperCase() : ''}•••`.replace('  ', ' ');
 }

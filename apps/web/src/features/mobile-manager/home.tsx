@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { Card, CardHeader, Money, ProgressBar } from '@/components/ui';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Mark, ScreenHeader, Section } from '@/components/mobile-ui/screen';
 import { getDashboard } from '@/demo';
 import { useDemoStore } from '@/demo/store';
 import { listPendingCash } from '@/demo/mobile';
 
 const ACTIONS = [
-  { mark: 'Rq', label: 'Request payment', href: '/m/manager/tenants' },
+  { mark: 'Rm', label: 'Payment reminder', href: '/m/manager/tenants' },
   { mark: 'Ex', label: 'Record expense', href: '/maintenance' },
   { mark: 'Sm', label: 'Send reminder', href: '/messages' },
 ];
@@ -61,19 +62,30 @@ export function ManagerHome() {
 
   return (
     <>
-      <ScreenHeader eyebrow={`${data.org.name} · November`} title="Hi Wanjiru" />
+      <ScreenHeader
+        eyebrow={`${data.org.name} · November`}
+        title="Hi Wanjiru"
+        right={<ThemeToggle />}
+      />
       <Section title="Collected this month" id="col">
         <Card className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
             <div className="relative size-[104px] flex-none">
               <svg width="104" height="104" viewBox="0 0 104 104" aria-hidden="true">
-                <circle cx="52" cy="52" r="44" fill="none" stroke="#E2E0D8" strokeWidth="10" />
                 <circle
                   cx="52"
                   cy="52"
                   r="44"
                   fill="none"
-                  stroke="#0E4D45"
+                  stroke="var(--color-border)"
+                  strokeWidth="10"
+                />
+                <circle
+                  cx="52"
+                  cy="52"
+                  r="44"
+                  fill="none"
+                  stroke="var(--color-link)"
                   strokeWidth="10"
                   strokeLinecap="round"
                   strokeDasharray={`${(circ * pct) / 100} ${circ}`}

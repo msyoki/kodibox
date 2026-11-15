@@ -16,7 +16,7 @@ export function OrgSwitcher() {
         className="flex min-h-11 w-full items-center justify-between rounded-control border border-brand-line bg-brand-dark px-3 py-2.5 text-left text-sm text-white focus-visible:outline-2 focus-visible:outline-amber"
       >
         <span>
-          <span className="block text-[11px] text-[#bfd8d2]">Organization</span>
+          <span className="block text-[11px] text-on-brand">Organization</span>
           {org.name}
         </span>
         <span aria-hidden="true">▾</span>

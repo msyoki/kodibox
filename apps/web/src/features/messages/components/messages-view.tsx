@@ -12,6 +12,7 @@ import {
   Field,
   Input,
   MaskedText,
+  ProgressBar,
   Money,
   Select,
   Switch,
@@ -93,15 +94,15 @@ export function MessagesView() {
         <div className="flex flex-col gap-4">
           <Card aria-labelledby="sched">
             <CardHeader title="Reminder schedule" id="sched" />
-            <ul className="m-0 list-none p-0">
+            <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
               {schedule.map((s) => (
                 <li
                   key={s.id}
-                  className="flex items-center justify-between gap-3 border-t border-divider first:border-t-0"
+                  className="flex min-h-[52px] items-center justify-between gap-3 rounded-control border border-divider bg-soft px-3 py-1.5"
                 >
-                  <div className="py-2">
-                    <div className="font-semibold">{s.when}</div>
-                    <div className="text-sm text-muted">{s.what}</div>
+                  <div>
+                    <div className="text-sm font-bold">{s.when}</div>
+                    <div className="text-xs text-muted">{s.what}</div>
                   </div>
                   <Switch
                     label={<span className="sr-only">{s.when}</span>}
@@ -142,7 +143,7 @@ export function MessagesView() {
             <CardHeader title="Message templates" id="tpl" />
             <ul className="m-0 flex list-none flex-col gap-3 p-0">
               {templates.map((t) => (
-                <li key={t.id} className="rounded-control border border-divider p-3">
+                <li key={t.id} className="rounded-xl border border-border px-3.5 py-3">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold">
                       {t.name} <Badge tone="info">{t.channel.toUpperCase()}</Badge>
@@ -151,7 +152,9 @@ export function MessagesView() {
                       Edit<span className="sr-only"> {t.name}</span>
                     </Button>
                   </div>
-                  <p className="mt-1 mb-0 text-sm text-muted">{t.body}</p>
+                  <p className="mt-1.5 mb-0 rounded-lg bg-soft p-2.5 font-mono text-[13px] leading-normal">
+                    {t.body}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -168,7 +171,7 @@ export function MessagesView() {
 
         <Card aria-labelledby="wallet" className="h-fit">
           <CardHeader title="SMS wallet" id="wallet" />
-          <div className="text-[28px]">
+          <div className="font-mono text-[28px] font-medium">
             <Money minor={wallet} />
           </div>
           <p className="mt-1 text-sm text-muted">
@@ -177,12 +180,13 @@ export function MessagesView() {
           <p className="text-sm text-muted">
             November use so far: 3,240 SMS. Estimated 4,100 for the month.
           </p>
-          <Button className="w-full" onClick={() => setTopUpOpen(true)}>
+          <ProgressBar value={62} label="November SMS use" className="mb-3" />
+          <Button variant="secondary" className="w-full" onClick={() => setTopUpOpen(true)}>
             Top up via M-Pesa
           </Button>
           <p className="mt-3 mb-0 text-xs text-muted">
-            Top-ups are a Kodibox service fee paid by STK push. This is separate from tenant rent,
-            which never passes through Kodibox.
+            Top-ups are a Kodibox service fee, billed on a Kodibox invoice. This is separate from
+            tenant rent, which never passes through Kodibox.
           </p>
         </Card>
       </div>
@@ -304,7 +308,7 @@ export function MessagesView() {
         open={topUpOpen}
         onClose={() => setTopUpOpen(false)}
         title="Top up SMS wallet"
-        description="You will get an M-Pesa STK push on your phone. This is a Kodibox service fee, not tenant rent."
+        description="Kodibox sends a service invoice with how to pay it. This is a Kodibox service fee, not tenant rent."
         footer={
           <>
             <Button variant="ghost" onClick={() => setTopUpOpen(false)}>
@@ -315,10 +319,10 @@ export function MessagesView() {
               onClick={() => {
                 setWallet((w) => w + topUpAmount);
                 setTopUpOpen(false);
-                toast('STK push sent. Wallet topped up.', 'ok');
+                toast('Service invoice paid (demo). Wallet topped up.', 'ok');
               }}
             >
-              Send STK push
+              Top up (demo)
             </Button>
           </>
         }

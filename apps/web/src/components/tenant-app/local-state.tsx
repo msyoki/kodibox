@@ -12,10 +12,6 @@ export interface Feedback {
 }
 
 interface TenantLocal {
-  /** Total paid in this demo session, in KES cents. */
-  paid: number;
-  lastPayment: number | null;
-  recordPayment: (amount: number) => void;
   localTickets: LocalTicket[];
   addTicket: (input: { title: string; kind: RequestKind; body: string }) => string;
   setLocalStatus: (id: string, status: TicketStatus) => void;
@@ -36,16 +32,9 @@ export function useTenantLocal(): TenantLocal {
 
 /** Session-only state for the tenant views (resets on reload, like DemoStore). */
 export function TenantLocalProvider({ children }: { children: ReactNode }) {
-  const [paid, setPaid] = useState(0);
-  const [lastPayment, setLastPayment] = useState<number | null>(null);
   const [localTickets, setLocalTickets] = useState<LocalTicket[]>([]);
   const [feedback, setFeedbackState] = useState<Record<string, Feedback>>({});
   const [vacateDate, setVacateDate] = useState<string | null>(null);
-
-  const recordPayment = useCallback((amount: number) => {
-    setPaid((p) => p + amount);
-    setLastPayment(amount);
-  }, []);
 
   const addTicket = useCallback((input: { title: string; kind: RequestKind; body: string }) => {
     const id = `local_${Date.now()}`;
@@ -114,9 +103,6 @@ export function TenantLocalProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      paid,
-      lastPayment,
-      recordPayment,
       localTickets,
       addTicket,
       setLocalStatus,
@@ -126,18 +112,7 @@ export function TenantLocalProvider({ children }: { children: ReactNode }) {
       vacateDate,
       setVacateDate,
     }),
-    [
-      paid,
-      lastPayment,
-      recordPayment,
-      localTickets,
-      addTicket,
-      setLocalStatus,
-      addLocalMessage,
-      feedback,
-      setFeedback,
-      vacateDate,
-    ],
+    [localTickets, addTicket, setLocalStatus, addLocalMessage, feedback, setFeedback, vacateDate],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

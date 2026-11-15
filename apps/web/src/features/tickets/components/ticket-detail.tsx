@@ -180,11 +180,11 @@ export function TicketDetail({ ticketId, onClose }: { ticketId: string; onClose?
                 onClick={() => setStep(s.id)}
                 aria-current={i === stepIndex ? 'step' : undefined}
                 className={cn(
-                  'min-h-11 rounded-control border px-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                  'min-h-11 rounded-control border px-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
                   i === stepIndex
                     ? 'border-brand bg-brand text-white'
                     : i < stepIndex
-                      ? 'border-brand bg-brand-tint text-brand-dark'
+                      ? 'border-brand bg-brand-tint text-link'
                       : 'border-border-strong bg-surface text-muted hover:bg-soft',
                 )}
               >
@@ -232,7 +232,7 @@ export function TicketDetail({ ticketId, onClose }: { ticketId: string; onClose?
                 aria-pressed={mode === m}
                 onClick={() => setMode(m)}
                 className={cn(
-                  'min-h-11 rounded-control border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                  'min-h-11 rounded-control border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
                   mode === m
                     ? m === 'internal'
                       ? 'border-warning bg-warn-soft text-warn'
@@ -304,7 +304,7 @@ export function TicketDetail({ ticketId, onClose }: { ticketId: string; onClose?
           </div>
           <p className="m-0 text-xs text-muted">
             Every change is recorded in the audit log.{' '}
-            <Link href="/tickets" className="font-semibold text-brand underline">
+            <Link href="/tickets" className="font-semibold text-link underline">
               All tickets
             </Link>
           </p>

@@ -79,22 +79,38 @@ export function PortalView() {
   return (
     <div className="flex flex-col gap-6">
       <section id="overview" className="flex flex-col gap-4 scroll-mt-4">
+        <p
+          role="note"
+          className="m-0 flex flex-wrap items-center gap-2.5 rounded-control bg-info-soft px-3.5 py-2.5 text-sm text-info"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          <span>
+            <strong>Read-only view.</strong> You can see and download your records here. To change
+            anything, contact Mwangi Properties.
+          </span>
+        </p>
         <div>
           <h1 className="m-0 text-[28px] font-extrabold tracking-tight">
             Karibu, {landlord.name.split(' ')[0]}
           </h1>
-          <p className="m-0 text-sm text-muted">
+          <p className="m-0 mt-1 text-sm text-muted">
             {props.map((p) => `${p.name}, ${p.area}`).join(' · ')} · {units} units · November 2026,
             updated 2 Nov 09:45
           </p>
         </div>
-        <p
-          role="note"
-          className="m-0 rounded-control bg-info-soft p-3 text-sm font-semibold text-info"
-        >
-          Read-only view. You can see and download your records here. To change anything, contact
-          Mwangi Properties.
-        </p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Stat
             label="Collected this month"
@@ -113,13 +129,19 @@ export function PortalView() {
             label="Still to collect"
             value={<Money minor={expected - collected} />}
             sub="Tenants with a balance"
+            progress={{
+              value: expected ? Math.round(((expected - collected) / expected) * 100) : 0,
+              tone: 'warning',
+            }}
           />
           <Stat
             label="Occupancy"
             value={`${units ? ((occupied / units) * 100).toFixed(1) : 0}%`}
             sub={`${occupied} of ${units} occupied · ${units - occupied} vacant`}
+            progress={{ value: units ? (occupied / units) * 100 : 0 }}
           />
           <Stat
+            highlight
             label="Next remittance (est.)"
             value={next ? <Money minor={next.gross - next.commission - next.expenses} /> : '-'}
             sub={`After ${landlord.commissionPct}% commission and approved expenses, by 5 Dec`}

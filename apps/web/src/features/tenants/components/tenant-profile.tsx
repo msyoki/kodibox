@@ -10,8 +10,6 @@ import {
   Card,
   CardHeader,
   Dialog,
-  Field,
-  Input,
   LinkButton,
   MaskedText,
   Money,
@@ -25,6 +23,8 @@ import {
   useToast,
 } from '@/components/ui';
 import { formatDate } from '@/demo/format';
+import { getInstruction, reminderSms } from '@/demo/recon';
+import { useDemoStore } from '@/demo/store';
 import type { TenantDetail } from '@/demo';
 import type { LedgerRow, RevealedContact } from '@/demo/properties-tenants';
 import { kes } from '@/lib/money';
@@ -41,23 +41,30 @@ export function TenantProfile({
   const { toast } = useToast();
   const { tenant, unit, property, lease } = detail;
   const [show, setShow] = useState(false);
-  const [stkOpen, setStkOpen] = useState(false);
-  const [amount, setAmount] = useState(String(Math.max(tenant.balance, 0) / 100));
-  const [amountError, setAmountError] = useState('');
+  const { data, actions } = useDemoStore();
+  const [reminderOpen, setReminderOpen] = useState(false);
   const [smsOptIn, setSmsOptIn] = useState(!tenant.smsOptOut);
 
-  function sendStk() {
-    const n = Number(amount);
-    if (!(n > 0)) {
-      setAmountError('Enter an amount greater than zero.');
+  const instruction = getInstruction(data, tenant.propertyId);
+  const smsBody = reminderSms(
+    instruction,
+    unit.code,
+    tenant.name,
+    `KES ${Math.round(Math.max(tenant.balance, 0) / 100).toLocaleString('en-KE')}`,
+  );
+
+  function sendReminder() {
+    setReminderOpen(false);
+    if (tenant.smsOptOut) {
+      toast(`${tenant.name} has opted out of SMS. No reminder was sent.`, 'info');
       return;
     }
-    setAmountError('');
-    setStkOpen(false);
-    toast(
-      `STK push of KES ${n.toLocaleString('en-KE')} sent to ${tenant.name}. Payment lands in your paybill.`,
-      'ok',
+    actions.logAudit(
+      'reminder.sent',
+      unit.code,
+      `Payment reminder SMS sent to ${tenant.name} (${unit.code})`,
     );
+    toast(`Payment reminder sent to ${tenant.name}.`, 'ok');
   }
 
   const overview = (
@@ -279,7 +286,7 @@ export function TenantProfile({
           <CardHeader
             title="Messages"
             action={
-              <Link href="/messages" className="text-brand">
+              <Link href="/messages" className="text-link">
                 Open messages
               </Link>
             }
@@ -342,7 +349,7 @@ export function TenantProfile({
             <LinkButton href="/move-outs" variant="secondary">
               Issue notice
             </LinkButton>
-            <Button onClick={() => setStkOpen(true)}>Request payment (STK)</Button>
+            <Button onClick={() => setReminderOpen(true)}>Send payment reminder</Button>
             <LinkButton href="/move-outs" variant="danger">
               End lease
             </LinkButton>
@@ -419,34 +426,23 @@ export function TenantProfile({
       <Tabs tabs={tabs} />
 
       <Dialog
-        open={stkOpen}
-        onClose={() => setStkOpen(false)}
-        title="Request payment (STK)"
-        description={`Sends an M-Pesa prompt to ${tenant.name}. Money goes to your own paybill; Kodibox never holds it.`}
+        open={reminderOpen}
+        onClose={() => setReminderOpen(false)}
+        title="Send payment reminder"
+        description="Sends an SMS with how to pay and the tenant's account reference. The money goes to your own account; Kodibox never holds it."
         footer={
           <>
-            <Button variant="ghost" onClick={() => setStkOpen(false)}>
+            <Button variant="ghost" onClick={() => setReminderOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={sendStk}>Send STK push</Button>
+            <Button onClick={sendReminder}>Send reminder</Button>
           </>
         }
       >
-        <Field
-          label="Amount (KES)"
-          htmlFor="stk-amount"
-          error={amountError}
-          help={`Account number ${unit.code}`}
-        >
-          <Input
-            id="stk-amount"
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </Field>
+        <p className="m-0 rounded-card bg-divider p-3.5 text-sm">{smsBody}</p>
         <p className="m-0 text-sm text-muted">
-          Phone: <MaskedText kind="phone" value={tenant.phone} />
+          To: <MaskedText kind="phone" value={tenant.phone} />
+          {tenant.smsOptOut ? ' (opted out of SMS)' : ''}
         </p>
       </Dialog>
     </div>

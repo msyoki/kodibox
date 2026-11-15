@@ -143,14 +143,20 @@ export function InvoiceRun() {
             {mvuleSkipped.length > 0 ? (
               <Link
                 href="/utilities"
-                className="flex min-h-11 flex-col gap-0.5 rounded-control border border-border bg-warn-soft p-3 no-underline"
+                className="flex min-h-11 items-start gap-3 rounded-control border border-divider bg-soft p-3 no-underline focus-visible:outline-2 focus-visible:outline-link"
               >
-                <strong className="text-text">
-                  Missing water reading, {mvuleSkipped.length} units
-                </strong>
-                <span className="text-sm text-muted">
-                  {mvuleSkipped[0]?.propertyName} {mvuleSkipped.map((s) => s.unit).join(', ')}.
-                  Enter readings in Utilities.
+                <span
+                  aria-hidden="true"
+                  className="mt-1.5 size-2.5 flex-none rounded-full bg-warning"
+                />
+                <span className="flex flex-col gap-0.5 text-sm">
+                  <strong className="font-bold text-text">
+                    Missing water reading, {mvuleSkipped.length} units
+                  </strong>
+                  <span className="text-[13px] text-muted">
+                    {mvuleSkipped[0]?.propertyName} {mvuleSkipped.map((s) => s.unit).join(', ')}.
+                    Enter readings in Utilities.
+                  </span>
                 </span>
               </Link>
             ) : (

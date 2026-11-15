@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { SAMPLE_MPESA_STATEMENT_CSV } from '@kodibox/demo';
 import { Logo } from '@/components/shell/logo';
 import {
   Badge,
@@ -18,18 +19,19 @@ import {
   THead,
   TR,
 } from '@/components/ui';
+import { seedData } from '@/demo/seed';
+import { parseStatement, previewImport, type ImportPreview } from '@/demo/recon';
 import { cn } from '@/lib/cn';
 
 const STEPS = [
   'Organization',
   'Property',
   'Units',
-  'Connect M-Pesa',
+  'Payment instructions',
   'Import tenants',
+  'First statement',
   'First invoices',
 ] as const;
-
-type Connection = 'idle' | 'testing' | 'ok';
 
 const SAMPLE_ROWS = [
   ['B-12', 'Peter Otieno', '0712 ••• 512', '14,000'],
@@ -42,20 +44,12 @@ export function OnboardingWizard() {
   const router = useRouter();
   const [step, setStep] = useState(3);
   const [kind, setKind] = useState<'paybill' | 'till'>('paybill');
-  const [conn, setConn] = useState<Connection>('idle');
   const [imported, setImported] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [stmt, setStmt] = useState<ImportPreview | null>(null);
 
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
-
-  function testConnection() {
-    setConn('testing');
-    timer.current = setTimeout(() => setConn('ok'), 700);
+  function loadSampleStatement() {
+    const r = parseStatement('mpesa', SAMPLE_MPESA_STATEMENT_CSV);
+    if (r.ok) setStmt(previewImport(seedData, r.value, { kind: 'mpesa', fileName: 'sample' }));
   }
 
   const last = step === STEPS.length - 1;
@@ -83,7 +77,7 @@ export function OnboardingWizard() {
                   onClick={() => setStep(i)}
                   aria-current={state === 'now' ? 'step' : undefined}
                   className={cn(
-                    'flex min-h-11 cursor-pointer items-center gap-2 rounded-full py-0 pr-3.5 pl-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                    'flex min-h-11 cursor-pointer items-center gap-2 rounded-full py-0 pr-3.5 pl-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
                     state === 'now' && 'bg-brand font-extrabold text-white',
                     state === 'done' && 'bg-ok-soft font-semibold text-ok',
                     state === 'next' && 'border border-border bg-surface font-semibold text-muted',
@@ -93,8 +87,8 @@ export function OnboardingWizard() {
                     className={cn(
                       'inline-flex size-7 items-center justify-center rounded-full text-[13px] font-extrabold',
                       state === 'now' && 'bg-amber text-text',
-                      state === 'done' && 'bg-ok text-white',
-                      state === 'next' && 'bg-divider text-[#4a524e]',
+                      state === 'done' && 'bg-ok text-on-fill',
+                      state === 'next' && 'bg-divider text-muted',
                     )}
                   >
                     {state === 'done' ? '✓' : i + 1}
@@ -118,7 +112,7 @@ export function OnboardingWizard() {
               <h1 id="wiz-h" className="mt-1.5 mb-2 text-[28px] font-extrabold tracking-tight">
                 {TITLES[step]}
               </h1>
-              <p className="m-0 text-[15px] leading-relaxed text-[#3f4743]">{INTROS[step]}</p>
+              <p className="m-0 text-[15px] leading-relaxed text-body">{INTROS[step]}</p>
             </div>
 
             {step === 0 ? (
@@ -234,7 +228,7 @@ export function OnboardingWizard() {
                   <Field
                     label={kind === 'paybill' ? 'Paybill number' : 'Till number'}
                     htmlFor="mp-number"
-                    help="The business number tenants pay to."
+                    help="The business number tenants pay to. Kodibox only shows it to tenants; it never connects to it."
                   >
                     <Input
                       id="mp-number"
@@ -242,27 +236,6 @@ export function OnboardingWizard() {
                       inputMode="numeric"
                       autoComplete="off"
                     />
-                  </Field>
-                  <Field
-                    label="Daraja consumer key"
-                    htmlFor="mp-key"
-                    help="From your Safaricom Daraja app."
-                  >
-                    <Input id="mp-key" type="password" autoComplete="off" />
-                  </Field>
-                  <Field
-                    label="Daraja consumer secret"
-                    htmlFor="mp-secret"
-                    help="Stored encrypted. Never shown again."
-                  >
-                    <Input id="mp-secret" type="password" autoComplete="off" />
-                  </Field>
-                  <Field
-                    label="Lipa na M-Pesa passkey"
-                    htmlFor="mp-pass"
-                    help={'Needed for “Pay now” prompts on tenants’ phones.'}
-                  >
-                    <Input id="mp-pass" type="password" autoComplete="off" />
                   </Field>
                 </div>
 
@@ -274,35 +247,17 @@ export function OnboardingWizard() {
                   </Select>
                 </Field>
 
-                <div role="status" aria-live="polite">
-                  {conn === 'ok' ? (
-                    <div className="flex items-start gap-3 rounded-xl bg-ok-soft px-4 py-3.5 text-sm">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#1C6B44"
-                        strokeWidth="2.4"
-                        aria-hidden="true"
-                        className="mt-px flex-none"
-                      >
-                        <path d="M5 12.5l4.5 4.5L19 7.5" />
-                      </svg>
-                      <span>
-                        <strong>Connection works (demo).</strong> Payment confirmations for paybill
-                        [PAYBILL] will arrive in Kodibox. Last checked just now.
-                      </span>
-                    </div>
-                  ) : conn === 'testing' ? (
-                    <div className="rounded-xl bg-info-soft px-4 py-3.5 text-sm text-info">
-                      Testing connection&hellip;
-                    </div>
-                  ) : (
-                    <div className="rounded-xl bg-soft px-4 py-3.5 text-sm text-muted">
-                      Not tested yet. No real call is made in the prototype.
-                    </div>
-                  )}
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+                  <Field label="Bank name (optional)" htmlFor="bk-name">
+                    <Input id="bk-name" placeholder="e.g. Equity Bank" />
+                  </Field>
+                  <Field label="Bank account (optional)" htmlFor="bk-acc">
+                    <Input id="bk-acc" inputMode="numeric" autoComplete="off" />
+                  </Field>
+                </div>
+                <div className="rounded-xl bg-soft px-4 py-3.5 text-sm text-muted">
+                  No credentials needed. Tenants see these details on invoices, SMS and the
+                  &ldquo;How to pay&rdquo; screen.
                 </div>
               </>
             ) : null}
@@ -356,6 +311,27 @@ export function OnboardingWizard() {
             ) : null}
 
             {step === 5 ? (
+              <>
+                <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-border-strong bg-soft p-6">
+                  <p className="m-0 text-sm text-muted">
+                    Download the statement from the M-Pesa business portal or your bank, then upload
+                    it. You can do this later from Payments.
+                  </p>
+                  <Button variant="secondary" onClick={loadSampleStatement}>
+                    Use sample M-Pesa statement
+                  </Button>
+                </div>
+                {stmt ? (
+                  <p className="m-0 text-sm font-semibold" role="status">
+                    Preview: {stmt.counts.fresh} new lines, {stmt.counts.duplicates} duplicates,{' '}
+                    {stmt.counts.autoMatched} auto-matched, {stmt.counts.needsReview} need review,{' '}
+                    {stmt.counts.rowErrors} row errors.
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+
+            {step === 6 ? (
               <Card className="flex flex-col gap-2 bg-soft">
                 <strong>November 2026 invoices</strong>
                 <span className="text-sm text-muted">
@@ -377,15 +353,6 @@ export function OnboardingWizard() {
                 Back
               </Button>
               <div className="flex flex-wrap gap-2.5">
-                {step === 3 ? (
-                  <Button
-                    variant="secondary"
-                    onClick={testConnection}
-                    disabled={conn === 'testing'}
-                  >
-                    {conn === 'ok' ? 'Test connection again' : 'Test connection'}
-                  </Button>
-                ) : null}
                 <Button
                   size="lg"
                   onClick={() => (last ? router.push('/dashboard') : setStep((s) => s + 1))}
@@ -394,7 +361,9 @@ export function OnboardingWizard() {
                     ? 'Run invoices and finish'
                     : step === 3
                       ? 'Continue to import tenants'
-                      : 'Continue'}
+                      : step === 4
+                        ? 'Continue to first statement'
+                        : 'Continue'}
                 </Button>
               </div>
             </div>
@@ -404,19 +373,19 @@ export function OnboardingWizard() {
             <div className="flex flex-col gap-2.5 rounded-panel bg-brand p-[22px] text-white">
               <h2 className="m-0 text-lg font-extrabold">We never hold your money</h2>
               <p className="m-0 text-sm leading-relaxed text-on-brand">
-                Rent goes from your tenant straight to your paybill. Kodibox only reads
-                confirmations so it can reconcile. We cannot move, withdraw or delay your funds.
+                Rent goes from your tenant straight to your own paybill, till or bank account.
+                Kodibox only reads the statements you import so it can reconcile. We cannot move,
+                withdraw or delay your funds.
               </p>
               <p className="m-0 text-sm leading-relaxed text-on-brand">
-                Your Daraja keys are encrypted, never shown again after saving, and only used to
-                read payment confirmations.
+                No payment credentials are ever requested or stored.
               </p>
             </div>
             <div className="flex flex-col gap-3 rounded-panel border border-border bg-surface p-[22px]">
               <h2 className="m-0 text-base font-bold">What your tenants will receive</h2>
-              <div className="rounded-[14px_14px_14px_4px] bg-[#f2f1ec] p-3.5 text-sm leading-normal">
+              <div className="rounded-[14px_14px_14px_4px] bg-divider p-3.5 text-sm leading-normal">
                 Hi Peter, your November rent for B-12 Riverside Court is KES 16,700, due 5 Nov. Pay
-                via M-Pesa Paybill [PAYBILL], Account B-12. Statement:
+                via M-Pesa Paybill 000111, Account B-12. Statement:
                 kodi.bx/s/&bull;&bull;&bull;&bull; Reply STOP to opt out of reminders.
               </div>
               <p className="m-0 text-xs text-muted">
@@ -424,9 +393,9 @@ export function OnboardingWizard() {
               </p>
             </div>
             <div className="rounded-panel border border-border bg-surface p-[22px] text-sm leading-relaxed">
-              <h2 className="m-0 mb-1.5 text-base font-bold">Don&rsquo;t have Daraja keys yet?</h2>
-              Our guide walks you through getting them from Safaricom, usually within 2&ndash;5
-              working days. You can import tenants and send invoices while you wait.{' '}
+              <h2 className="m-0 mb-1.5 text-base font-bold">Where do I get a statement?</h2>
+              From the M-Pesa business portal (paybill or till) or your bank&rsquo;s online banking,
+              as CSV. Import it daily or weekly; re-importing the same file is safe.{' '}
               <a href="#guide" className="font-semibold">
                 Read the guide
               </a>
@@ -442,15 +411,17 @@ const TITLES = [
   'Your organization',
   'Add your first property',
   'Set up units',
-  'Connect your M-Pesa paybill',
+  'Add payment instructions',
   'Import tenants',
+  'Import your first statement',
   'Send first invoices',
 ];
 const INTROS = [
   'Tell us who is managing the properties. You can change this later in settings.',
   'Start with one property. You can add more, and assign a landlord, at any time.',
   'Create all units at once. Rents can be adjusted per unit afterwards.',
-  'Tenants keep paying to your own paybill or till. Kodibox reads each payment confirmation from Safaricom and matches it to the right unit automatically.',
+  'Tenants keep paying to your own paybill, till or bank account. Tell Kodibox what to show them. No credentials are needed.',
   'Bring your existing tenant list. Phone numbers and IDs are encrypted and masked in the app.',
+  'Upload a statement and Kodibox matches each line to a tenant. Anything unsure goes to a review queue.',
   'Review and run your first billing. Nothing is sent to tenants until you confirm.',
 ];

@@ -26,7 +26,10 @@ export function TabBar({ tabs, label = 'Primary' }: TabBarProps) {
   const matches = tabs.filter((t) => pathname === t.href || pathname.startsWith(`${t.href}/`));
   const current = matches.sort((a, b) => b.href.length - a.href.length)[0]?.href;
   return (
-    <nav aria-label={label} className="sticky bottom-0 z-10 flex border-t border-border bg-surface">
+    <nav
+      aria-label={label}
+      className="sticky bottom-0 z-10 grid grid-flow-col auto-cols-fr gap-0 border-t border-border bg-surface px-2 pt-1.5 pb-3.5"
+    >
       {tabs.map((tab) => {
         const active = tab.href === current;
         return (
@@ -35,14 +38,10 @@ export function TabBar({ tabs, label = 'Primary' }: TabBarProps) {
             href={tab.href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-xs no-underline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand',
-              active ? 'font-extrabold text-brand' : 'font-semibold text-muted',
+              'flex min-h-11 flex-col items-center justify-center rounded-control text-[13px] no-underline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-link',
+              active ? 'bg-brand-soft font-extrabold text-link' : 'font-semibold text-muted',
             )}
           >
-            <span
-              aria-hidden="true"
-              className={cn('h-1 w-6 rounded-full', active ? 'bg-amber' : 'bg-transparent')}
-            />
             <span>
               {tab.label}
               {tab.badge ? (

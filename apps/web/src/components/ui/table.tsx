@@ -21,7 +21,10 @@ export function Table({ minWidth = 560, className, style, ...props }: TableProps
 export function THead({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
     <thead
-      className={cn('text-left text-xs tracking-wide text-muted uppercase', className)}
+      className={cn(
+        'text-left text-xs tracking-wide text-muted uppercase [&_tr]:border-t-0',
+        className,
+      )}
       {...props}
     />
   );
@@ -32,7 +35,7 @@ export function TBody(props: HTMLAttributes<HTMLTableSectionElement>) {
 }
 
 export function TR({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn('border-t border-divider first:border-t-0', className)} {...props} />;
+  return <tr className={cn('border-t border-divider', className)} {...props} />;
 }
 
 export function TH({

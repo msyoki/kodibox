@@ -87,7 +87,7 @@ export function TicketsView() {
         <Stat label="Satisfaction" value={stats.satisfaction} sub="Tenant rating after closing" />
       </section>
 
-      <Card>
+      <section aria-label="Filters">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <Field label="Search tickets" htmlFor="tk-q">
             <Input id="tk-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -143,7 +143,7 @@ export function TicketsView() {
             </Select>
           </Field>
         </div>
-      </Card>
+      </section>
 
       <div
         className={cn('grid gap-5', selected ? 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]' : '')}
@@ -171,7 +171,7 @@ export function TicketsView() {
                       }}
                       aria-current={selected === t.id ? 'true' : undefined}
                       className={cn(
-                        'flex min-h-11 flex-col gap-1 rounded-control px-2 py-3 text-text no-underline hover:bg-soft focus-visible:outline-2 focus-visible:outline-brand',
+                        'flex min-h-11 flex-col gap-1 rounded-control px-2 py-3 text-text no-underline hover:bg-soft focus-visible:outline-2 focus-visible:outline-link',
                         selected === t.id && 'bg-brand-tint',
                       )}
                     >

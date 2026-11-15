@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Logo } from './logo';
 import { SidebarContent } from './sidebar-content';
 import { UserMenu } from './user-menu';
@@ -16,7 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen lg:flex">
-      <aside className="hidden w-60 flex-none bg-brand p-4 pt-6 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
+      <aside className="hidden w-[232px] flex-none bg-brand p-4 pt-6 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
         <SidebarContent />
       </aside>
 
@@ -32,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-expanded={drawer}
             aria-controls="mobile-drawer"
             onClick={() => setDrawer((d) => !d)}
-            className="flex size-11 items-center justify-center rounded-control hover:bg-divider focus-visible:outline-2 focus-visible:outline-brand lg:hidden"
+            className="flex size-11 items-center justify-center rounded-control hover:bg-divider focus-visible:outline-2 focus-visible:outline-link lg:hidden"
           >
             <svg
               width="22"
@@ -51,13 +52,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Logo size={24} tone="dark" />
             <span className="text-lg font-extrabold">Kodibox</span>
           </span>
-          <label className="flex min-h-11 max-w-md min-w-0 flex-1 items-center gap-2 rounded-control border border-border-strong bg-surface px-3 focus-within:outline-2 focus-within:outline-brand">
+          <label className="flex min-h-11 max-w-md min-w-0 flex-1 items-center gap-2 rounded-control border border-border-strong bg-surface px-3 focus-within:outline-2 focus-within:outline-link">
             <svg
               width="16"
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#5A635F"
+              stroke="var(--color-muted)"
               strokeWidth="2"
               aria-hidden="true"
             >
@@ -71,7 +72,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               className="min-w-0 flex-1 border-0 bg-transparent text-sm outline-0"
             />
           </label>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
             <UserMenu />
           </div>
         </header>

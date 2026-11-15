@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CardHeader,
+  LinkButton,
   Money,
   ProgressBar,
   Stat,
@@ -26,7 +27,7 @@ import { cn } from '@/lib/cn';
 
 const STATUS: Record<string, { label: string; tone: Tone }> = {
   matched: { label: 'Auto-matched', tone: 'ok' },
-  unmatched: { label: 'Needs match', tone: 'warn' },
+  unmatched: { label: 'Unmatched', tone: 'warn' },
   awaiting_approval: { label: 'Awaiting approval', tone: 'info' },
 };
 
@@ -34,7 +35,7 @@ const DOT = { warning: 'bg-warning', info: 'bg-info', muted: 'bg-muted' } as con
 const AGING_TONE = ['brand', 'brand', 'warning', 'danger'] as const;
 
 export function DashboardView() {
-  const { data } = useDemoStore();
+  const { data, actions } = useDemoStore();
   const { toast } = useToast();
   const d = getDashboard(data);
   const k = d.kpis;
@@ -48,11 +49,24 @@ export function DashboardView() {
         title="Good morning, Wanjiru"
         actions={
           <>
+            <LinkButton href="/payments" variant="secondary">
+              Import statement
+            </LinkButton>
             <Button
               variant="secondary"
-              onClick={() => toast('Demo: payment request sent to the tenant', 'ok')}
+              onClick={() => {
+                actions.logAudit(
+                  'reminder.batch_sent',
+                  'tenants_with_balance',
+                  `Payment reminder SMS queued for ${remindCount} tenants`,
+                );
+                toast(
+                  `Payment reminders queued for ${remindCount} tenants (pay instructions included, opt-outs skipped)`,
+                  'ok',
+                );
+              }}
             >
-              Request payment
+              Send payment reminder
             </Button>
             <Button onClick={() => toast('Demo: November invoices queued for review', 'ok')}>
               Run November invoices
@@ -161,7 +175,7 @@ export function DashboardView() {
             <Link
               key={a.id}
               href={a.href}
-              className="flex items-start gap-3 rounded-control border border-divider bg-soft p-3 text-text no-underline hover:border-brand focus-visible:outline-2 focus-visible:outline-brand"
+              className="flex items-start gap-3 rounded-control border border-divider bg-soft p-3 text-text no-underline hover:border-brand focus-visible:outline-2 focus-visible:outline-link"
             >
               <span
                 aria-hidden="true"
@@ -246,10 +260,15 @@ export function DashboardView() {
           ))}
           <Button
             variant="ghost"
-            className="justify-start px-0 text-brand"
-            onClick={() =>
-              toast(`Demo: reminder queued for ${remindCount} tenants (opt-outs skipped)`, 'ok')
-            }
+            className="justify-start px-0 text-link"
+            onClick={() => {
+              actions.logAudit(
+                'reminder.batch_sent',
+                'arrears',
+                `Payment reminder SMS queued for ${remindCount} tenants`,
+              );
+              toast(`Demo: reminder queued for ${remindCount} tenants (opt-outs skipped)`, 'ok');
+            }}
           >
             Send reminder to {remindCount} tenants
           </Button>

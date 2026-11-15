@@ -9,21 +9,23 @@ import { formatWhen } from '@/demo/format';
 import { useDemoStore } from '@/demo/store';
 import { AllPaymentsPanel } from './all-payments-panel';
 import { ApprovalsPanel, type SubmittedCash } from './approvals-panel';
+import { ClaimsPanel } from './claims-panel';
+import { ImportStatementDialog } from './import-statement-dialog';
 import { NeedsMatchPanel } from './needs-match-panel';
 import { RecordCashDialog } from './record-cash-dialog';
 
 export function PaymentsView() {
   const { data, actions } = useDemoStore();
   const { toast } = useToast();
-  const [notRentIds, setNotRentIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState<SubmittedCash[]>([]);
   const [cashOpen, setCashOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
-  const allUnmatched = listUnmatched(data);
-  const unmatched = allUnmatched.filter((u) => !notRentIds.includes(u.id));
-  const notRent = allUnmatched.filter((u) => notRentIds.includes(u.id));
+  const unmatched = listUnmatched(data);
+  const notRent = data.notRent;
   const payments = listPayments({}, data);
   const pending = payments.filter((p) => p.status === 'awaiting_approval');
+  const pendingClaims = data.claims.filter((c) => c.status === 'pending');
 
   return (
     <div className="flex flex-col gap-5">
@@ -32,11 +34,8 @@ export function PaymentsView() {
         eyebrow="Payments"
         actions={
           <>
-            <Button
-              variant="secondary"
-              onClick={() => toast('Bank statement import is coming in M2-10.', 'info')}
-            >
-              Import bank statement
+            <Button variant="secondary" onClick={() => setImportOpen(true)}>
+              Import statement
             </Button>
             <Button onClick={() => setCashOpen(true)}>Record cash payment</Button>
           </>
@@ -52,14 +51,28 @@ export function PaymentsView() {
           },
           {
             id: 'needs',
-            label: 'Needs match',
+            label: 'Unmatched',
             badge: unmatched.length,
             content: (
               <NeedsMatchPanel
                 data={data}
                 unmatched={unmatched}
                 onMatch={actions.matchPayment}
-                onNotRent={(id) => setNotRentIds((ids) => [...ids, id])}
+                onSplit={actions.splitPayment}
+                onNotRent={actions.ignorePayment}
+              />
+            ),
+          },
+          {
+            id: 'claims',
+            label: 'Tenant claims',
+            badge: pendingClaims.length,
+            content: (
+              <ClaimsPanel
+                data={data}
+                claims={data.claims}
+                onApprove={actions.approveClaim}
+                onReject={actions.rejectClaim}
               />
             ),
           },
@@ -102,11 +115,11 @@ export function PaymentsView() {
                         <Button
                           variant="secondary"
                           onClick={() => {
-                            setNotRentIds((ids) => ids.filter((x) => x !== u.id));
-                            toast('Moved back to Needs match.', 'info');
+                            actions.restoreNotRent(u.id);
+                            toast('Moved back to Unmatched.', 'info');
                           }}
                         >
-                          Move back to Needs match
+                          Move back to Unmatched
                         </Button>
                       </Card>
                     </li>
@@ -115,6 +128,12 @@ export function PaymentsView() {
               ),
           },
         ]}
+      />
+      <ImportStatementDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        data={data}
+        onConfirm={actions.commitImport}
       />
       <RecordCashDialog
         open={cashOpen}
