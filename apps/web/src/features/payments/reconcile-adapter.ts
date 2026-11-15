@@ -6,9 +6,9 @@
  *   payment when a statement line merges into it or a manager approves it;
  * - raw lines and raw phones are never displayed or logged.
  */
-import { createTestPhoneHasher } from '@kodibox/core/testing';
 import {
   allocate,
+  createKeyedPhoneHasher,
   maskPhone,
   neutraliseForSpreadsheet,
   normalisePhone,
@@ -40,8 +40,14 @@ export type {
 export const MAX_FILE_BYTES = 5 * 1024 * 1024;
 export const MAX_SMS_CHARS = 1000;
 
-/** Demo-only unkeyed hasher. Production uses the server-side keyed HMAC. */
-export const demoHashPhone = createTestPhoneHasher();
+/**
+ * Demo hasher: HMAC-SHA256 with an ephemeral random 32-byte key generated once per process.
+ * Production servers must derive the key from KMS (versioned) per ADR 0007.
+ */
+export const demoHashPhone = createKeyedPhoneHasher(
+  globalThis.crypto.getRandomValues(new Uint8Array(32)),
+  'demo-ephemeral',
+);
 
 export const parseMpesaStatement = (text: string) =>
   parseMpesaStatementCsv(text, { hashPhone: demoHashPhone, now: new Date() });

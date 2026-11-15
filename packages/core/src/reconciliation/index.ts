@@ -28,6 +28,7 @@ export {
   type DuplicateRecord,
   type PossibleDuplicate,
 } from './dedupe';
+export { createKeyedPhoneHasher } from './hasher';
 export { match } from './match';
 export { allocate } from './allocate';
 export { rawLinesById, toPaymentRecord, toPaymentRecordWithRaw } from './records';

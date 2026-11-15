@@ -1,5 +1,6 @@
 import {
   compactRef,
+  createKeyedPhoneHasher,
   normaliseAccountRef,
   parseMpesaSms,
   parseMpesaStatementCsv,
@@ -10,7 +11,7 @@ import {
   type ScoredCandidate,
   type PaymentRecord,
 } from '@kodibox/core';
-import { createTestPhoneHasher } from '@kodibox/core/testing';
+import { randomBytes } from './random-key';
 import {
   DEMO_TENANT_ID,
   SAMPLE_CLAIMS,
@@ -28,8 +29,11 @@ import {
 
 const SOURCE_ACCOUNT = 'paybill-demo';
 
-/** Demo/test hasher only. Production uses a server-side keyed HMAC hasher. */
-const hashPhone = createTestPhoneHasher();
+/**
+ * Demo hasher: HMAC-SHA256 with an ephemeral random 32-byte key generated once per session.
+ * Production servers must derive the key from KMS (versioned) per ADR 0007.
+ */
+const hashPhone = createKeyedPhoneHasher(randomBytes(32), 'demo-ephemeral');
 
 /** Names the landlord's paybill/till shows on a tenant's M-Pesa confirmation SMS (demo). */
 const EXPECTED_PAYEES = ['RIVERSIDE COURT', 'MWANGI PROPERTIES'] as const;

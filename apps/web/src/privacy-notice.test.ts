@@ -11,7 +11,7 @@ describe('privacy notice at the point of collection', () => {
     const shell = read('features/auth/components/auth-shell.tsx');
     expect(shell).toContain('PRIVACY_NOTICE_PATH');
     expect(shell).toContain('PRIVACY_NOTICE_VERSION');
-    expect(shell).not.toMatch(/Data Protection Act 2019 compliant/);
+    expect(shell).not.toMatch(/Data\s+Protection\s+Act\s+2019\s+compliant/);
     for (const f of ['login-form.tsx', 'two-factor-setup.tsx'])
       expect(read(`features/auth/components/${f}`)).toContain('<AuthShell>');
   });
@@ -26,16 +26,17 @@ describe('privacy notice at the point of collection', () => {
     expect(PRIVACY_NOTICE_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(page.match(/Basis:/g)?.length).toBeGreaterThanOrEqual(5); // one per data item
     expect(page).toMatch(/Required/);
-    expect(page).toMatch(/cannot use Kodibox/);
-    expect(page).toMatch(/withdraw any consent/);
-    expect(page).toMatch(/object to or\s+restrict/);
-    expect(page).toMatch(/automated means or profiling/);
-    expect(page).toMatch(/Data Protection Commissioner/);
-    expect(page).toMatch(/organization&apos;s own privacy notice/);
+    expect(page).toMatch(/cannot\s+use\s+Kodibox/);
+    expect(page).toMatch(/withdraw\s+any\s+consent/);
+    expect(page).toMatch(/object\s+to\s+or\s+restrict/);
+    // Whitespace-tolerant: prettier may wrap this sentence across lines.
+    expect(page).toMatch(/automated\s+means\s+or\s+profiling/);
+    expect(page).toMatch(/Data\s+Protection\s+Commissioner/);
+    expect(page).toMatch(/organization&apos;s\s+own\s+privacy\s+notice/);
   });
   it('the public page carries no internal legal markers or pending-review wording', () => {
     const page = read('app/privacy/page.tsx');
-    expect(page).not.toMatch(/\[LEGAL\]|pending legal|legal review|proposal/i);
+    expect(page).not.toMatch(/\[LEGAL\]|pending\s+legal|legal\s+review|proposal/i);
   });
   it('the page quotes the real OTP template exactly and refuses to render in production with placeholder identity', () => {
     const page = read('app/privacy/page.tsx');
