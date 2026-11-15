@@ -1,6 +1,6 @@
 # Kodibox Mobile App Plan
 
-> Status: Draft v1 · 2026-11-02 · Scope: `apps/mobile` (Expo / React Native, TypeScript)
+> Status: Draft v2 · 2026-11-15 · Scope: `apps/mobile` (Expo / React Native, TypeScript). MA-01 scaffold done; a clickable prototype runs on demo data (section 13).
 > Related: `docs/PROJECT_PLAN.md` (Phase 2 M2-01/M2-02, Phase 3 M3-01, M3-08), `docs/ARCHITECTURE.md` §12, `docs/SECURITY.md` §4.9 and §6
 
 ## 1. Goals
@@ -30,13 +30,15 @@ Design frames live in the design project; filenames are `*.dc.html`.
 ### 3.1 Shared
 | Screen | Frame | Notes |
 |---|---|---|
-| Login, OTP, 2FA, biometric unlock, role switcher | `AppLogin` | Phone + OTP for tenants/caretakers; password + TOTP for owners/managers |
+| Welcome (brand hero, Get started, sign in) | `Welcome` | Prototype: `src/app/(auth)/welcome.tsx`. Amber primary action, no account needed to read |
+| Login, OTP, 2FA, biometric unlock, role switcher | `AppLogin` | Phone + OTP for tenants/caretakers; password + TOTP for owners/managers. Prototype: phone and 6-digit OTP on demo data, then the role switcher (`roles.tsx`). Sign-up is not built |
 
 ### 3.2 Tenant (tabs: Home, Payments, Requests, Profile)
 | Screen | Frame | Notes |
 |---|---|---|
-| Home (amount due, quick actions, receipts) | `TenantHome` | Single balance card, "How to pay" and "I've paid" actions |
-| Pay (payment instructions, "I've paid" proof, status) | `TenantPay` | Paybill or till number and account reference (unit code) with copy buttons; proof by pasted M-Pesa SMS or slip photo; status "pending verification" until matched or approved |
+| Home (amount due, quick actions, receipts) | `TenantHome` | Single balance card, "Pay rent" (How to pay) and "I've paid" actions. Prototype: `(tenant)/(tabs)/home.tsx` |
+| How to pay (payment instructions, M-Pesa steps) | `TenantPay` | Prototype: `(tenant)/pay.tsx`. Paybill or till number and account reference (unit code) with copy buttons, bank details, and the M-Pesa steps. No in-app payment |
+| I've paid (proof submission, status) | `TenantPaid` | Prototype: `(tenant)/paid.tsx`. Paste the M-Pesa SMS or upload a slip photo; parsed code, amount, date and account; warnings; "Send for verification"; status "pending verification" until matched or approved |
 | Receipt | `TenantReceipt` | Shareable PDF, M-Pesa code |
 | Statement | `TenantStatement` | Payments tab; current statement only cached |
 | Requests: create repair or complaint ticket, list | `TenantRequest` | Photos and video, urgency, preferred access times, emergency guidance ("Fire, gas leak or break-in? Call 999 or 112 first."), status list |
@@ -44,7 +46,7 @@ Design frames live in the design project; filenames are `*.dc.html`.
 | Notices | `TenantNotices` | Vacation and rent-increase notices (templates only) |
 | Profile, consents, data export and correction requests | `TenantProfile` | DPA rights entry points |
 
-### 3.3 Caretaker (tabs: Tasks, Readings, Cash, Jobs), offline-first
+### 3.3 Caretaker (tabs: Tasks, Readings, Cash, Jobs, Account), offline-first
 | Screen | Frame | Notes |
 |---|---|---|
 | Today's tasks and sync status | `CaretakerHome` | Outbox count, Sync now |
@@ -52,14 +54,16 @@ Design frames live in the design project; filenames are `*.dc.html`.
 | Record cash payment, my entries | `CaretakerCash` | Receipt book no. + photo, pending until manager approves |
 | Move-out inspection | `CaretakerInspection` | Room checklist, final reading, keys, signature |
 | Job / work order | `CaretakerJob` | Cost, receipt photo, mark done, tenant notified |
+| Account (profile, appearance, sign out) | none yet | Prototype tab only (`(caretaker)/(tabs)/account.tsx`). The frames show four tabs; a frame is still needed |
 
-### 3.4 Manager / landlord (tabs: Home, Approvals, Tenants, Alerts)
+### 3.4 Manager / landlord (tabs: Home, Approvals, Tenants, Alerts, More)
 | Screen | Frame | Notes |
 |---|---|---|
-| Home (collected vs expected, quick actions, attention list, property switcher) | `ManagerHome` | Read-mostly dashboard |
-| Approvals (tenant payment claims, unmatched statement lines, cash entries, flagged readings) | `ManagerApprovals` | Biometric/2FA step-up on every approve; claims show the proof and the open balance |
-| Tenant search and quick card | `ManagerTenant` | Call, SMS, payment reminder, statement |
+| Home (collection ring, quick actions, attention list, property switcher) | `ManagerHome` | Read-mostly dashboard. Actions: Send reminder, Record expense, Import statement |
+| Approvals, segmented: Claims, Unmatched, Cash, Readings | `ManagerApprovals` | Claims: tenant claim with proof and balance, Approve or Reject. Unmatched: statement line with the suggested unit, Assign or Not rent (a reason is needed). Cash: caretaker entries, Approve or Reject. Readings: flagged water readings. Biometric/2FA step-up on every approve; never auto-approved |
+| Tenant search and quick card | `ManagerTenant` | Call, SMS, send payment reminder, statement |
 | Alerts inbox | `ManagerAlerts` | Payments, statement import reminders with open claim count, failed SMS, lease ending, MRI due, security alerts, ticket SLA breaches (escalated to Owner) |
+| More (profile, module grid, appearance, security and privacy, sign out) | `ManagerMore` | Module grid opens the web modules: Invoices, Payments and import summary, Reports and MRI tax, Properties, Tenants and leases, Utilities, Expenses and repairs, Tickets, Move-outs and notices, Messages, Landlords, Organization settings. Desk tasks (bulk imports, invoice runs, reports) open on the web app. Prototype: `(manager)/(tabs)/more.tsx` and `(manager)/manage/*` |
 
 ## 4. Technology
 | Concern | Choice |
@@ -155,15 +159,15 @@ Phase 2 delivers a mobile-friendly **PWA** first (cheaper to validate, no store 
 - M2-02 Caretaker app view (PWA, offline-capable readings and checklists): proves the outbox and idempotency design before native.
 
 Phase 3 **M3-01 Native mobile app (Expo)** is split into sub-tasks, one PR each:
-- [x] MA-01 Scaffold `apps/mobile`: Expo, Expo Router, TypeScript strict, workspace packages, lint, CI build, EAS project.
+- [ ] MA-01 Scaffold `apps/mobile`: Expo, Expo Router, TypeScript strict, workspace packages, lint, CI build, EAS project. _Status: scaffold done; CI build and EAS project outstanding, so not ticked._
 - [ ] MA-02 API client: OpenAPI-generated types, fetch wrapper, TanStack Query setup, Zod response validation, error model.
 - [ ] MA-03 Auth: `AppLogin`, OTP, TOTP, token storage in secure-store, rotating refresh, device binding, remote revoke.
 - [ ] MA-04 Biometric unlock and step-up, app-switcher masking, screenshot blocking, role switcher.
-- [ ] MA-05 Tenant core: `TenantHome`, `TenantPay` (payment instructions and "I've paid" proof submission), `TenantReceipt`, `TenantStatement`.
+- [ ] MA-05 Tenant core: `TenantHome`, `TenantPay` (payment instructions and "I've paid" proof submission), `TenantReceipt`, `TenantStatement`. _Prototype screens exist on demo data (How to pay, I've paid, receipt, statement)._
 - [ ] MA-06 Tenant extras: `TenantRequest` (create/list tickets with photos and video), `TenantTicket` (detail, public thread, rating), `TenantNotices`, `TenantProfile` (consents, data requests).
 - [ ] MA-07 Offline engine: SQLite outbox, idempotency keys, sync worker, conflict rules, attachment upload, sync status UI.
-- [ ] MA-08 Caretaker screens: `CaretakerHome`, `Caretaker` (readings), `CaretakerCash`, `CaretakerInspection`, `CaretakerJob` (repair jobs opened from a ticket; internal notes only, no complainant identity).
-- [ ] MA-09 Manager screens: `ManagerHome`, `ManagerApprovals` (tenant payment claims, unmatched statement lines, cash entries), `ManagerTenant`, `ManagerAlerts` with step-up on approvals.
+- [ ] MA-08 Caretaker screens: `CaretakerHome`, `Caretaker` (readings), `CaretakerCash`, `CaretakerInspection`, `CaretakerJob` (repair jobs opened from a ticket; internal notes only, no complainant identity). _Prototype screens exist (Tasks, Readings, Cash, Jobs, inspection); the Account tab is prototype only._
+- [ ] MA-09 Manager screens: `ManagerHome`, `ManagerApprovals` (tenant payment claims, unmatched statement lines, cash entries), `ManagerTenant`, `ManagerAlerts` with step-up on approvals. _Prototype screens exist (Home, Approvals with Claims, Unmatched, Cash and Readings, Tenants, Alerts, More); approvals use demo state only._
 - [ ] MA-10 Push notifications (Expo Notifications, FCM/APNs), no-PII payloads, preferences; certificate pinning ADR and implementation.
 - [ ] MA-11 i18n English/Kiswahili (aligns with M3-08), low-end and 3G optimisation pass, bundle-size budget in CI.
 - [ ] MA-12 Hardening and release: Maestro e2e, device matrix, pentest fixes (H-01), store forms, EAS Update signing, closed beta then production on Play, then App Store.
@@ -188,3 +192,23 @@ Rough timing: MA-01 to MA-04 in weeks 20-22, MA-05 to MA-09 in weeks 23-27, MA-1
 - WhatsApp opt-in flows (M3-02) reusing push preferences.
 - Whether landlords of agencies (read-only portal) get a fourth role group in the app or stay web-only at launch.
 - Whether a slip photo should be OCR-parsed on device or only on the server (server-side parsing is the default; device OCR would need its own privacy review).
+
+## 13. Prototype status (2026-11-15)
+What the `apps/mobile` prototype does and does not do. Nothing here is production.
+
+**Built (on demo data):**
+- Stack as installed: Expo SDK 58 (`expo ~58.0.25`), React Native 0.88, Expo Router, TypeScript. Manrope and IBM Plex Mono load at startup through `@expo-google-fonts/*` (`src/theme/fonts.ts`).
+- Colour tokens from `packages/ui` (light and dark, system follows the OS). Demo data from `packages/demo` (integer minor units). The app declares `@kodibox/core` as a workspace dependency.
+- Welcome, sign-in (phone and 6-digit OTP, demo), role switcher, then the Tenant, Caretaker and Manager experiences with the tabs in sections 3.2 to 3.4.
+- Manager Approvals has four segments (Claims, Unmatched, Cash, Readings). Approve, Reject, Assign and Not rent update the demo state only.
+- Manager More has the module grid, appearance, security and privacy entries, and sign out. Every role has account and sign-out.
+
+**Not built:** real OTP or TOTP, sessions and token storage, biometric unlock or step-up, the API client, the offline outbox, push notifications, certificate pinning, device checks, real claim parsing, PDF receipts, and any database write. No payment is initiated anywhere (ADR 0007).
+
+**Known open items:**
+- Onboarding starts at step 4 from the web, and is reachable only from `/login` "Create account". It should start at step 1 for a new Organization.
+- Mobile sign-up is not built.
+- Role labels for independent landlords: the app shows the role, but it should say Owner of your own Organization (see DATA_MODEL, `landlord_viewer`).
+- Agency-only modules (Landlords, remittances) are visible to every role in the prototype. They should show only when the Organization is an agency.
+- Android navigation bar in Expo Go: the bottom bar can overlap the system bar on some devices.
+- Caretaker Account tab has no frame (section 3.3).

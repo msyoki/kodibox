@@ -19,14 +19,63 @@ a{color:#0E4D45}a:hover{color:#08332D}
 <div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 10px">
 <header style="display: flex; justify-content: space-between; align-items: baseline">
 <h1 style="margin: 0; font-size: 22px; font-weight: 800">Approvals</h1>
-<span style="font-size: 13px; color: #5A635F">6 waiting</span>
+<span style="font-size: 13px; color: #5A635F">7 waiting</span>
 </header>
+
+<div role="tablist" aria-label="Approval types" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; background: #EEECE5; border-radius: 12px; padding: 4px">
+<sc-for list="{{segs}}" as="s" hint-placeholder-count="4">
+<button type="button" role="tab" aria-selected="{{s.selected}}" onClick="{{s.go}}" style="{{s.style}}">{{s.label}}</button>
+</sc-for>
+</div>
 
 <p role="note" style="margin: 0; display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: #E3ECF9; color: #1D4F91; font-size: 12px; font-weight: 600">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D4F91" stroke-width="2" aria-hidden="true" style="flex: none"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg>
 Each approval asks for fingerprint or face unlock, or your 2FA code.
 </p>
 
+<sc-if value="{{isClaims}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="claims" style="display: flex; flex-direction: column; gap: 8px">
+<h2 id="claims" style="margin: 0; font-size: 14px; font-weight: 800">Tenant claims to verify</h2>
+<sc-for list="{{claims}}" as="c" hint-placeholder-count="2">
+<article aria-label="{{c.aria}}" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<span style="display: flex; flex-direction: column; gap: 2px; font-size: 13px"><strong style="font-size: 14px">{{c.unit}} · {{c.tenant}}</strong><span style="font-family: 'IBM Plex Mono', monospace; color: #5A635F">{{c.code}} · {{c.when}}</span></span>
+<span style="flex: none; padding: 3px 10px; border-radius: 99px; background: #FDEBD3; color: #8A4B08; font-size: 12px; font-weight: 700">Pending</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #5A635F">
+<span>{{c.proof}}</span>
+<strong style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: #14201E">{{c.amount}}</strong>
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+<button type="button" aria-label="{{c.rejectLabel}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #9B2C1A; background: #FFFFFF; color: #9B2C1A; font: inherit; font-size: 14px; font-weight: 700">Reject</button>
+<button type="button" aria-label="{{c.approveLabel}}" style="min-height: 44px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700">Approve</button>
+</div>
+</article>
+</sc-for>
+<span style="font-size: 12px; color: #5A635F">Approving checks the claim against the statement first. It never posts a second payment.</span>
+</section>
+</sc-if>
+
+<sc-if value="{{isUnmatched}}" hint-placeholder-val="{{ false }}">
+<section aria-labelledby="mp" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+<h2 id="mp" style="margin: 0; font-size: 14px; font-weight: 800">Unmatched statement lines</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px">
+<span style="display: flex; flex-direction: column; gap: 2px"><strong style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500">TK2F9RT4KD</strong><span style="color: #5A635F">0712 ••• 512 · account “B12 ”</span></span>
+<strong style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500">16,700</strong>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #F1F7F5; font-size: 13px">
+<span>Suggested: <strong>B-12 · Peter Otieno</strong></span>
+<span style="padding: 3px 10px; border-radius: 99px; background: #E1F2E8; color: #1C6B44; font-size: 12px; font-weight: 700">Strong</span>
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+<button type="button" style="min-height: 44px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-size: 14px; font-weight: 700">Assign</button>
+<button type="button" style="min-height: 44px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-size: 14px; font-weight: 700">Not rent</button>
+</div>
+<span style="font-size: 12px; color: #5A635F">1 more unmatched line below. Assign re-runs allocation; Not rent needs a note.</span>
+</section>
+</sc-if>
+
+<sc-if value="{{isCash}}" hint-placeholder-val="{{ false }}">
 <section aria-labelledby="cash" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
 <h2 id="cash" style="margin: 0; font-size: 14px; font-weight: 800">Cash from caretaker</h2>
 <div style="display: flex; gap: 10px; align-items: center">
@@ -42,20 +91,9 @@ Each approval asks for fingerprint or face unlock, or your 2FA code.
 </div>
 <span style="font-size: 12px; color: #5A635F">2 more cash entries below</span>
 </section>
+</sc-if>
 
-<section aria-labelledby="mp" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
-<h2 id="mp" style="margin: 0; font-size: 14px; font-weight: 800">Unmatched M-Pesa</h2>
-<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px">
-<span style="display: flex; flex-direction: column; gap: 2px"><strong style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500">TK2F9RT4KD</strong><span style="color: #5A635F">0712 ••• 512 · account "B12 "</span></span>
-<strong style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500">16,700</strong>
-</div>
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #F1F7F5; font-size: 13px">
-<span>Suggested: <strong>B-12 · Peter Otieno</strong></span>
-<button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 700">Confirm</button>
-</div>
-<span style="font-size: 12px; color: #5A635F">1 more unmatched payment below</span>
-</section>
-
+<sc-if value="{{isReadings}}" hint-placeholder-val="{{ false }}">
 <section aria-labelledby="rd" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
 <h2 id="rd" style="margin: 0; font-size: 14px; font-weight: 800">Unusual water readings</h2>
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px">
@@ -67,12 +105,13 @@ Each approval asks for fingerprint or face unlock, or your 2FA code.
 <button type="button" style="min-height: 44px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700">Accept</button>
 </div>
 </section>
+</sc-if>
 
 <p style="margin: 0; font-size: 12px; color: #5A635F; text-align: center">Every decision is logged and can be reversed, never deleted.</p>
 </div>
 
-<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
-<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
 <a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
 </sc-for>
 </nav>
@@ -82,8 +121,26 @@ Each approval asks for fingerprint or face unlock, or your 2FA code.
 class Component extends DCLogic {
 renderVals() {
 const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const current = (this.state && this.state.seg) || 'claims';
+const seg = (id, label) => ({
+id, label, selected: current === id ? 'true' : 'false',
+go: () => this.setState({ seg: id }),
+style: 'min-height: 44px; border: 0; border-radius: 9px; background: ' + (current === id ? '#FFFFFF' : 'transparent') + '; color: ' + (current === id ? '#0E4D45' : '#5A635F') + '; font: inherit; font-size: 12px; font-weight: ' + (current === id ? '800' : '600') + '; cursor: pointer'
+});
+const claim = (unit, tenant, code, when, proof, amount) => ({
+unit, tenant, code, when, proof, amount,
+aria: 'Claim ' + code + ' for ' + unit,
+rejectLabel: 'Reject claim ' + code,
+approveLabel: 'Approve claim ' + code
+});
 return {
-tabs: [tab('Home', 'ManagerHome.dc.html'), tab('Approvals', 'ManagerApprovals.dc.html', true), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html')]
+segs: [seg('claims', 'Claims · 2'), seg('unmatched', 'Unmatched · 2'), seg('cash', 'Cash · 3'), seg('readings', 'Readings · 1')],
+isClaims: current === 'claims', isUnmatched: current === 'unmatched', isCash: current === 'cash', isReadings: current === 'readings',
+claims: [
+claim('B-12', 'Peter Otieno', 'TK2F9RT4KD', '2 Nov 09:41', 'Pasted M-Pesa SMS', 'KES 16,700'),
+claim('M-03', 'Amina Hassan', 'TK2G1QW7ZA', '1 Nov 18:12', 'Slip photo', 'KES 8,000')
+],
+tabs: [tab('Home', 'ManagerHome.dc.html'), tab('Approvals', 'ManagerApprovals.dc.html', true), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html'), tab('More', 'ManagerMore.dc.html')]
 };
 }
 }

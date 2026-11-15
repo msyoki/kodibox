@@ -29,17 +29,26 @@ kodibox/
 │  │     ├─ features/<feature>/{components,actions,queries,schemas}
 │  │     └─ lib/           request context, auth glue, result/AppError, openapi
 │  ├─ worker/              BullMQ processors, schedulers, job registry
-│  └─ mobile/              Expo / React Native (Phase 3), consumes REST /api/v1
+│  └─ mobile/              Expo SDK 58 / React Native (Phase 3). Prototype today, on demo data; consumes REST /api/v1 once built (section 2.1)
 ├─ packages/
 │  ├─ db/                  Drizzle schema, migrations, RLS policies, `withOrg(tx)` helper, seed
 │  ├─ core/                PURE domain logic: ledger/, billing/, allocation/, penalties/, proration/, reconciliation/, authz/
 │  ├─ integrations/        payment-sources/ (M-Pesa paybill/till statement, bank CSV/XLSX, SMS proof parser), sms/ (Africa's Talking), email/, etims/, storage/
-│  ├─ ui/                  shared shadcn-based components, tokens
+│  ├─ ui/                  shared components and colour tokens (tokens.ts: light and dark palettes; web CSS variables mirror them, a test keeps them in step)
+│  ├─ demo/                shared demo data for the web and mobile prototypes (integer minor units, no I/O)
 │  └─ config/              env.ts (Zod), tsconfig, eslint, constants (roles, permissions list)
-├─ docs/                   ARCHITECTURE, DATA_MODEL, SECURITY, PROJECT_PLAN, adr/, research/
+├─ docs/                   ARCHITECTURE, DATA_MODEL, SECURITY, PROJECT_PLAN, adr/, research/, design/
 ├─ docker/                 Dockerfiles, compose for local dev
 ├─ turbo.json  pnpm-workspace.yaml  .env.example
 ```
+
+### 2.1 Mobile app structure (apps/mobile)
+- **Routing:** Expo Router, file-based. Route groups per experience: `(auth)` (welcome, login, roles), `(tenant)`, `(caretaker)` and `(manager)`, each with its own tab layout. Shared screens sit at the top level (`settings.tsx`).
+- **Components:** `src/components` holds the shared kit (screen, controls, list rows, copy button, theme toggle, manager UI).
+- **Lib:** `src/lib` holds pure helpers (format, phone, OTP, readings, jobs, payment instructions, manager data, payments engine) with Vitest tests next to them.
+- **State:** `src/state/demo-state.tsx` is an in-memory demo store (approvals, claims, cash). There is no network or database access in the prototype.
+- **Theme:** `src/theme` maps `@kodibox/ui` tokens to light and dark palettes. Fonts: Manrope for text and IBM Plex Mono for amounts and codes (`fonts.ts`).
+- **Data:** `@kodibox/demo` supplies the persona and seed data. Money is integer minor units, as on the server.
 
 ## 3. Module boundaries and dependency rules
 
@@ -107,7 +116,7 @@ Platform-admin paths use a separate `withPlatformAdmin()` helper that sets `app.
 
 - **Organization** = the SaaS customer (a landlord, a property-management agency, or a SACCO/caretaker firm). Every tenant-scoped row has `organization_id`.
 - **User** is global (one login), linked to organizations via **memberships** (`user_id`, `organization_id`, `role`, optional `property_ids` scope).
-- **Roles**: `owner`, `manager`, `accountant`, `caretaker`, `tenant`, `platform_admin`.
+- **Roles**: `owner`, `manager`, `accountant`, `caretaker`, `tenant`, `landlord_viewer`, `platform_admin` (`platform_admin` is not a membership role; see below).
 
 | Role | Scope | Summary |
 |---|---|---|
@@ -116,10 +125,11 @@ Platform-admin paths use a separate `withPlatformAdmin()` helper that sets `app.
 | accountant | org, read + finance write | payments, reconciliation, expenses, reports; no tenant PII beyond need |
 | caretaker | assigned properties | meter readings, maintenance, notices, view occupancy; no financial totals |
 | tenant | own lease(s) only | statements, pay, requests, notices |
+| landlord_viewer | agency clients only, scoped to `landlord_id` | read-only portal: statements and remittances |
 | platform_admin | cross-org, audited | Kodibox staff; support and ops only, time-boxed access with reason |
 
 - A tenant (person) who logs in is a `user` with a `tenant` membership linked to a `tenants` row. One person can rent in several organizations.
-- **Landlord-on-behalf (agencies)**: an agency org manages properties for several landlords. `landlords` rows (within the agency org) own `properties`. Each landlord can have its own `payment_sources`, statements, and remittance reports. Landlords may optionally be invited as a read-only `owner`-lite membership scoped to their `landlord_id` (Phase 2). Isolation between landlords inside one agency is by app-level `can()` scope, not RLS; isolation between agencies is RLS.
+- **Landlord-on-behalf (agencies)**: an agency org manages properties for several landlords. `landlords` rows (within the agency org) own `properties`. Each landlord can have its own `payment_sources`, statements, and remittance reports. Landlords of an agency may optionally be invited as a read-only `landlord_viewer` membership scoped to their `landlord_id` (Phase 2). An independent landlord is not an agency client: they are the Owner of their own Organization and need no `landlord_viewer` membership (DATA_MODEL, memberships). Isolation between landlords inside one agency is by app-level `can()` scope, not RLS; isolation between agencies is RLS.
 
 ## 6. Payment evidence and reconciliation
 
@@ -182,6 +192,27 @@ flowchart LR
   X -- no --> Done
 ```
 Allocation order is configurable per org (default: oldest due first; line priority rent -> utilities -> other charges -> penalties last, matching the ledger-money skill). Pure function `allocate(payment, openInvoices, policy)` in `core/allocation`; it returns `Allocation[]` and a residual that becomes a `credits` row. Ledger postings are described in DATA_MODEL.md.
+
+### 6.5 Reconciliation code as built
+The reconciliation logic is pure (no I/O, no clock) and lives in `packages/core/src/reconciliation`, with one module per step:
+
+| Step | Module | Exports (main) |
+|---|---|---|
+| Types and records | `types.ts`, `records.ts` | `PaymentRecord`, `PaymentSource`, phone hasher types; `toPaymentRecord`, `toPaymentRecordWithRaw` |
+| CSV | `csv.ts` | `parseCsv` with size and row limits |
+| Parse | `parsers.ts` | `parseMpesaStatementCsv`, `parseBankCsv` (with a column mapping), `parseMpesaSms` (pasted claim text). Row errors are per row |
+| Normalise | `normalize.ts` | `normaliseExternalRef`, `normaliseAccountRef`, `normalisePhone`, `hashedPhone`, `maskPhone`, `parseAmountMinor`, `nairobiToUtcIso`, `withinPaymentWindow`, `neutraliseForSpreadsheet` (no formula execution) |
+| Deduplicate | `dedupe.ts` | `dedupeKey`, `fingerprint`, `dedupe`: duplicates, claim merges, conflicts, possible duplicates |
+| Match | `match.ts` | `match`: scored candidates from account reference, payer and amount window |
+| Allocate | `allocate.ts` | `allocate`: oldest-first allocation, with any residual for a credit |
+| Orchestrate | `reconcile.ts` | `reconcile`: matched and unmatched payments, allocations and claim reviews |
+| Test helpers | `testing.ts`, `__fixtures__/` | `createTestPhoneHasher` (exported as `@kodibox/core/testing`); synthetic statement and SMS fixtures |
+
+Tests: `engine`, `parsers`, `review`, and the security review rounds (`round3`, `round5`, `security`). The branch reports 160 tests for this module (see `docs/PROGRESS.md`).
+
+Still to build: the worker that stores and parses files, the database writes, ledger posting through `core/ledger`, the audit events, and the unmatched queue persistence (M1-07 to M1-09). The web prototype drives its screens from `apps/web/src/demo` (`recon.ts`, with `recon.test.ts`) on the shared `packages/demo` data.
+
+Open point: ADR 0007 places the statement parsers in `packages/integrations/payment-sources`. The pure parsing code currently sits in `packages/core/src/reconciliation`. Keep the parsing logic pure in core, and move only the file and I/O adapters into `integrations`, or record the change in an ADR.
 
 ## 7. Reconciliation queue
 

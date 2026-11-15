@@ -102,6 +102,7 @@ S = Spoofing, T = Tampering, R = Repudiation, I = Information disclosure, D = De
 - T: tampered client. Mitigate: server enforces everything; no secrets in the app bundle; certificate pinning for api domain (with rotation plan).
 - I: PII cached on device or in screenshots. Mitigate: no offline PII cache beyond the current statement; mask on app switcher; backups excluded.
 - D/E: API abuse via reversed client. Mitigate: same rate limits and `can()` as web; attestation (Play Integrity, App Attest) considered for high-risk endpoints.
+- Prototype status (2026-11-15): `apps/mobile` runs on demo data with no network, auth or storage. The mitigations above are design requirements, not yet implemented.
 
 ## 5. Top abuse cases and mitigations
 
@@ -275,6 +276,16 @@ Applies to M-Pesa paybill/till statement imports, bank CSV/XLSX imports, tenant 
 13. **Error reporting**: row-level parse errors show row number and reason category only. Error reports never echo raw cell values, which may contain names or phone numbers.
 14. **Monitoring**: alert on spikes in parse failures, rejected references, claim bursts, and approvals of claims that remain unmatched.
 15. **Fixtures**: tests and demos use synthetic statements and SMS samples only. No real statement or message is committed to the repository.
+
+### 7.1 Prototype status and acceptance criteria (ADR 0007 addendum)
+- **Status:** the web and mobile prototypes show the claim, approval and import screens on demo data only. None of the controls in items 1 to 15 is enforced by server code yet. The pure reconciliation engine in `packages/core/src/reconciliation` has been through four security review rounds, with tests for the engine, parsers, review and each review round. It does not replace the server controls.
+- **Acceptance criteria for the real server actions.** Each must have a test before the feature ships:
+  1. Claim approval is blocked while a verified record with the same dedupe key exists. A review claim is settled by linking it to that record, never by a fresh allocation.
+  2. Approver differs from claimant, and approver differs from maker, enforced with `can()` on the server.
+  3. Receipt and claim endpoints check that the lease belongs to the actor (no IDOR).
+  4. A conflict row needs a reversal of the original, or a step-up approval, before it can be assigned.
+  5. Parsing and phone hashing (keyed HMAC) run server-side or in the worker. Raw lines never reach the client.
+- **Notification forwarding (M2-12)** adds: accept mail only from addresses the org registers, require SPF and DKIM alignment, rate-limit per org, and never auto-verify. Forwarded records confirm only when a statement line matches or the owner approves.
 
 ## 8. Logging and redaction
 

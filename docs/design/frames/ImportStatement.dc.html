@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import statement</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#E9E7DF}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; padding: 40px 16px; display: flex; align-items: center; justify-content: center; background: #E9E7DF; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<section role="dialog" aria-modal="true" aria-labelledby="imp-title" style="width: 100%; max-width: 680px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-direction: column; gap: 6px">
+<h1 id="imp-title" style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px">Import statement</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5A635F">Upload an M-Pesa or bank statement. Nothing is saved until you confirm the preview. Each line is checked for duplicates first.</p>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600">
+Payment source
+<select style="min-height: 44px; padding: 0 12px; border: 1px solid #C9C6BB; border-radius: 10px; font: inherit; font-size: 15px; background: #FFFFFF">
+<option>Paybill 000111 · Riverside Court</option>
+<option>Equity bank · Mwangi Properties</option>
+</select>
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600">
+Statement format
+<select style="min-height: 44px; padding: 0 12px; border: 1px solid #C9C6BB; border-radius: 10px; font: inherit; font-size: 15px; background: #FFFFFF">
+<option>M-Pesa paybill statement (CSV)</option>
+<option>M-Pesa till statement (CSV)</option>
+<option>Bank statement (CSV or XLSX)</option>
+<option>Saved column mapping</option>
+</select>
+</label>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px dashed #B9CFCA; border-radius: 12px; background: #FAF9F6">
+<span style="display: flex; flex-direction: column; gap: 2px; font-size: 14px"><strong style="font-weight: 700">mpesa-paybill-oct-2026.csv</strong><span style="font-size: 12px; color: #5A635F; font-family: 'IBM Plex Mono', monospace">214 KB · sha256 3f9a…c21d · 412 lines</span></span>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Choose another file</button>
+</div>
+
+<section aria-labelledby="prev" style="display: flex; flex-direction: column; gap: 10px">
+<h2 id="prev" style="margin: 0; font-size: 14px; font-weight: 800">Preview</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px">
+<sc-for list="{{counts}}" as="c" hint-placeholder-count="6">
+<div style="{{c.style}}"><span style="font-size: 12px; color: #5A635F">{{c.label}}</span><strong style="font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500; color: {{c.color}}">{{c.value}}</strong><span style="font-size: 12px; color: #5A635F">{{c.note}}</span></div>
+</sc-for>
+</div>
+</section>
+
+<section role="note" aria-labelledby="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 12px; background: #FDEBD3; color: #8A4B08">
+<h2 id="alert" style="margin: 0; font-size: 14px; font-weight: 800">Needs your decision</h2>
+<sc-for list="{{alerts}}" as="a" hint-placeholder-count="2">
+<p style="margin: 0; font-size: 13px; line-height: 1.5; font-weight: 600">{{a}}</p>
+</sc-for>
+</section>
+
+<label style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; min-height: 44px">
+<input type="checkbox" style="width: 20px; height: 20px; margin: 2px 0 0; accent-color: #0E4D45">
+<span>I have read the 4 conflicts and 2 possible duplicates. Import the 388 new lines now and keep the conflicts on hold.</span>
+</label>
+
+<footer style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid #EEECE5; padding-top: 18px">
+<span style="font-size: 12px; color: #5A635F; max-width: 320px; line-height: 1.45">Matching runs after the import. Lines that do not match go to the unmatched queue.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 14px">Cancel</button>
+<button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 15px">Import 388 new lines</button>
+</div>
+</footer>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+const cell = (tone) => 'display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 12px; border: 1px solid ' + (tone === 'warn' ? '#FDEBD3' : '#E2E0D8') + '; background: ' + (tone === 'warn' ? '#FFF8EE' : '#FFFFFF');
+return {
+counts: [
+{ label: 'Lines read', value: '412', note: 'from the file', color: '#14201E', style: cell('') },
+{ label: 'New', value: '388', note: 'will be imported', color: '#1C6B44', style: cell('') },
+{ label: 'Duplicates', value: '18', note: 'already imported, skipped', color: '#14201E', style: cell('') },
+{ label: 'Conflicts', value: '4', note: 'same M-Pesa code, other amount', color: '#8A4B08', style: cell('warn') },
+{ label: 'Possible duplicates', value: '2', note: 'no code, same amount and date', color: '#8A4B08', style: cell('warn') },
+{ label: 'Row errors', value: '0', note: 'no cell values shown', color: '#14201E', style: cell('') }
+],
+alerts: [
+'Conflicts are held, not imported. A held line cannot be assigned to a tenant until the original is reversed or a manager approves with a step-up.',
+'Possible duplicates need a decision in the import history before they are matched.'
+]
+};
+}
+}
+</script>
+</body>
+</html>

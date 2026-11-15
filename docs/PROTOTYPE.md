@@ -19,7 +19,10 @@ Sign in with anything, enter any 6 digits for 2FA, land on `/dashboard`. Demo da
 | `/login` | Login | P-01 (done) | E-04 auth |
 | `/onboarding` | Onboarding | P-01 (done) | M1-16 |
 | `/dashboard` | Main | P-01 (done) | M1-14 |
-| `/payments`, `/invoices` | Payments, Invoices | P-02 | M1-05, M1-06..M1-10 |
+| `/payments`, `/invoices` | Payments, ImportStatement, Invoices | P-02, P-08 | M1-05, M1-07..M1-10 |
+| `/settings/payment-instructions` | PaymentInstructions | P-08 | M1-06 |
+| `/settings/appearance` | Settings (Appearance) | P-08 | theme preference (light, dark, system, `kb-theme` cookie) |
+| `/onboarding` | Onboarding (7 steps) | P-01, P-08 | M1-16. Opens at step 4 today; see open items in `docs/PROGRESS.md` |
 | `/properties`, `/tenants` | Properties, TenantLease, Import | P-03 | M1-01..M1-03 |
 | `/tickets`, `/maintenance`, `/move-outs`, `/utilities` | Tickets, Maintenance, MoveOut, Utilities | P-04 | M1-18 and Phase 2 |
 | `/messages`, `/landlords`, `/reports`, `/settings` | Messages, Agency, Reports, Settings, Privacy, Billing | P-05 | M1-12, M1-15, M1-17 |
@@ -27,12 +30,22 @@ Sign in with anything, enter any 6 digits for 2FA, land on `/dashboard`. Demo da
 
 Unbuilt routes render `ComingSoon` (`src/components/coming-soon.tsx`) so nav links never 404.
 
+## Mobile app prototype (apps/mobile)
+
+The native prototype (Expo SDK 58, Expo Router) is a separate app with the same demo data. It is not the `/m` web routes above. Run it with the steps in the root `README.md` (Expo Go over USB with `adb reverse`). It has no auth, API, database or SMS: sign-in is UI only, and approvals change the in-memory demo state. Screen list and status: `docs/MOBILE_APP_PLAN.md` sections 3 and 13.
+
+## Shared packages used by both prototypes
+
+- `packages/demo` (`@kodibox/demo`): demo seed, queries, reconciliation samples and formatting. Amounts are `bigint` minor units.
+- `apps/web/src/demo/adapt.ts` converts the shared bigint data to numbers at the boundary, so the web components stay unchanged. `apps/web/src/demo/recon.ts` (with `recon.test.ts`) holds the web reconciliation demo.
+- `packages/ui/src/tokens.ts` is the single source of colour tokens. The web CSS variables in `apps/web/src/app/globals.css` mirror it, and a test keeps the keys in step. Light, dark and system themes are both supported.
+
 ## Layout
 
 - `src/app/(app)/` authenticated shell (sidebar, top bar, "Demo mode" banner, providers).
 - `src/app/m/` phone-like column (max 420px) plus `components/mobile/tab-bar.tsx`.
 - `src/features/<feature>/components` page-level components; `src/components/ui` shared kit; `src/demo` data.
-- Tokens live in `src/app/globals.css` (`@theme`): colours `bg surface border border-strong divider soft text muted brand brand-dark brand-soft brand-tint amber warning danger(-soft) ok(-soft) warn(-soft) info(-soft)`, radii `rounded-control|card|panel`, fonts `font-sans|font-mono`.
+- Tokens: the source is `packages/ui/src/tokens.ts`; `src/app/globals.css` (`@theme`) mirrors it for Tailwind. Colours `bg surface border border-strong divider soft text muted brand brand-dark brand-soft brand-tint amber warning danger(-soft) ok(-soft) warn(-soft) info(-soft)`, radii `rounded-control|card|panel`, fonts `font-sans|font-mono`.
 
 ## UI kit (`@/components/ui`)
 

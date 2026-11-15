@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Connect M-Pesa</title>
+<title>Set up payment instructions</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -27,7 +27,7 @@ a{color:#0E4D45}a:hover{color:#08332D}
 <div style="width: 100%; max-width: 1180px; margin: 0 auto; padding: 32px clamp(16px, 3vw, 40px) 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px">
 
 <ol aria-label="Setup steps" style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px">
-<sc-for list="{{steps}}" as="s" hint-placeholder-count="6">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="7">
 <li style="{{s.style}}"><span style="{{s.num}}">{{s.n}}</span>{{s.label}}</li>
 </sc-for>
 </ol>
@@ -36,20 +36,20 @@ a{color:#0E4D45}a:hover{color:#08332D}
 
 <section aria-labelledby="h" style="flex: 3 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: clamp(20px, 3vw, 32px); display: flex; flex-direction: column; gap: 22px">
 <div>
-<p style="margin: 0; font-size: 13px; font-weight: 700; color: #5A635F; text-transform: uppercase; letter-spacing: 0.5px">Step 4 of 6</p>
-<h1 id="h" style="margin: 6px 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Connect your M-Pesa paybill</h1>
-<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3F4743">Tenants keep paying to <strong>your own</strong> paybill or till. Kodibox reads each payment confirmation from Safaricom and matches it to the right unit automatically.</p>
+<p style="margin: 0; font-size: 13px; font-weight: 700; color: #5A635F; text-transform: uppercase; letter-spacing: 0.5px">Step 4 of 7</p>
+<h1 id="h" style="margin: 6px 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Payment instructions</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3F4743">Tell tenants where to pay. Use your own paybill, till or bank account. Kodibox reads the statements you upload and matches them to units. It never receives the money.</p>
 </div>
 
 <fieldset style="border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 12px">
 <legend style="font-size: 14px; font-weight: 700; margin-bottom: 10px">How do tenants pay you?</legend>
 <label style="flex: 1 1 200px; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 2px solid #0E4D45; background: #F1F7F5; cursor: pointer">
 <input type="radio" name="kind" checked style="width: 20px; height: 20px; margin: 2px 0 0; accent-color: #0E4D45">
-<span><strong style="display: block; font-size: 15px">Paybill</strong><span style="font-size: 13px; color: #5A635F">Tenants enter an account number (best for matching)</span></span>
+<span><strong style="display: block; font-size: 15px">Paybill</strong><span style="font-size: 13px; color: #5A635F">Tenants enter their unit code as the account number (best for matching)</span></span>
 </label>
 <label style="flex: 1 1 200px; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 1px solid #D9D6CC; cursor: pointer">
 <input type="radio" name="kind" style="width: 20px; height: 20px; margin: 2px 0 0; accent-color: #0E4D45">
-<span><strong style="display: block; font-size: 15px">Buy Goods till</strong><span style="font-size: 13px; color: #5A635F">Matched by phone number and amount</span></span>
+<span><strong style="display: block; font-size: 15px">Bank account</strong><span style="font-size: 13px; color: #5A635F">Tenants pay by bank transfer and quote the unit code as the reference</span></span>
 </label>
 </fieldset>
 
@@ -64,23 +64,22 @@ a{color:#0E4D45}a:hover{color:#08332D}
 </div>
 
 <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600">
-Account number tenants should use
+Account reference tenants should use
 <select style="min-height: 44px; padding: 0 12px; border: 1px solid #C9C6BB; border-radius: 10px; font: inherit; font-size: 15px; background: #FFFFFF">
 <option>Unit code, e.g. B-12 (recommended)</option>
-<option>Tenant phone number</option>
-<option>Tenant ID from Kodibox</option>
+<option>Tenant phone number (not recommended)</option>
 </select>
 </label>
 
 <div role="status" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #E1F2E8; color: #14201E">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C6B44" stroke-width="2.4" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
-<span style="font-size: 14px"><strong>Connection works.</strong> Payment confirmations for paybill [PAYBILL] will arrive in Kodibox. Last checked just now.</span>
+<span style="font-size: 14px"><strong>Saved.</strong> Tenants will see Paybill 000111 and account B-12 on invoices, reminders and in the tenant app.</span>
 </div>
 
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-top: 1px solid #EEECE5; padding-top: 20px">
 <button type="button" style="min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #D9D6CC; background: #FFFFFF; color: #14201E; font: inherit; font-weight: 600; font-size: 14px">Back</button>
 <div style="display: flex; flex-wrap: wrap; gap: 10px">
-<button type="button" style="min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Test connection again</button>
+<button type="button" style="min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Preview tenant message</button>
 <button type="button" style="min-height: 44px; padding: 0 22px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 15px">Continue to import tenants</button>
 </div>
 </div>
@@ -89,19 +88,19 @@ Account number tenants should use
 <aside style="flex: 2 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
 <div style="background: #0E4D45; color: #FFFFFF; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; font-size: 18px; font-weight: 800">We never hold your money</h2>
-<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #D7E7E3">Rent goes from your tenant straight to your paybill. Kodibox only reads confirmations so it can reconcile. We cannot move, withdraw or delay your funds.</p>
-<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #D7E7E3">Your Daraja keys are encrypted, never shown again after saving, and only used to read payment confirmations.</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #D7E7E3">Rent goes from your tenant straight to your paybill or bank account. Kodibox only reads the statements you upload, so it can reconcile them.</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #D7E7E3">No payment-rail keys are needed. Nothing is connected to your M-Pesa or bank account.</p>
 </div>
 <div style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
 <h2 style="margin: 0; font-size: 16px; font-weight: 700">What your tenants will receive</h2>
 <div style="background: #F2F1EC; border-radius: 14px 14px 14px 4px; padding: 14px; font-size: 14px; line-height: 1.5">
-Hi Peter, your November rent for B-12 Riverside Court is KES 16,700, due 5 Nov. Pay via M-Pesa Paybill [PAYBILL], Account B-12. Statement: kodi.bx/s/•••• Reply STOP to opt out of reminders.
+Hi Peter, your November rent for B-12 Riverside Court is KES 16,700, due 5 Nov. Pay to Paybill 000111, Account B-12. Statement: kodi.bx/s/•••• Reply STOP to opt out of reminders.
 </div>
-<p style="margin: 0; font-size: 12px; color: #5A635F">Sent from sender ID MWANGIPROP. Receipts are sent automatically after each payment.</p>
+<p style="margin: 0; font-size: 12px; color: #5A635F">Sent from sender ID MWANGIPROP. Receipts are sent automatically after each payment is reconciled.</p>
 </div>
 <div style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 22px; font-size: 14px; line-height: 1.55">
-<h2 style="margin: 0 0 6px; font-size: 16px; font-weight: 700">Don’t have Daraja keys yet?</h2>
-Our guide walks you through getting them from Safaricom, usually within 2–5 working days. You can import tenants and send invoices while you wait. <a href="#" style="font-weight: 600">Read the guide</a>
+<h2 style="margin: 0 0 6px; font-size: 16px; font-weight: 700">Next: first statement</h2>
+You can import tenants and send invoices now. After your first M-Pesa or bank statement is uploaded, payments start matching to units. <a href="#" style="font-weight: 600">How to export a statement</a>
 </div>
 </aside>
 </div>
@@ -119,13 +118,13 @@ num: 'display: inline-flex; align-items: center; justify-content: center; width:
 return {
 steps: [
 step(1, 'Organization', 'done'), step(2, 'Property', 'done'), step(3, 'Units', 'done'),
-step(4, 'Connect M-Pesa', 'now'), step(5, 'Import tenants', 'next'), step(6, 'First invoices', 'next')
+step(4, 'Payment instructions', 'now'), step(5, 'Import tenants', 'next'), step(6, 'First statement', 'next'), step(7, 'First invoices', 'next')
 ],
 fields: [
-{ label: 'Paybill number', type: 'text', value: '[PAYBILL]', ph: 'e.g. 4123456', help: 'The business number tenants pay to.' },
-{ label: 'Daraja consumer key', type: 'password', value: '••••••••••••••••', ph: '', help: 'From your Safaricom Daraja app.' },
-{ label: 'Daraja consumer secret', type: 'password', value: '••••••••••••', ph: '', help: 'Stored encrypted. Never shown again.' },
-{ label: 'Lipa na M-Pesa passkey', type: 'password', value: '••••••••••••••••••••', ph: '', help: 'Needed for “Pay now” prompts on tenants’ phones.' }
+{ label: 'Paybill number', type: 'text', value: '000111', ph: 'e.g. 4123456', help: 'The business number tenants pay to. Display only.' },
+{ label: 'Till number (optional)', type: 'text', value: '', ph: 'Buy Goods till', help: 'Only if tenants pay by till.' },
+{ label: 'Bank name (optional)', type: 'text', value: 'Equity Bank', ph: 'Bank', help: 'Shown to tenants with the account reference.' },
+{ label: 'Bank account number (optional)', type: 'text', value: '0240 ••• 4821', ph: '', help: 'Encrypted. Shown masked after saving.' }
 ]
 };
 }
