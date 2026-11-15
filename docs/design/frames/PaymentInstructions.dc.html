@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Payment instructions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F5F1}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E">
+
+<nav aria-label="Main" style="flex: 1 1 232px; max-width: 100%; background: #0E4D45; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Kodibox</span>
+</div>
+<button type="button" style="display: flex; justify-content: space-between; align-items: center; background: #0A3C36; border: 1px solid #2B6A61; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; min-height: 44px; cursor: pointer">
+<span style="text-align: left"><span style="display: block; font-size: 11px; color: #BFD8D2">Organization</span>Mwangi Properties</span><span aria-hidden="true">▾</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="12">
+<a href="{{n.href}}" style="{{n.style}}">{{n.label}}<span style="font-size: 12px; color: #F0B54A; font-weight: 700">{{n.badge}}</span></a>
+</sc-for>
+</div>
+<div style="margin-top: auto; background: #0A3C36; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.45; color: #D7E7E3">
+<strong style="color: #FFFFFF; display: block; margin-bottom: 4px">Your money, your paybill</strong>
+Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconciles it.
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div>
+<p style="margin: 0; font-size: 14px; color: #5A635F"><a href="Settings.dc.html">Settings</a> / Payment instructions</p>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">Payment instructions</h1>
+</div>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Add payment source</button>
+</header>
+
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #5A635F; max-width: 760px">Tenants pay into these accounts. Kodibox never receives the money. It reads the statements you upload and matches them to units, using the account reference below.</p>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<section aria-label="Payment sources" style="flex: 2 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<sc-for list="{{sources}}" as="s" hint-placeholder-count="2">
+<article aria-label="{{s.aria}}" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px">
+<strong style="font-size: 17px; font-weight: 700">{{s.title}}</strong>
+<span style="{{s.pill}}">{{s.status}}</span>
+</div>
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{s.rows}}" as="r" hint-placeholder-count="4">
+<div style="{{r.style}}"><span style="color: #5A635F; font-size: 13px">{{r.label}}</span><span style="display: flex; align-items: center; gap: 10px; text-align: right"><strong style="{{r.vstyle}}">{{r.value}}</strong><button type="button" aria-label="{{r.aria}}" style="{{r.btn}}">{{r.btnLabel}}</button></span></div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5A635F">{{s.note}}</p>
+</article>
+</sc-for>
+</section>
+
+<aside style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section aria-labelledby="see" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="see" style="margin: 0; font-size: 16px; font-weight: 700">What tenants see</h2>
+<div style="background: #F2F1EC; border-radius: 14px 14px 14px 4px; padding: 14px; font-size: 14px; line-height: 1.5">
+Hi Peter, your November rent for B-12 Riverside Court is KES 16,700, due 5 Nov. Pay to Paybill <strong style="font-family: 'IBM Plex Mono', monospace">000111</strong>, Account <strong style="font-family: 'IBM Plex Mono', monospace">B-12</strong>. Reply STOP to opt out of reminders.
+</div>
+<p style="margin: 0; font-size: 12px; color: #5A635F">The same instructions appear on invoices, reminders, receipts and the tenant app.</p>
+</section>
+
+<section aria-labelledby="rules" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 id="rules" style="margin: 0; font-size: 16px; font-weight: 700">Account reference rules</h2>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.5; color: #3F4743">
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+<li>{{r}}</li>
+</sc-for>
+</ul>
+</section>
+
+<section aria-labelledby="cred" style="background: #E1F2E8; border-radius: 16px; padding: 18px 20px; font-size: 13px; line-height: 1.5; color: #14201E">
+<strong style="display: block; margin-bottom: 4px; font-size: 14px">No payment-rail credentials</strong>
+Kodibox does not connect to your M-Pesa or bank account. Paybill numbers and bank details here are display details only.
+</section>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() {
+const navItem = (label, href, active, badge) => ({
+label, href, badge: badge || '',
+style: 'display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (active ? '700' : '500') + '; color: ' + (active ? '#14201E' : '#D7E7E3') + '; background: ' + (active ? '#F0B54A' : 'transparent')
+});
+const pill = (kind) => {
+const m = { ok: ['#E1F2E8', '#1C6B44'], warn: ['#FDEBD3', '#8A4B08'], brand: ['#E2EEEB', '#0E4D45'], neutral: ['#EEECE5', '#4A524E'] }[kind];
+return 'display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: ' + m[0] + '; color: ' + m[1];
+};
+const row = (label, value, mono, aria, btnLabel, last) => ({
+label, value, aria, btnLabel,
+style: 'display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 12px 0' + (last ? '' : '; border-bottom: 1px solid #EEECE5'),
+vstyle: 'font-size: 15px; font-weight: 700' + (mono ? "; font-family: 'IBM Plex Mono', monospace" : ''),
+btn: 'min-height: 44px; padding: 0 14px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 13px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; cursor: pointer',
+});
+return {
+nav: [
+navItem('Dashboard', 'Main.dc.html'), navItem('Properties & units', 'Properties.dc.html'), navItem('Tenants & leases', 'TenantLease.dc.html'),
+navItem('Tickets', 'Tickets.dc.html', false, '9'), navItem('Invoices', 'Invoices.dc.html'), navItem('Payments', 'Payments.dc.html', false, '6'),
+navItem('Utilities', 'Utilities.dc.html'), navItem('Expenses & repairs', 'Maintenance.dc.html'), navItem('Notices & move-outs', 'MoveOut.dc.html'),
+navItem('Messages', 'Messages.dc.html'), navItem('Landlords', 'Agency.dc.html'), navItem('Reports & tax', 'Reports.dc.html'),
+navItem('Settings', 'Settings.dc.html', true)
+],
+sources: [
+{
+aria: 'Paybill 000111, default source', title: 'M-Pesa paybill 000111', status: 'Active · default', pill: pill('ok'),
+rows: [
+row('Business number', '000111', true, 'Copy paybill number', 'Copy'),
+row('Account reference', 'B-12 (unit code)', true, 'Copy account reference format', 'Copy example'),
+row('Used for', 'Riverside Court, Baraka Flats', false, 'Edit properties', 'Edit', true)
+],
+note: 'Tenants enter the unit code. Spaces, hyphens and case are ignored when statements are matched, so “B12 ” and B-12 both match unit B-12.'
+},
+{
+aria: 'Equity bank account, Mvule Apartments', title: 'Bank account · Equity', status: 'Active', pill: pill('brand'),
+rows: [
+row('Account name', 'Mwangi Properties', false, 'Copy account name', 'Copy'),
+row('Account number', '•••• •••• 4821', true, 'Account number is masked', 'Replace'),
+row('Used for', 'Mvule Apartments', false, 'Edit properties', 'Edit', true)
+],
+note: 'The full account number is encrypted and shown masked. Bank statements are uploaded as files; Kodibox never connects to the bank.'
+}
+],
+rules: [
+'Each unit code is unique for a payment source. Two properties with the same code on one paybill are blocked.',
+'Property-prefixed references such as GV-B12 are planned. Until then, unit codes are used as they are.',
+'Invoices, reminders, receipts and the tenant app repeat the reference, so tenants see the same text everywhere.'
+]
+};
+}
+}
+</script>
+</body>
+</html>

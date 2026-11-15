@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Kodibox",
+    "slug": "kodibox",
+    "scheme": "kodibox",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "jsEngine": "hermes",
+    "plugins": ["expo-router", "expo-font"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "ke.kodibox.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "7907804e-4459-44bd-992d-0192938d444e"
+      }
+    },
+    "owner": "msyoki"
+  }
+}

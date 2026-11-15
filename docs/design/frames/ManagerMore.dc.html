@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>More</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<div style="flex: 1; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 10px">
+<h1 style="margin: 0; font-size: 22px; font-weight: 800">More</h1>
+
+<section aria-label="Your account" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px">
+<span style="flex: none; width: 46px; height: 46px; border-radius: 99px; background: #0E4D45; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800" aria-hidden="true">WM</span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><strong style="font-size: 15px">Wanjiru Mwangi</strong><span style="font-size: 12px; color: #5A635F">Owner · Mwangi Properties</span><span style="font-size: 12px; color: #1C6B44; font-weight: 700">2FA on</span></span>
+<a href="#" style="flex: none; min-height: 44px; display: flex; align-items: center; padding: 0 10px; border-radius: 10px; border: 1px solid #0E4D45; color: #0E4D45; text-decoration: none; font-size: 12px; font-weight: 700">Switch role</a>
+</section>
+
+<section aria-labelledby="modules" style="display: flex; flex-direction: column; gap: 6px">
+<h2 id="modules" style="margin: 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; color: #5A635F">Modules</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{modules}}" as="m" hint-placeholder-count="12">
+<a href="#" style="display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 4px 6px; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 12px; text-decoration: none; color: #14201E; font-size: 12px; font-weight: 700; text-align: center; line-height: 1.25">{{m}}</a>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5A635F">Desk tasks such as bulk imports and invoice runs open on the web app.</p>
+</section>
+
+<section aria-labelledby="look" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+<h2 id="look" style="margin: 0; font-size: 14px; font-weight: 800">Appearance</h2>
+<div role="radiogroup" aria-label="Theme" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: #EEECE5; border-radius: 12px; padding: 4px">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{t.checked}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="sec" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 4px 14px; display: flex; flex-direction: column">
+<h2 id="sec" style="margin: 10px 0 2px; font-size: 14px; font-weight: 800">Security and privacy</h2>
+<sc-for list="{{security}}" as="s" hint-placeholder-count="3">
+<a href="#" style="{{s.style}}"><span style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; font-weight: 700">{{s.title}}</strong><span style="font-size: 12px; color: #5A635F">{{s.sub}}</span></span><span style="color: #5A635F; font-size: 18px" aria-hidden="true">›</span></a>
+</sc-for>
+</section>
+
+<a href="AppLogin.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 14px; border: 1px solid #9B2C1A; background: #FFFFFF; color: #9B2C1A; text-decoration: none; font-size: 15px; font-weight: 700">Sign out</a>
+</div>
+
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const tab = (label, href, active) => ({ label, href, style: 'display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: ' + (active ? '800; color: #0E4D45; background: #E2EEEB' : '600; color: #5A635F') });
+const theme = (label, checked) => ({ label, checked: checked ? 'true' : 'false', style: 'min-height: 44px; border: 0; border-radius: 9px; background: ' + (checked ? '#FFFFFF' : 'transparent') + '; color: ' + (checked ? '#0E4D45' : '#5A635F') + '; font: inherit; font-size: 13px; font-weight: ' + (checked ? '800' : '600') + '; cursor: pointer' });
+const row = (title, sub, last) => ({ title, sub, style: 'display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; padding: 8px 0; text-decoration: none; color: #14201E' + (last ? '' : '; border-bottom: 1px solid #EEECE5') });
+return {
+modules: ['Invoices', 'Payments', 'Reports & tax', 'Properties', 'Tenants & leases', 'Utilities', 'Expenses & repairs', 'Tickets', 'Move-outs & notices', 'Messages', 'Landlords', 'Org settings'],
+themes: [theme('Light', false), theme('Dark', false), theme('System', true)],
+security: [
+row('Two-factor sign-in', 'On. Required for Owner and Manager roles'),
+row('Active sessions', 'Three devices, each can be revoked'),
+row('Privacy and data requests', 'Export or correct your data', true)
+],
+tabs: [tab('Home', 'ManagerHome.dc.html'), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html'), tab('More', 'ManagerMore.dc.html', true)]
+};
+}
+}
+</script>
+</body>
+</html>

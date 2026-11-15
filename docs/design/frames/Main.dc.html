@@ -48,7 +48,7 @@ Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconcil
 <span style="position: absolute; left: -9999px">Search</span>
 <input type="search" placeholder="Search tenant, unit or M-Pesa code" style="border: 0; outline: 0; font: inherit; font-size: 14px; flex: 1; background: transparent">
 </label>
-<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Request payment</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Import statement</button>
 <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Run November invoices</button>
 </div>
 </header>
@@ -195,9 +195,9 @@ attention: [
 { title: '2 leases end within 30 days', sub: 'A-07 Riverside Court · S-03 Tumaini Shops', href: '#', dot: dot('#5A635F') }
 ],
 payments: [
-{ time: '09:42', tenant: 'Mercy Achieng', unit: 'C-02', channel: 'M-Pesa STK', ref: 'TK2H8L3M9P', amount: '17,500', status: 'Auto-matched', pill: pill('ok') },
+{ time: '09:42', tenant: 'Mercy Achieng', unit: 'C-02', channel: 'Tenant claim',ref: 'TK2H8L3M9P', amount: '17,500', status: 'Auto-matched', pill: pill('ok') },
 { time: '09:15', tenant: 'Amina Hassan', unit: 'M-03', channel: 'M-Pesa paybill', ref: 'TK2G1QW7ZA', amount: '8,000', status: 'Auto-matched', pill: pill('ok') },
-{ time: '08:58', tenant: 'Unknown payer', unit: 'acc “B12 ”', channel: 'M-Pesa paybill', ref: 'TK2F9RT4KD', amount: '15,000', status: 'Needs match', pill: pill('warn') },
+{ time: '08:58', tenant: 'Unknown payer', unit: 'acc “B12 ”', channel: 'M-Pesa paybill', ref: 'TK2F9RT4KD', amount: '15,000', status: 'Unmatched', pill: pill('warn') },
 { time: '08:31', tenant: 'Grace Wambui', unit: 'A-04', channel: 'Equity bank', ref: 'EQ-55102931', amount: '23,500', status: 'Auto-matched', pill: pill('ok') },
 { time: '07:50', tenant: 'Kevin Mutua', unit: 'R-21', channel: 'Cash', ref: 'Receipt #1043', amount: '9,500', status: 'Awaiting approval', pill: pill('info') },
 { time: 'Yesterday', tenant: 'Faith Njeri', unit: 'A-11', channel: 'M-Pesa paybill', ref: 'TK1Z0PL2CX', amount: '12,000', status: 'Auto-matched', pill: pill('ok') }

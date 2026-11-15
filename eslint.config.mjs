@@ -27,4 +27,21 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
     },
   },
+  {
+    // Raw DB clients bypass withOrg; only packages/db itself (scripts, tests) may use them.
+    ignores: ['packages/db/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@kodibox/db/internal', '**/db/src/internal*'],
+              message: 'Use withOrg() from @kodibox/db; raw clients are for packages/db only.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

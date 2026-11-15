@@ -13,14 +13,14 @@
 
 ---
 
-> **Status:** early development (Sprint 0–1). The project plan, architecture, security model and UI designs are complete, and the monorepo scaffold and CI are in place. Product features are being built in the order set out in [docs/DEV_PLAN.md](docs/DEV_PLAN.md).
+> **Status:** early development (Sprint 0–1). The project plan, architecture, security model and UI designs are complete, and the monorepo scaffold and CI are in place. Clickable web and mobile prototypes run on demo data, and the reconciliation engine exists as pure, tested logic. The backend (auth, database, ledger, persistence of imports and claims) is not built yet. Progress is tracked in [docs/PROGRESS.md](docs/PROGRESS.md), and the build order is in [docs/DEV_PLAN.md](docs/DEV_PLAN.md).
 
 ## Why Kodibox
 
 Most Kenyan landlords still chase rent through M-Pesa messages, spreadsheets and phone calls. Kodibox automates that loop and stays on the right side of the law:
 
-- **We never hold your money.** Tenants pay directly into the landlord's own paybill, till or bank account. Kodibox only reads payment confirmations to reconcile them.
-- **Automatic reconciliation.** M-Pesa and bank payments are matched to the right unit and invoice. Payments with a wrong account number go to a review queue with suggested matches.
+- **We never hold your money.** Tenants pay directly into the landlord's own paybill, till or bank account. Kodibox only reconciles the statements and payment proofs you bring in. It has no connection to M-Pesa or bank APIs (ADR 0007).
+- **Automatic reconciliation.** Statement lines and tenant payment proofs are matched to the right unit and invoice, with a confidence score. Payments with a wrong account number go to a review queue with suggested matches.
 - **An accurate ledger.** Every shilling goes through a double-entry ledger. Mistakes are corrected with reversals, never deleted.
 - **Privacy by design.** The platform is built for the Data Protection Act 2019: consent records, data subject rights, encryption of ID and KRA PIN numbers, and audit logs.
 
@@ -30,16 +30,16 @@ Most Kenyan landlords still chase rent through M-Pesa messages, spreadsheets and
 |---|---|
 | **Properties & tenants** | Properties, units, tenants and leases. Bulk import from Excel/CSV. Residential and commercial units. |
 | **Billing** | Monthly invoice runs, recurring charges, metered water and electricity, penalties with grace periods, deposits, pro-rating. |
-| **Payments** | M-Pesa C2B and STK Push ("pay now" prompts), bank callbacks and statement import, cash with maker-checker approval, receipts. |
+| **Payments** | Payment instructions (paybill, till, bank) with copy buttons. Statement import for M-Pesa and bank files, tenant "I've paid" claims, an unmatched queue, cash with maker-checker approval, receipts. No payment-rail integrations. |
 | **Reminders** | SMS and email reminders with quiet hours and opt-out handling. WhatsApp is planned. |
 | **Tickets** | Tenants raise repair requests, complaints and billing queries, with response-time targets, escalation to the owner and ratings. |
 | **Move-outs** | Lawful notices, move-out inspections, deposit refund statements. |
 | **Agencies** | Multiple landlords, commission rules, remittance statements, a read-only landlord portal. |
 | **Reports & tax** | Rent roll, arrears aging, collections, income and expenses, the Monthly Rental Income (MRI) tax report, eTIMS-ready receipts. |
-| **Mobile app** | One app with tenant, caretaker (offline meter readings, inspections) and manager views. |
+| **Mobile app** | One Expo app with tenant, caretaker (offline meter readings, inspections) and manager views. Prototype on demo data. |
 | **Security** | 2FA for owners, managers and accountants. Role-based access, row-level data isolation, a tamper-evident audit log. |
 
-UI designs for all 37 web and mobile screens are in [docs/design/](docs/design/).
+UI designs for all 42 web and mobile screens are in [docs/design/](docs/design/).
 
 ## Tech stack
 
@@ -49,8 +49,8 @@ UI designs for all 37 web and mobile screens are in [docs/design/](docs/design/)
 | Web | Next.js 15 (App Router, Server Actions), React 19, Tailwind CSS v4 |
 | Background jobs | Node worker with BullMQ on Redis |
 | Database | PostgreSQL 16, Drizzle ORM, row-level security per organisation |
-| Mobile | Expo / React Native (planned) |
-| Integrations | Safaricom Daraja (M-Pesa), Africa's Talking (SMS), KRA eTIMS (planned) |
+| Mobile | Expo SDK 58 / React Native with Expo Router (prototype) |
+| Integrations | Africa's Talking (SMS), email, KRA eTIMS (planned). No payment-rail integrations (ADR 0007). |
 | Validation | Zod at every boundary |
 | Testing | Vitest, Testcontainers, Playwright |
 
@@ -64,10 +64,11 @@ flowchart LR
   W --> Q[(Redis / BullMQ)]
   Q --> K[Worker: invoices, reminders, reconciliation]
   K --> DB
-  MP[Safaricom Daraja] -- payment confirmations --> W
+  L -- statement files --> W
+  T -- "I've paid" proof --> W
   K -- SMS --> AT[Africa's Talking]
   T -- pays directly --> PB[Landlord's own paybill / bank]
-  PB -. confirmation .-> MP
+  PB -. statement .-> L
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/DATA_MODEL.md](docs/DATA_MODEL.md) for the full design.
@@ -78,12 +79,14 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/DATA_MODEL.md](docs/D
 apps/
   web/            Next.js app for landlords, staff and tenants
   worker/         background jobs (BullMQ)
+  mobile/         Expo app for tenants, caretakers and managers (prototype)
 packages/
   config/         environment validation (Zod)
-  core/           pure domain logic: money, ledger, billing (no I/O)
+  core/           pure domain logic: money, ledger, billing, reconciliation (no I/O)
   db/             schema, migrations, row-level security
-  integrations/   M-Pesa, SMS, email, KRA
-  ui/             shared UI components
+  demo/           shared demo data for the web and mobile prototypes
+  integrations/   SMS, email, KRA, storage
+  ui/             shared components and colour tokens (light and dark)
 docs/             plans, architecture, security, privacy, ADRs, designs
 .claude/          Claude Code agents, skills and guard hooks
 ```
@@ -98,10 +101,10 @@ cd kodibox
 cp .env.example .env            # local placeholder values; never commit .env
 docker compose up -d postgres redis mailpit
 pnpm install
-pnpm dev                        # web on http://localhost:3000, plus the worker
+pnpm dev                        # web on http://localhost:3100, plus the worker
 ```
 
-> **Windows:** if port 5432 is reserved, set `POSTGRES_PORT=5433` in `.env` and the database URLs.
+> **Windows:** if port 5432 is taken or reserved (for example by a native Postgres), use `POSTGRES_PORT=5433` in `.env` and in every database URL (`.env.example` already does). The web dev server defaults to port 3100 in `.env.example` (`APP_URL`, `BETTER_AUTH_URL`); run `pnpm --filter @kodibox/web dev -p 3100`.
 
 | Command | What it does |
 |---|---|
@@ -112,7 +115,59 @@ pnpm dev                        # web on http://localhost:3000, plus the worker
 | `pnpm format` | Format the codebase with Prettier |
 | `pnpm db:migrate` / `pnpm db:seed` | Apply migrations and seed demo data (arrives with the database layer) |
 
-Mailpit (the local email inbox) is at http://localhost:8025. M-Pesa and SMS run against the Safaricom and Africa's Talking **sandboxes** in development.
+Mailpit (the local email inbox) is at http://localhost:8025. SMS runs against the Africa's Talking **sandbox** in development. There is no Safaricom sandbox to set up, because Kodibox does not call M-Pesa (ADR 0007).
+
+### Run the web app with real sign-in (E-04)
+
+Sign-in uses Better Auth against Postgres. The web app reads the root `.env`.
+
+```bash
+cp .env.example .env
+docker compose up -d postgres redis
+pnpm install
+pnpm db:bootstrap      # once: creates roles kodibox_migrator, kodibox_app, kodibox_auth
+pnpm db:migrate
+pnpm db:seed           # demo org + 4 demo users (needs SEED_DEMO_PASSWORD, ALLOW_DB_SEED=1)
+pnpm --filter @kodibox/web dev -p 3100
+```
+
+Needed env (all in `.env.example`): `AUTH_SECRET`, `AUTH_DATABASE_URL` (role `kodibox_auth`, the only role that can read credentials), `BETTER_AUTH_URL`/`APP_URL`, `REDIS_URL` (rate limits; falls back to in-process memory if Redis is down), `SEED_DEMO_PASSWORD`.
+
+Demo users (all `@example.test`, password = `SEED_DEMO_PASSWORD`):
+
+| User | Role | How to sign in |
+|---|---|---|
+| `owner@example.test` | owner | password, then forced TOTP enrolment (scan the QR, save recovery codes) |
+| `manager@example.test` | manager | same as owner |
+| `caretaker@example.test` (+254700000002) | caretaker | phone code at `/login` ("Sign in with a phone code") or `/m/login` |
+| `tenant@example.test` (+254700000003) | tenant | same as caretaker |
+
+There is no SMS provider yet. In development the OTP is printed, with a masked number, to the web server console (`[dev otp] to +2547****0003 code 123456`); email verification and reset links print the same way. Outside development nothing is delivered or logged. Staff roles can never sign in with an SMS code.
+
+Pages still render demo data after sign-in; real org and role resolution arrives with E-05.
+
+### Run the web prototype
+
+Pages render demo data. Sign-in itself is real (see above).
+
+```bash
+pnpm --filter @kodibox/web dev      # http://localhost:3100 (/ redirects to /login)
+```
+
+The data on every page is demo data. Payment screens are under `/payments`, and payment instructions are under `/settings/payment-instructions`.
+
+### Run the mobile app with Expo Go over USB
+
+The mobile prototype runs on demo data. It has no sign-in backend.
+
+Requirements: an Android phone with USB debugging on, the Expo Go app installed, and `adb` (Android platform-tools) on your PATH.
+
+```bash
+pnpm --filter @kodibox/mobile exec expo start --localhost   # Metro on this computer
+adb reverse tcp:8081 tcp:8081                              # let the phone reach Metro over USB
+```
+
+Open Expo Go on the phone and scan the QR code. The package script `pnpm --filter @kodibox/mobile start` uses `--lan`, which needs the phone on the same Wi-Fi network. Use `--localhost` with `adb reverse` for USB. Known issue: on some Android devices the bottom tab bar overlaps the system navigation bar in Expo Go (see [docs/PROGRESS.md](docs/PROGRESS.md)).
 
 ## Documentation
 
@@ -130,13 +185,18 @@ Mailpit (the local email inbox) is at http://localhost:8025. M-Pesa and SMS run 
 | [ADRs](docs/adr/) | Architecture decision records |
 | [Research](docs/research/) | Market analysis and Kenyan legal research |
 | [Claude workflow](docs/CLAUDE_WORKFLOW.md) | Developing with Claude Code agents and skills |
+| [Progress](docs/PROGRESS.md) | What is done as prototype and what is in production |
+| [Prototype](docs/PROTOTYPE.md) | Clickable web prototype and the shared demo packages |
+| [Changelog](CHANGELOG.md) | Notable changes, in Keep a Changelog format |
 
 ## Roadmap
 
 - [x] Planning, architecture, security and privacy design
 - [x] Monorepo scaffold and CI pipeline
+- [x] Clickable web and mobile prototypes on demo data
+- [x] Payment-agnostic reconciliation engine (pure logic with tests, ADR 0007)
 - [ ] **Sprint 1:** database with row-level security, auth with 2FA, roles, audit log, ledger
-- [ ] **Sprints 2–5:** properties, tenants, leases, billing, M-Pesa reconciliation, reminders, then a pilot with landlords
+- [ ] **Sprints 2–5:** properties, tenants, leases, billing, statement reconciliation, reminders, then a pilot with landlords
 - [ ] **Sprints 6–9:** tenant portal, caretaker tools, deposits, agency mode, MRI tax report, then public beta
 - [ ] **Sprints 10–14:** mobile app, WhatsApp, eTIMS, USSD, penetration test, then general availability
 
@@ -145,7 +205,7 @@ Mailpit (the local email inbox) is at http://localhost:8025. M-Pesa and SMS run 
 1. Pick a task from [docs/DEV_PLAN.md](docs/DEV_PLAN.md) and branch from `main` (`feat/<task>-short-name`).
 2. Follow the rules in [CLAUDE.md](CLAUDE.md): integer money, the ledger only, RLS on every table, server-side authorisation, no PII in logs.
 3. Write commit messages in lowercase [conventional commit](https://www.conventionalcommits.org/) style, for example `feat(billing): add monthly invoice run`.
-4. Open a pull request. CI must pass, and changes to auth, money, personal data, webhooks or migrations need a security review (see [CODEOWNERS](.github/CODEOWNERS)).
+4. Open a pull request. CI must pass, and changes to auth, money, personal data, statement or claim imports, or migrations need a security review (see [CODEOWNERS](.github/CODEOWNERS)).
 
 ## Security
 

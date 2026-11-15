@@ -37,7 +37,7 @@ a{color:#0E4D45}a:hover{color:#08332D}
 <p style="margin: 0; font-size: 12px; color: #5A635F; text-align: center">Push notifications never show tenant names or amounts on the lock screen.</p>
 </div>
 
-<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
 <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
 <a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
 </sc-for>
@@ -61,7 +61,7 @@ alerts: [
 { href: '#', mark: 'Tax', markStyle: warn, card: card(false), title: 'MRI tax due 20 Nov', body: 'October gross rent KES 1,935,500 ready to review', time: 'Fri' },
 { href: '#', mark: 'Sec', markStyle: bad, card: card(true, '#9B2C1A'), title: 'Security alert: new sign-in', body: 'Chrome on Windows, Nairobi. Not you? Sign out all devices.', time: 'Thu' }
 ],
-tabs: [tab('Home', 'ManagerHome.dc.html'), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html', true)]
+tabs: [tab('Home', 'ManagerHome.dc.html'), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html', true), tab('More', 'ManagerMore.dc.html')]
 };
 }
 }

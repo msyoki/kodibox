@@ -6,12 +6,32 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./internal": "./src/internal.ts",
+    "./auth": "./src/auth.ts",
+    "./env-urls": "./src/env.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "build": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "db:generate": "drizzle-kit generate",
+    "db:bootstrap": "tsx src/scripts/bootstrap.ts",
+    "db:migrate": "tsx src/scripts/migrate.ts",
+    "db:seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.4",
+    "postgres": "^4.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@testcontainers/postgresql": "^12.2.1",
+    "drizzle-kit": "^0.31.11",
+    "testcontainers": "^12.2.1",
+    "tsx": "^4.23.15",
+    "vitest": "^5.0.5"
   }
 }

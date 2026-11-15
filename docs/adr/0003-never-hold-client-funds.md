@@ -1,6 +1,7 @@
 # 0003. Kodibox never holds client funds
 
 - Status: Accepted
+  - Amended by ADR 0007: Kodibox no longer reads payments through Daraja, bank callbacks or webhooks. It reconciles statements, tenant proofs and manual entries only.
 - Date: 2026-11-02
 
 ## Context

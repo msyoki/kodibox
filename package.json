@@ -8,15 +8,17 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint && pnpm lint:guards",
+    "lint:guards": "node scripts/check-guc-usage.mjs",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:migrate": "echo \"db:migrate not implemented until E-03\"",
-    "db:generate": "echo \"db:generate not implemented until E-03\"",
-    "db:seed": "echo \"db:seed not implemented until E-03\"",
+    "db:migrate": "pnpm --filter @kodibox/db db:migrate",
+    "db:generate": "pnpm --filter @kodibox/db db:generate",
+    "db:seed": "pnpm --filter @kodibox/db db:seed && pnpm --filter @kodibox/auth seed:demo",
+    "db:bootstrap": "pnpm --filter @kodibox/db db:bootstrap",
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {

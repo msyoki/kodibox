@@ -73,7 +73,7 @@ All properties
 </section>
 </div>
 
-<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
 <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
 <a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
 </sc-for>
@@ -96,17 +96,18 @@ props: [
 { name: 'Tumaini Shops', pct: '72%', bar: bar(72) }
 ],
 actions: [
-{ mark: 'Rq', label: 'Request payment', href: 'ManagerTenant.dc.html' },
+{ mark: 'Sm', label: 'Send reminder', href: 'ManagerTenant.dc.html' },
 { mark: 'Ex', label: 'Record expense', href: '#' },
-{ mark: 'Sm', label: 'Send reminder', href: '#' }
+{ mark: 'Im', label: 'Import statement', href: 'ImportStatement.dc.html' }
 ],
 items: [
 { href: 'ManagerApprovals.dc.html', dot: dot('#D9822B'), title: '3 cash entries to approve', sub: 'KES 36,000 from Otieno Ouma' },
-{ href: 'ManagerApprovals.dc.html', dot: dot('#D9822B'), title: '2 unmatched M-Pesa payments', sub: 'KES 28,500 waiting for a unit' },
+{ href: 'ManagerApprovals.dc.html', dot: dot('#D9822B'), title: '2 tenant claims to verify', sub: 'KES 24,700 waiting for a statement line or approval' },
+{ href: 'ManagerApprovals.dc.html', dot: dot('#D9822B'), title: '2 unmatched statement lines', sub: 'KES 28,500 waiting for a unit or “Not rent”' },
 { href: 'ManagerAlerts.dc.html', dot: dot('#9B2C1A'), title: '2 tickets past SLA', sub: 'B-14 noise complaint · staff conduct (Owner)' },
 { href: 'ManagerAlerts.dc.html', dot: dot('#9B2C1A'), title: 'MRI tax due 20 Nov', sub: 'Gross rent for October ready to file' }
 ],
-tabs: [tab('Home', 'ManagerHome.dc.html', true), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html')]
+tabs: [tab('Home', 'ManagerHome.dc.html', true), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html'), tab('Alerts', 'ManagerAlerts.dc.html'), tab('More', 'ManagerMore.dc.html')]
 };
 }
 }

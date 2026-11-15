@@ -49,7 +49,7 @@ Rent goes straight to your M-Pesa paybill or bank account. Kodibox only reconcil
 <div style="display: flex; flex-wrap: wrap; gap: 10px">
 <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Send statement</button>
 <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #0E4D45; background: #FFFFFF; color: #0E4D45; font: inherit; font-weight: 700; font-size: 14px">Issue notice</button>
-<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Request payment (STK)</button>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-weight: 700; font-size: 14px">Send payment reminder</button>
 <a href="MoveOut.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #9B2C1A; background: #FFFFFF; color: #9B2C1A; font-weight: 700; font-size: 14px; text-decoration: none; box-sizing: border-box">End lease</a>
 </div>
 </header>
@@ -186,7 +186,7 @@ lease: [
 { k: 'Due day', v: '5th of month' },
 { k: 'Grace period', v: '3 days' },
 { k: 'Late penalty', v: '5% of unpaid, cap KES 1,000' },
-{ k: 'M-Pesa account no.', v: 'B-12' },
+{ k: 'Account reference', v: 'B-12' },
 { k: 'Notice period', v: '30 days' }
 ],
 charges: [
@@ -202,7 +202,7 @@ consents: [
 ledger: [
 row('1 Oct', 'October rent, service charge, garbage, water', 'INV-2026-0412', '16,500', '', '16,500'),
 row('8 Oct', 'Late fee (5% of KES 4,000 unpaid after grace)', 'PEN-0087', '200', '', '16,700'),
-row('9 Oct', 'Payment received · M-Pesa paybill', 'TK2F9RT4KD', '', '16,500', '200'),
+row('9 Oct', 'Payment received · statement import', 'TK2F9RT4KD', '', '16,500', '200'),
 row('1 Nov', 'November rent', 'INV-2026-0538', '14,000', '', '14,200'),
 row('1 Nov', 'Service charge (incl. garbage)', 'INV-2026-0538', '1,300', '', '15,500'),
 row('1 Nov', 'Water 10 units at KES 120', 'INV-2026-0538', '1,200', '', '16,700')

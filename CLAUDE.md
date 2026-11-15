@@ -1,6 +1,6 @@
 # Kodibox — Claude Code Guide
 
-Kodibox is a multi-tenant rent & property management SaaS for Kenya (landlords, property managers/agents, caretakers, tenants). It is a better alternative to Bomahut: automated M-Pesa/bank reconciliation, accurate ledgers, tenant self-service, KRA-ready reports, and privacy-by-design under the Kenya Data Protection Act 2019.
+Kodibox is a multi-tenant rent & property management SaaS for Kenya (landlords, property managers/agents, caretakers, tenants). It is a better alternative to Bomahut: payment-agnostic reconciliation of M-Pesa/bank statements and tenant payment proofs (no payment-rail integrations, see ADR 0007), accurate ledgers, tenant self-service, KRA-ready reports, and privacy-by-design under the Kenya Data Protection Act 2019.
 
 Read before starting any non-trivial task:
 
@@ -14,26 +14,26 @@ Read before starting any non-trivial task:
 
 - **Monorepo:** pnpm workspaces + Turborepo, TypeScript strict everywhere, Node 22 LTS
 - **apps/web:** Next.js 15 (App Router, React Server Components, Server Actions), Tailwind CSS + shadcn/ui
-- **apps/worker:** Node worker running BullMQ jobs (invoicing runs, reminders, reconciliation, webhooks retry)
+- **apps/worker:** Node worker running BullMQ jobs (invoicing runs, reminders, statement import parsing, reconciliation)
 - **apps/mobile:** Expo / React Native (Phase 3) for tenants and caretakers
 - **packages/db:** PostgreSQL 16 + Drizzle ORM + drizzle-kit migrations; Postgres Row-Level Security for tenancy isolation
 - **packages/core:** pure domain logic (billing, ledger, penalties, allocations). No I/O; 100% unit-tested
-- **packages/integrations:** M-Pesa Daraja (STK Push, C2B, transaction status), bank callbacks, Africa's Talking SMS, email (Resend/SES), KRA eTIMS
+- **packages/integrations:** payment-source parsers (M-Pesa paybill/till and bank statement CSV/XLSX, M-Pesa SMS text) behind one `PaymentSource` interface, Africa's Talking SMS, email (Resend/SES), KRA eTIMS. No payment-rail APIs (Daraja, bank APIs) per ADR 0007
 - **packages/ui:** shared components
 - **Auth:** Better Auth (email/phone + password, OTP, TOTP 2FA mandatory for owner/manager roles), session cookies (httpOnly, Secure, SameSite=Lax)
-- **Validation:** Zod at every boundary (forms, server actions, API routes, webhooks, env)
+- **Validation:** Zod at every boundary (forms, server actions, API routes, file imports, env)
 - **Infra:** Docker; Redis (BullMQ); S3-compatible object storage (private buckets, signed URLs); Sentry; OpenTelemetry logs
 - **Testing:** Vitest (unit/integration with Testcontainers Postgres), Playwright (e2e)
 
 ## Non-negotiable rules
 
 1. **Money:** store as integer minor units (`bigint` cents of KES) + `currency` column. Never use floats. All balance changes go through the double-entry ledger in `packages/core/ledger`. Ledger entries are append-only: correct mistakes with reversing entries, never UPDATE/DELETE.
-2. **Never hold client funds.** Payments go straight to the landlord's own paybill/till/bank account. Kodibox only reads and reconciles them. Any feature that would route money through a Kodibox account needs an ADR and a legal review (CBK National Payment System Act).
+2. **Never hold client funds.** Payments go straight to the landlord's own paybill/till/bank account. Kodibox never collects, initiates or detects payments; it only reconciles imported statements, tenant proofs and manual entries (ADR 0007). Any feature that would route money through a Kodibox account needs an ADR and a legal review (CBK National Payment System Act).
 3. **Tenancy isolation:** every tenant-scoped table has `organization_id`, enforced by RLS. Every request sets `app.current_org_id` within its transaction. Never query across orgs except in audited platform-admin code paths.
 4. **Authorization:** check permissions on the server for every action via `can(user, action, resource)` in `packages/core/authz`. Hiding UI is not access control.
-5. **Personal data (DPA 2019):** collect the minimum. National ID / KRA PIN / phone numbers are encrypted at the application layer (envelope encryption) and masked in the UI and logs. Never log PII, tokens, or M-Pesa payloads unredacted. Record consent and lawful basis. Respect retention periods in `docs/SECURITY.md`.
+5. **Personal data (DPA 2019):** collect the minimum. National ID / KRA PIN / phone numbers are encrypted at the application layer (envelope encryption) and masked in the UI and logs. Never log PII, tokens, statement lines or M-Pesa messages unredacted. Record consent and lawful basis. Respect retention periods in `docs/SECURITY.md`.
 6. **Audit log:** every state change to money, leases, users/roles, or settings writes an `audit_events` row (actor, action, before/after diff, IP, user agent).
-7. **Webhooks (M-Pesa/bank):** verify source (IP allowlist + secret path token), make them idempotent on `TransID`, store the raw payload encrypted, respond fast and process in the worker.
+7. **Payment evidence (statements, tenant proofs, manual entries):** no payment-rail integrations or payment webhooks (ADR 0007). Imports are permission-gated and audited; deduplicate on (org, source account, external transaction ref) so re-imports are no-ops; store raw files/lines encrypted with retention per `docs/SECURITY.md`; parse and match in the worker via the pure engine in `packages/core/reconciliation`; tenant proofs stay "pending verification" until matched or approved.
 8. **Secrets:** env vars only, validated by `packages/config/env.ts`. Never commit `.env*` (except `.env.example`). Never hard-code credentials, even in tests.
 9. **Migrations:** forward-only, reviewed, and every new table gets RLS policies in the same migration.
 10. **Notifications:** SMS/email only to contacts with a lawful basis. Marketing messages need opt-in and an opt-out (STOP) path.
@@ -66,9 +66,9 @@ pnpm lint && pnpm typecheck
   - `codebase-scout` (Haiku): finds files and patterns. Use it instead of reading many files yourself.
   - `feature-builder` (Sonnet): implements one scoped task from the plan.
   - `test-writer` (Sonnet): writes and fixes tests.
-  - `security-reviewer` (Opus): reviews diffs touching auth, money, PII, or webhooks.
+  - `security-reviewer` (Opus): reviews diffs touching auth, money, PII, or statement imports.
   - `compliance-reviewer` (Sonnet): checks features against Kenyan law and the DPA.
   - `docs-writer` (Haiku): keeps docs and ADRs in sync.
-- Use the project skills in `.claude/skills/` (`mpesa-daraja`, `ledger-money`, `kenya-compliance`, `secure-feature`, `drizzle-rls`). Load the relevant skill before touching its area.
+- Use the project skills in `.claude/skills/` (`payment-reconciliation`, `ledger-money`, `kenya-compliance`, `secure-feature`, `drizzle-rls`). Load the relevant skill before touching its area.
 - Build one milestone task at a time from `docs/PROJECT_PLAN.md`, finish it, test it, then tick it off.
 - Prefer targeted reads (Grep, then Read with offset/limit) over reading whole files.

@@ -37,10 +37,10 @@ Never throw raw errors to the client; map unexpected errors to `AppError('intern
    - happy path and validation failures;
    - each role allowed/denied;
    - **cross-org access test:** user of org A cannot read or mutate org B's record by ID (expects not-found, and zero rows without org context);
-   - idempotency (double submit / webhook replay);
+   - idempotency (double submit / statement re-import);
    - audit row written; ledger balanced if money moved.
 9. **Verify:** `pnpm lint && pnpm typecheck && pnpm test` (scoped).
-10. **Review:** invoke `security-reviewer` for anything touching auth, money, PII, webhooks, or migrations (`/review-sensitive` does this plus compliance).
+10. **Review:** invoke `security-reviewer` for anything touching auth, money, PII, statement imports, or migrations (`/review-sensitive` does this plus compliance).
 
 ## Quick red flags
-Client-supplied org/user IDs; queries outside `withOrg`; `UPDATE`/`DELETE` on ledger tables; `parseFloat` on money; `console.log(payload)`; secrets in code or fixtures; UI-only permission checks; webhook handlers doing heavy work inline; missing `.strict()` on Zod objects.
+Client-supplied org/user IDs; queries outside `withOrg`; `UPDATE`/`DELETE` on ledger tables; `parseFloat` on money; `console.log(payload)`; secrets in code or fixtures; UI-only permission checks; heavy statement parsing inline in a request instead of the worker; missing `.strict()` on Zod objects.

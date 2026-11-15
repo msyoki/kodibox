@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Welcome</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; display: flex; flex-direction: column">
+
+<section aria-labelledby="hero" style="flex: none; background: #0A3C36; color: #FFFFFF; padding: 56px 24px 32px; display: flex; flex-direction: column; gap: 16px">
+<div style="width: 56px; height: 56px; border-radius: 16px; background: #0E4D45; border: 1px solid #2B6A61; display: flex; align-items: center; justify-content: center">
+<svg width="30" height="30" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="3" y="9" width="22" height="16" rx="3" stroke="#F0B54A" stroke-width="2.2"></rect><path d="M3 12L14 4l11 8" stroke="#F0B54A" stroke-width="2.2" stroke-linejoin="round"></path><rect x="11" y="16" width="6" height="9" rx="1" fill="#F0B54A"></rect></svg>
+</div>
+<p style="margin: 0; font-size: 14px; font-weight: 700; color: #D7E7E3">Kodibox</p>
+<h1 id="hero" style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.15">Rent, paid straight to your landlord.</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #D7E7E3">Pay into your landlord’s own M-Pesa paybill or bank account, tell Kodibox with one tap, and keep every receipt in one place.</p>
+</section>
+
+<div style="flex: 1; overflow: hidden; padding: 24px 20px 0; display: flex; flex-direction: column; gap: 20px">
+<ul aria-label="What you can do" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{points}}" as="p" hint-placeholder-count="3">
+<li style="display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px">
+<span style="flex: none; width: 32px; height: 32px; border-radius: 10px; background: #E2EEEB; color: #0E4D45; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800" aria-hidden="true">{{p.mark}}</span>
+<span style="display: flex; flex-direction: column; gap: 2px; font-size: 14px"><strong style="font-weight: 700">{{p.title}}</strong><span style="font-size: 13px; line-height: 1.45; color: #5A635F">{{p.text}}</span></span>
+</li>
+</sc-for>
+</ul>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5A635F; text-align: center">Kodibox never holds your money. We never ask for or store your M-Pesa PIN.</p>
+</div>
+
+<div style="padding: 16px 20px 28px; display: flex; flex-direction: column; gap: 10px">
+<a href="AppLogin.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 56px; border-radius: 14px; background: #F0B54A; color: #14201E; text-decoration: none; font-size: 17px; font-weight: 800">Get started</a>
+<a href="AppLogin.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; font-size: 14px; font-weight: 700">I already have an account. Sign in</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+points: [
+{ mark: 'Pb', title: 'How to pay', text: 'Paybill, account and bank details, with copy buttons.' },
+{ mark: 'Ip', title: 'I’ve paid, in one tap', text: 'Paste your M-Pesa message. It is checked against the landlord’s statement.' },
+{ mark: 'Rc', title: 'Receipts and statements', text: 'Every payment, allocation and balance, always up to date.' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

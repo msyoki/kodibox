@@ -1,6 +1,6 @@
 ---
 name: test-writer
-description: Writes and repairs tests (Vitest unit/integration with Testcontainers Postgres, Playwright e2e). Use after implementing a feature, when coverage is missing, when a test is failing, or to add cross-org/RLS, ledger-invariant, and webhook-idempotency tests.
+description: Writes and repairs tests (Vitest unit/integration with Testcontainers Postgres, Playwright e2e). Use after implementing a feature, when coverage is missing, when a test is failing, or to add cross-org/RLS, ledger-invariant, and statement-import dedupe / reconciliation tests.
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 ---

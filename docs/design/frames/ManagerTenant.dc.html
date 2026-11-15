@@ -53,12 +53,12 @@ Call</a>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4D45" stroke-width="2" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>
 SMS</a>
 </div>
-<a href="#" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #0E4D45; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 800">Send STK request for KES 16,700</a>
+<a href="#" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #0E4D45; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 800">Send payment reminder for KES 16,700</a>
 <a href="#" style="display: flex; align-items: center; justify-content: center; min-height: 44px; font-size: 14px; font-weight: 700">View statement</a>
 </section>
 </div>
 
-<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
+<nav aria-label="Tabs" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E0D8; padding: 6px 8px 14px">
 <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
 <a href="{{t.href}}" style="{{t.style}}">{{t.label}}</a>
 </sc-for>
@@ -80,7 +80,7 @@ tenants: [
 { ...row('Rose Otieno', 'C-03 · Baraka Flats', '0', 'paid', false) },
 { ...row('James Otienoh', 'M-09 · Mvule Apartments', '4,500', 'owing', false) }
 ],
-tabs: [tab('Home', 'ManagerHome.dc.html'), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html', true), tab('Alerts', 'ManagerAlerts.dc.html')]
+tabs: [tab('Home', 'ManagerHome.dc.html'), tab('Approvals', 'ManagerApprovals.dc.html'), tab('Tenants', 'ManagerTenant.dc.html', true), tab('Alerts', 'ManagerAlerts.dc.html'), tab('More', 'ManagerMore.dc.html')]
 };
 }
 }

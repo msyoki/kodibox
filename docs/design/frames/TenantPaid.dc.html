@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>I’ve paid</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4D45}a:hover{color:#08332D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F6F5F1; font-family: Manrope, system-ui, sans-serif; color: #14201E; padding: 20px 16px; display: flex; flex-direction: column; gap: 14px">
+
+<header style="display: flex; align-items: center; gap: 12px">
+<a href="TenantPay.dc.html" aria-label="Back to how to pay" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #E2E0D8; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14201E" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 20px; font-weight: 800">I’ve paid</h1>
+</header>
+
+<sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #5A635F">Paste the M-Pesa confirmation message. We read the code, amount, date and account, then check them against the landlord’s statement.</p>
+
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 700">
+M-Pesa message
+<textarea rows="4" style="box-sizing: border-box; padding: 12px 14px; border: 1px solid #C9C6BB; border-radius: 14px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; line-height: 1.45; resize: none">{{sms}}</textarea>
+</label>
+
+<section aria-labelledby="parsed" style="background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 12px 16px; display: flex; flex-direction: column">
+<h2 id="parsed" style="margin: 4px 0 6px; font-size: 14px; font-weight: 800">What we read</h2>
+<sc-for list="{{parsed}}" as="p" hint-placeholder-count="5">
+<div style="{{p.style}}"><span style="color: #5A635F">{{p.label}}</span><span style="{{p.vstyle}}">{{p.value}}</span></div>
+</sc-for>
+</section>
+
+<section aria-labelledby="warn" role="note" style="background: #FDEBD3; color: #8A4B08; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+<h2 id="warn" style="margin: 0; font-size: 13px; font-weight: 800">Before you send</h2>
+<sc-for list="{{warnings}}" as="w" hint-placeholder-count="2">
+<p style="margin: 0; font-size: 12px; line-height: 1.45; font-weight: 600">{{w.text}}</p>
+</sc-for>
+</section>
+
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+<button type="button" onClick="{{send}}" style="min-height: 56px; border-radius: 14px; border: 0; background: #0E4D45; color: #FFFFFF; font: inherit; font-size: 17px; font-weight: 800; cursor: pointer">Send for verification</button>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5A635F; text-align: center">The pasted text is cleared from the app once it is sent. Kodibox never holds your money.</p>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding-top: 24px">
+<div style="width: 80px; height: 80px; border-radius: 99px; background: #FDEBD3; display: flex; align-items: center; justify-content: center">
+<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8A4B08" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+</div>
+<h2 style="margin: 0; font-size: 22px; font-weight: 800">Pending verification</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3F4743; max-width: 300px">Sent 2 Nov, 09:45 for <strong>KES 16,700</strong>, account B-12. Your manager is checking it against the landlord’s statement.</p>
+<div style="width: 100%; background: #FFFFFF; border: 1px solid #E2E0D8; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; text-align: left; font-size: 14px">
+<div style="display: flex; gap: 10px; align-items: center"><span style="width: 10px; height: 10px; border-radius: 99px; background: #1C6B44"></span>Message received</div>
+<div style="display: flex; gap: 10px; align-items: center"><span style="width: 10px; height: 10px; border-radius: 99px; background: #D9822B"></span>Waiting for the statement line or approval</div>
+<div style="display: flex; gap: 10px; align-items: center; color: #5A635F"><span style="width: 10px; height: 10px; border-radius: 99px; border: 2px solid #C9C6BB; box-sizing: border-box"></span>Marked paid when verified</div>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5A635F">Rent is not marked as paid until the payment is verified or approved. Your balance stays as it is until then.</p>
+<div style="margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 10px">
+<a href="TenantHome.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 56px; border-radius: 14px; background: #0E4D45; color: #FFFFFF; text-decoration: none; font-size: 17px; font-weight: 800">Back home</a>
+<button type="button" onClick="{{reset}}" style="min-height: 44px; border: 0; background: transparent; color: #0E4D45; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Send another message</button>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const sent = !!(this.state && this.state.sent);
+const row = (label, value, mono, last) => ({
+label, value,
+style: 'display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; font-size: 14px' + (last ? '' : '; border-bottom: 1px solid #EEECE5'),
+vstyle: 'text-align: right; font-weight: 700' + (mono ? "; font-family: 'IBM Plex Mono', monospace" : '')
+});
+return {
+sent, notSent: !sent,
+sms: 'TK2F9RT4KD Confirmed. Ksh16,700.00 paid to MWANGI PROPERTIES 000111 for account B-12 on 2/11/26 at 9:41 AM.',
+parsed: [
+row('M-Pesa code', 'TK2F9RT4KD', true),
+row('Amount', 'KES 16,700', true),
+row('Paid on', '2 Nov 2026, 09:41', true),
+row('Paybill', '000111 · matches', true),
+row('Account', 'B-12 · matches your unit', false, true)
+],
+warnings: [
+{ text: 'Paste only the M-Pesa confirmation. Never share your M-Pesa PIN.' },
+{ text: 'If the amount or date looks wrong, edit the text before you send. A wrong claim is rejected.' }
+],
+send: () => this.setState({ sent: true }),
+reset: () => this.setState({ sent: false })
+};
+}
+}
+</script>
+</body>
+</html>
